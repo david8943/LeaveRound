@@ -1,12 +1,12 @@
-package com.ssafy.Dandelion.common.apiPayload;
+package com.ssafy.Dandelion.globbal.apiPayload;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import com.ssafy.Dandelion.common.apiPayload.code.BaseCode;
-import com.ssafy.Dandelion.common.apiPayload.code.status.SuccessStatus;
+import com.ssafy.Dandelion.globbal.apiPayload.code.BaseCode;
+import com.ssafy.Dandelion.globbal.apiPayload.code.status.SuccessStatus;
 
 @Getter
 @AllArgsConstructor
