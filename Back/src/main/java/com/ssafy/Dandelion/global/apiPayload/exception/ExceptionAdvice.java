@@ -1,4 +1,4 @@
-package com.ssafy.Dandelion.globbal.apiPayload.exception;
+package com.ssafy.Dandelion.global.apiPayload.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import com.ssafy.Dandelion.globbal.apiPayload.ApiResponse;
-import com.ssafy.Dandelion.globbal.apiPayload.code.ErrorReasonDTO;
-import com.ssafy.Dandelion.globbal.apiPayload.code.status.ErrorStatus;
+import com.ssafy.Dandelion.global.apiPayload.ApiResponse;
+import com.ssafy.Dandelion.global.apiPayload.code.ErrorReasonDTO;
+import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;

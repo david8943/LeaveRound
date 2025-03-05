@@ -1,9 +1,9 @@
-package com.ssafy.Dandelion.globbal.apiPayload.exception;
+package com.ssafy.Dandelion.global.apiPayload.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import com.ssafy.Dandelion.globbal.apiPayload.code.BaseErrorCode;
-import com.ssafy.Dandelion.globbal.apiPayload.code.ErrorReasonDTO;
+import com.ssafy.Dandelion.global.apiPayload.code.BaseErrorCode;
+import com.ssafy.Dandelion.global.apiPayload.code.ErrorReasonDTO;
 
 @Getter
 @AllArgsConstructor

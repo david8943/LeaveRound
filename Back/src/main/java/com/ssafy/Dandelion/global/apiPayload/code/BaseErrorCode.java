@@ -1,4 +1,4 @@
-package com.ssafy.Dandelion.globbal.apiPayload.code;
+package com.ssafy.Dandelion.global.apiPayload.code;
 
 public interface BaseErrorCode {
 

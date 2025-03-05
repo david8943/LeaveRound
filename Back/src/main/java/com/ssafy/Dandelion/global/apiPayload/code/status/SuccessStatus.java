@@ -1,10 +1,10 @@
-package com.ssafy.Dandelion.globbal.apiPayload.code.status;
+package com.ssafy.Dandelion.global.apiPayload.code.status;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import com.ssafy.Dandelion.globbal.apiPayload.code.BaseCode;
-import com.ssafy.Dandelion.globbal.apiPayload.code.ReasonDTO;
+import com.ssafy.Dandelion.global.apiPayload.code.BaseCode;
+import com.ssafy.Dandelion.global.apiPayload.code.ReasonDTO;
 
 @Getter
 @AllArgsConstructor
