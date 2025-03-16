@@ -79,7 +79,7 @@ public class JwtTokenProvider {
 		CustomUserDetails userDetails = buildUserDetails(claims);
 
 		/*
-		memberRepository.findByMemberId(userDetails.getMemberId()).orElseThrow(
+		userRepository.findByMemberId(userDetails.getUserrId()).orElseThrow(
 			() -> new AuthHandler(ErrorCode.INVALID_TOKEN)
 		);
 		 */
@@ -89,7 +89,7 @@ public class JwtTokenProvider {
 
 	private CustomUserDetails buildUserDetails(Claims claims) {
 		return CustomUserDetails.builder()
-			.userId(claims.get("userId", Long.class))
+			.userId(claims.get("userId", Integer.class))
 			.email(claims.getSubject())
 			.name(claims.get("name", String.class))
 			.email(claims.get("email", String.class))

@@ -15,7 +15,7 @@ import lombok.ToString;
 @ToString
 public class CustomUserDetails implements UserDetails {
 
-	private Long userId;
+	private Integer userId;
 	private String name;
 	private String email;
 	private String password;
