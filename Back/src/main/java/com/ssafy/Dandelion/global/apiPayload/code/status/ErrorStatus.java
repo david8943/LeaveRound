@@ -26,7 +26,8 @@ public enum ErrorStatus implements BaseErrorCode {
     // 인증 관련 에러
     EXPIRED_TOKEN(HttpStatus.FORBIDDEN, "AUTH4004", "유효 기간이 만료된 토큰입니다."),
     INVALID_TOKEN(HttpStatus.FORBIDDEN, "AUTH4005", "유효하지 않은 토큰입니다."),
-    UNAUTHORIZED_USER(HttpStatus.FORBIDDEN, "AUTH4006", "인가된 사용자가 아닙니다."),
+    UNAUTHORIZED(HttpStatus.FORBIDDEN, "AUTH4006", "인증된 사용자가 아닙니다."),
+    INVALID_CREDENTIALS(HttpStatus.FORBIDDEN, "AUTH4007", "잘못된 자격 증명입니다."),
 
     // Ror test
     TEMP_EXCEPTION(HttpStatus.BAD_REQUEST, "TEMP4001", "이거는 테스트");
