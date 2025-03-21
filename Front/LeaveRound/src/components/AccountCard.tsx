@@ -20,12 +20,12 @@ export function AccountCard({ accountInfo }: AccountCardProps) {
   const cardStyle = () => {
     switch (autoDonation) {
       case 'active':
-        return 'border-[var(--primary)] bg-[rgba(255,217,95,0.2)]';
+        return 'border-primary bg-[rgba(255,217,95,0.2)]';
       case 'inactive':
-        return 'border-[var(--primary-light)] bg-[rgba(255,239,169,0.2)]';
+        return 'border-primary-light bg-[rgba(255,239,169,0.2)]';
       case 'unregistered':
       default:
-        return 'border-[#E0E0E0] bg-[rgba(224,224,224,0.2)]';
+        return 'border-gray-300 bg-[rgba(224,224,224,0.2)]';
     }
   };
 
