@@ -3,7 +3,7 @@ FROM openjdk:17
 WORKDIR /usr/src/app
 
 ARG JAR_PATH=./build/libs
-ARG JAR_NAME=dandelion-0.0.1-SNAPSHOT.jar
+ARG JAR_NAME=Dandelion-0.0.1-SNAPSHOT.jar
 
 COPY ${JAR_PATH}/${JAR_NAME} app.jar
 
