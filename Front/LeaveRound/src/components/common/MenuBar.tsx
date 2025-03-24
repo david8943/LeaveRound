@@ -9,7 +9,7 @@ const TRANSITION_CLASSES = 'transition-all duration-500 ease-out transform-gpu';
 const MENU_POSITIONS = {
   donate: '21.8%',
   home: '50%',
-  event: '78.1%',
+  event: '78.2%',
 } as const;
 
 const menuItems = [
