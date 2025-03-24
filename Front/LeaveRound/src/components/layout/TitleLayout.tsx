@@ -8,7 +8,7 @@ interface TitleLayoutProps {
 
 const TitleLayout: React.FC<TitleLayoutProps> = ({ title, children }) => {
   return (
-    <div className='h-screen'>
+    <div className='h-screen pb-[1rem] overflow-y-auto'>
       <div className='w-full h-[62px] relative flex items-center'>
         <div className='absolute left-[30px]'>
           <img src={LeftArrow} />
