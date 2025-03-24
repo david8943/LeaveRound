@@ -59,6 +59,12 @@ dependencies {
 
     /* Spring AOP */
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    /* .env file support */
+    implementation 'me.paulschwarz:spring-dotenv:3.0.0'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
 }
 
 tasks.named('test') {
