@@ -26,6 +26,7 @@ public class AutoDonationServiceImpl implements AutoDonationService{
 		// TODO: USER 인증 부분
 
 		// TODO: ProjectID 인증 부분
+
 		AutoDonation autoDonation = AutoDonationConverter.toAutoDonation(userId, request);
 		autoDonationRepository.save(autoDonation);
 	}
