@@ -17,8 +17,8 @@ const menuItems = [
     menuId: 'donate',
     inactiveIcon: donateIcon,
     activeIcon: donateActiveIcon,
-    alt: 'donate',
-    to: '/donate',
+    alt: 'organization',
+    to: '/organization',
     label: '기부처',
   },
   { menuId: 'home', inactiveIcon: homeIcon, activeIcon: homeActiveIcon, alt: 'home', to: '/', label: '홈' },
@@ -36,9 +36,18 @@ export const MenuBar = () => {
   const location = useLocation();
   const listRef = useRef<HTMLUListElement>(null);
 
+  // 현재 경로에 따른 활성화 메뉴 아이템 확인
+  const isItemActive = (itemPath: string) => {
+    // AccountDetailPage와 AccountDonatePage에서는 홈 버튼 활성화
+    if (itemPath === '/' && location.pathname.includes('/donate')) {
+      return true;
+    }
+    return location.pathname === itemPath;
+  };
+
   // 오목한 배경 요소의 위치 계산
   const getActiveItemPosition = () => {
-    const activeItem = menuItems.find((item) => item.to === location.pathname);
+    const activeItem = menuItems.find((item) => isItemActive(item.to));
     return activeItem ? MENU_POSITIONS[activeItem.menuId as keyof typeof MENU_POSITIONS] : MENU_POSITIONS.home;
   };
 
@@ -62,7 +71,7 @@ export const MenuBar = () => {
 
       <ul ref={listRef} className='flex justify-between items-center w-full max-w-screen-md mx-auto px-8'>
         {menuItems.map((item) => (
-          <MenuBarItem key={item.menuId} {...item} isActive={location.pathname === item.to} />
+          <MenuBarItem key={item.menuId} {...item} isActive={isItemActive(item.to)} />
         ))}
       </ul>
     </div>
