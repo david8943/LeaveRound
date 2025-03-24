@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ssafy.Dandelion.domain.autodonation.dto.RequestDTO;
 import com.ssafy.Dandelion.global.apiPayload.ApiResponse;
 import com.ssafy.Dandelion.global.auth.user.CustomUserDetails;
 
@@ -18,9 +19,9 @@ import lombok.RequiredArgsConstructor;
 public class AutoDonationController {
 
 	@PostMapping("")
-	public ApiResponse<Void> createUniRoom(
-		@AuthenticationPrincipal CustomUserDetails customUserDetails
-		//@RequestBody @Valid
+	public ApiResponse<Void> createAutoDonation(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@RequestBody @Valid RequestDTO.CreateAutoDonationDTO request
 	) {
 		return ApiResponse.onSuccess(null);
 	}

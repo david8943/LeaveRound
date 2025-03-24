@@ -6,13 +6,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.ssafy.Dandelion.global.validation.validator.ExistDonationTimeValidator;
+import com.ssafy.Dandelion.global.validation.validator.ExistSliceMoneyValidator;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 @Documented
-@Constraint(validatedBy = ExistDonationTimeValidator.class)
+@Constraint(validatedBy = ExistSliceMoneyValidator.class)
 @Target( { ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExistSliceMoney {

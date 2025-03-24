@@ -14,7 +14,8 @@ public class RequestDTO {
 		@NotBlank
 		String bankName;
 
-		Integer accountNo;
+		@NotBlank
+		String accountNo;
 
 		@NotBlank
 		@ExistSliceMoney

@@ -1,5 +1,7 @@
 package com.ssafy.Dandelion.domain.autodonation.entity;
 
+import com.ssafy.Dandelion.domain.autodonation.entity.constant.DonationTime;
+import com.ssafy.Dandelion.domain.autodonation.entity.constant.SliceMoney;
 import com.ssafy.Dandelion.global.audit.BaseTimeEntityWithUpdatedAt;
 
 import jakarta.persistence.Column;
@@ -31,8 +33,7 @@ public class AutoDonation extends BaseTimeEntityWithUpdatedAt {
 	private Long amountSum;
 
 	@Column(nullable = false)
-	//TODO: ENUM 설정 필요
-	private String sliceMoney;
+	private SliceMoney sliceMoney;
 
 	@Column(nullable = false)
 	//TODO: ENUM 설정 필요
@@ -42,8 +43,7 @@ public class AutoDonation extends BaseTimeEntityWithUpdatedAt {
 	private String accountNo;
 
 	@Column(nullable = false)
-	//TODO: ENUM 설정 필요
-	private String donateTime;
+	private DonationTime donateTime;
 
 	@Column(nullable = false)
 	private boolean isActive;

@@ -2,9 +2,8 @@ package com.ssafy.Dandelion.global.validation.validator;
 
 import org.springframework.stereotype.Component;
 
-import com.ssafy.Dandelion.domain.autodonation.entity.constant.DonationTime;
 import com.ssafy.Dandelion.domain.autodonation.entity.constant.SliceMoney;
-import com.ssafy.Dandelion.global.validation.annotation.ExistDonationTime;
+import com.ssafy.Dandelion.global.validation.annotation.ExistSliceMoney;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -14,9 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ExistSliceMoneyValidator implements ConstraintValidator<ExistDonationTime, String> {
+public class ExistSliceMoneyValidator implements ConstraintValidator<ExistSliceMoney, String> {
+
 	@Override
-	public void initialize(ExistDonationTime constraintAnnotation) {
+	public void initialize(ExistSliceMoney constraintAnnotation) {
 		ConstraintValidator.super.initialize(constraintAnnotation);
 	}
 

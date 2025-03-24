@@ -67,26 +67,26 @@ public class SecurityConfig {
 					.anyRequest().authenticated()
 					 */
 			)
-			.sessionManagement(
-				sessionManagement -> sessionManagement
-					.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			)
-			.addFilterBefore(
-				new ExceptionHandlerFilter(objectMapper),
-				UsernamePasswordAuthenticationFilter.class
-			)
-			.addFilterBefore(
-				new LoginFilter(
-					authenticationManager(authenticationConfiguration),
-					jwtTokenProvider,
-					objectMapper
-				),
-				UsernamePasswordAuthenticationFilter.class
-			)
-			.addFilterBefore(
-				new JwtAuthenticationFilter(jwtTokenProvider),
-				UsernamePasswordAuthenticationFilter.class
-			)
+			// .sessionManagement(
+			// 	sessionManagement -> sessionManagement
+			// 		.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+			// )
+			// .addFilterBefore(
+			// 	new ExceptionHandlerFilter(objectMapper),
+			// 	UsernamePasswordAuthenticationFilter.class
+			// )
+			// .addFilterBefore(
+			// 	new LoginFilter(
+			// 		authenticationManager(authenticationConfiguration),
+			// 		jwtTokenProvider,
+			// 		objectMapper
+			// 	),
+			// 	UsernamePasswordAuthenticationFilter.class
+			// )
+			// .addFilterBefore(
+			// 	new JwtAuthenticationFilter(jwtTokenProvider),
+			// 	UsernamePasswordAuthenticationFilter.class
+			// )
 			.build();
 	}
 
