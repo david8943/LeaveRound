@@ -1,8 +1,12 @@
+import TitleLayout from './components/layout/TitleLayout';
+import DonatePage from './pages/Event/DonatePage';
+
 function App() {
   return (
     <div>
-      <div className='font-heading'>Heading</div>
-      <div className=''>Body</div>
+      <TitleLayout title='기부하기'>
+        <DonatePage />
+      </TitleLayout>
     </div>
   );
 }
