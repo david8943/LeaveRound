@@ -10,6 +10,7 @@ const menuCloseListeners: Map<string, () => void> = new Map();
 
 interface DonationAccountCardProps {
   accountInfo: {
+    userId: string;
     bankIcon?: string;
     bankName: string;
     accountNumber: string;
@@ -96,7 +97,7 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
 
     // 현재 메뉴 상태 토글
     setIsMenuOpen(!isMenuOpen);
-    activeMenuId = !isMenuOpen ? id : null;
+    activeMenuId = isMenuOpen ? null : id;
     console.log('메뉴 클릭');
   };
 
