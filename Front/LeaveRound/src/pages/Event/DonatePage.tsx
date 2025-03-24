@@ -40,7 +40,8 @@ const DonatePage = () => {
           </div>
           <div>
             <input
-              placeholder={whiteCnt}
+              type='number'
+              placeholder={whiteCnt.toString()}
               className='placeholder-gray-400 px-1 text-center bg-transparent w-[46px] border-b-2 border-gray-600 mr-1'
             />
             <span>개</span>
