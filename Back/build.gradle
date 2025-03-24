@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id("org.sonarqube") version "6.0.1.5171"
 }
 
 group = 'com.ssafy'
@@ -10,12 +11,6 @@ version = '0.0.1-SNAPSHOT'
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
-    }
-}
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
     }
 }
 
@@ -54,7 +49,7 @@ dependencies {
     /* Redis */
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-    /* JWT*/
+    /* JWT */
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
@@ -64,7 +59,6 @@ dependencies {
 
     /* Spring AOP */
     implementation 'org.springframework.boot:spring-boot-starter-aop'
-
 }
 
 tasks.named('test') {
