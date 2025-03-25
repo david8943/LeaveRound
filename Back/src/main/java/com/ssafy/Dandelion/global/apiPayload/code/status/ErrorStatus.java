@@ -5,7 +5,7 @@ import com.ssafy.Dandelion.global.apiPayload.code.ErrorReasonDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
- 
+
 @Getter
 @AllArgsConstructor
 public enum ErrorStatus implements BaseErrorCode {
@@ -29,8 +29,14 @@ public enum ErrorStatus implements BaseErrorCode {
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "AUTH4006", "인증된 사용자가 아닙니다."),
     INVALID_CREDENTIALS(HttpStatus.FORBIDDEN, "AUTH4007", "인가된 사용자가 아닙니다."),
 
+    // SSAFY API 관련 에러
+    SSAFY_API_ERROR(HttpStatus.BAD_REQUEST, "SSAFY4001", "SSAFY API 요청 실패"),
+    SSAFY_API_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "SSAFY4002", "SSAFY API 인증 실패"),
+    SSAFY_API_CONNECTION_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "SSAFY5001", "SSAFY API 연결 실패"),
+
     // Ror test
     TEMP_EXCEPTION(HttpStatus.BAD_REQUEST, "TEMP4001", "이거는 테스트");
+
 
     private final HttpStatus httpStatus;
     private final String code;
