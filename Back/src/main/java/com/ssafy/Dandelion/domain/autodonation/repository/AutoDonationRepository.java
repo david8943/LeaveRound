@@ -9,4 +9,5 @@ import com.ssafy.Dandelion.domain.autodonation.entity.AutoDonation;
 
 public interface AutoDonationRepository extends JpaRepository<AutoDonation, Integer> {
 	List<AutoDonation> findAllByUserId(Integer userId);
+	Boolean existsByAccountNo(String accountNo);
 }

@@ -16,6 +16,7 @@ import com.ssafy.Dandelion.domain.autodonation.repository.AutoDonationRepository
 import com.ssafy.Dandelion.domain.organization.repository.OrganizationProjectRepository;
 import com.ssafy.Dandelion.domain.organization.repository.OrganizationRepository;
 import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
+import com.ssafy.Dandelion.global.apiPayload.exception.handler.BadRequestHandler;
 import com.ssafy.Dandelion.global.apiPayload.exception.handler.NotFoundHandler;
 
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,9 @@ public class AutoDonationServiceImpl implements AutoDonationService{
 		// TODO: ProjectID 인증 부분
 		if (!organizationProjectRepository.existsById(request.getOrganizationProjectId()))
 			throw new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT);
+
+		if (autoDonationRepository.existsByAccountNo(request.getAccountNo()))
+			throw new BadRequestHandler(ErrorStatus.ALREADY_EXIST_AUTO_DONATION);
 
 		AutoDonation autoDonation = AutoDonationConverter.toAutoDonation(userId, request);
 		autoDonationRepository.save(autoDonation);

@@ -29,6 +29,8 @@ public enum ErrorStatus implements BaseErrorCode {
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "AUTH4006", "인증된 사용자가 아닙니다."),
     INVALID_CREDENTIALS(HttpStatus.FORBIDDEN, "AUTH4007", "인가된 사용자가 아닙니다."),
 
+    // AutoDonation 관련 에러
+    ALREADY_EXIST_AUTO_DONATION(HttpStatus.BAD_REQUEST, "AUTO4004", "이미 자동 기부에 등록된 계좌입니다."),
     // OrganizationProject 관련 에러
     NOT_FOUND_ORGANIZATION_PROJECT(HttpStatus.NOT_FOUND, "PROJECT4001", "존재하지 않는 기부 프로젝트입니다."),
 
