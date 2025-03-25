@@ -2,6 +2,8 @@ package com.ssafy.Dandelion.domain.autodonation;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +40,16 @@ public class AutoDonationController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
 		//autoDonationService.readAllAutoDonation(customUserDetails.getUserId());
-
 		return ApiResponse.onSuccess(autoDonationService.readAllAutoDonation(1));
+	}
+
+	@PatchMapping("/{autoDonationId}/active")
+	public ApiResponse<Void> changeActive(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@PathVariable Integer autoDonationId
+	) {
+		//autoDonationService.changeActive(customUserDetails.getUserId(), autoDonationId);
+		autoDonationService.changeActive(1, autoDonationId);
+		return ApiResponse.onSuccess(null);
 	}
 }

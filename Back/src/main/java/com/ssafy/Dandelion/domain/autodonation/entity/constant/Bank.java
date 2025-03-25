@@ -1,6 +1,5 @@
 package com.ssafy.Dandelion.domain.autodonation.entity.constant;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

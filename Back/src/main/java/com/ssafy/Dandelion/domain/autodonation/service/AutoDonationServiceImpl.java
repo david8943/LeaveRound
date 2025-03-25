@@ -1,11 +1,8 @@
 package com.ssafy.Dandelion.domain.autodonation.service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ssafy.Dandelion.domain.autodonation.converter.AutoDonationConverter;
@@ -26,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Slf4j
-public class AutoDonationServiceImpl implements AutoDonationService{
+public class AutoDonationServiceImpl implements AutoDonationService {
 
 	private final AutoDonationRepository autoDonationRepository;
 	private final OrganizationRepository organizationRepository;
@@ -67,6 +64,18 @@ public class AutoDonationServiceImpl implements AutoDonationService{
 			.toList();
 
 		return AutoDonationConverter.toRealAllAutoDonationDTO(accountDTOList);
+	}
+
+	@Transactional
+	@Override
+	public void changeActive(Integer userId, Integer autoDonationId) {
+		// TODO: USER 인증 부분
+
+		AutoDonation target = autoDonationRepository.findById(autoDonationId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_AUTO_DONATION));
+
+		target.changeActive();
+		autoDonationRepository.save(target);
 	}
 
 }
