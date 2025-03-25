@@ -232,3 +232,7 @@ gradle-app.setting
 
 .env
 
+# API 키 관련 설정
+**/application-API-KEY.properties
+
+
