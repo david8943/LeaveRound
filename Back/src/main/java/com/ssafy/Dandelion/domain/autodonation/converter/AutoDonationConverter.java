@@ -46,6 +46,7 @@ public class AutoDonationConverter {
 	public static ResponseDTO.AccountDTO toAccountDTO(AutoDonation autoDonation, String organizationName) {
 		return ResponseDTO.AccountDTO.builder()
 			.autoDonationId(autoDonation.getAutoDonationId())
+			.acountNo(autoDonation.getAccountNo())
 			.bankName(Bank.fromBankCode(autoDonation.getBankCode()).getBankName())
 			.sliceMoney(autoDonation.getSliceMoney().toString())
 			.donationTime(autoDonation.getDonateTime().toString())
