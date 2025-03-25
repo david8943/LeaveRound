@@ -89,7 +89,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_AUTO_DONATION));
 
 		autoDonationInfoRepository.findAllByAutoDonationId(target.getAutoDonationId())
-			.forEach(autoDonationInfo -> autoDonationInfoRepository.delete(autoDonationInfo));
+			.forEach(autoDonationInfoRepository::delete);
 
 		autoDonationRepository.delete(target);
 	}
