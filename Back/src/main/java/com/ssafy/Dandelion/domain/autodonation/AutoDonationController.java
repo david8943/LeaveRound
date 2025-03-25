@@ -37,7 +37,7 @@ public class AutoDonationController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
 		//autoDonationService.readAllAutoDonation(customUserDetails.getUserId());
-		autoDonationService.readAllAutoDonation(1);
+		//autoDonationService.readAllAutoDonation(1);
 		return ApiResponse.onSuccess(null);
 	}
 }

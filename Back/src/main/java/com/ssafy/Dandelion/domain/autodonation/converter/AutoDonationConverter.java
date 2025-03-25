@@ -9,11 +9,11 @@ import com.ssafy.Dandelion.domain.autodonation.entity.constant.SliceMoney;
 public class AutoDonationConverter {
 	public static AutoDonation toAutoDonation(Integer userId, RequestDTO.CreateAutoDonationDTO request) {
 		return AutoDonation.builder()
-			.organizationProjectId(request.getOrganizationId())
+			.organizationProjectId(request.getOrganizationProjectId())
 			.userId(userId)
 			.amountSum(0L)
 			.sliceMoney(SliceMoney.valueOf(request.getSliceMoney()))
-			.bankCode(Bank.valueOf(request.getBankName()).getBankCode())
+			.bankCode(Bank.fromBankName(request.getBankName()).getBankCode())
 			.accountNo(request.getAccountNo())
 			.donateTime(DonationTime.valueOf(request.getDonationTime()))
 			.isActive(true)

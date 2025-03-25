@@ -16,7 +16,7 @@ import jakarta.validation.Payload;
 @Target( { ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExistBank {
-	String message() default "일치하는 은행이 단위가 없습니다";
+	String message() default "일치하는 은행이 없습니다";
 	Class<?>[] groups() default {};
 	Class<? extends Payload>[] payload() default {};
 }

@@ -30,8 +30,8 @@ public class AutoDonationServiceImpl implements AutoDonationService{
 		// TODO: USER 인증 부분
 
 		// TODO: ProjectID 인증 부분
-		if (!organizationProjectRepository.existsById(request.getOrganizationId()))
-			throw new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT);
+		// if (!organizationProjectRepository.existsById(request.getOrganizationProjectId()))
+		// 	throw new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT);
 
 		AutoDonation autoDonation = AutoDonationConverter.toAutoDonation(userId, request);
 		autoDonationRepository.save(autoDonation);
