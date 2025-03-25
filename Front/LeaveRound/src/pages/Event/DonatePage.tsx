@@ -6,8 +6,8 @@ import YellowDandelion from '@/assets/yellow-dandelion.png';
 import { useState } from 'react';
 
 const DonatePage = () => {
-  const [whiteCnt, setWhiteCnt] = useState<number>(30);
-  const [yellowCnt, setYelloCnt] = useState<number>(0);
+  const [whiteCnt, _setWhiteCnt] = useState<number>(30);
+  const [yellowCnt, _setYellowCnt] = useState<number>(0);
 
   return (
     <div className='h-[calc(100%-62px)] flex flex-col justify-center gap-20'>
