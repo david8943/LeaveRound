@@ -31,6 +31,7 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const {
+    userId,
     bankName,
     accountNumber,
     balance,
@@ -145,7 +146,7 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
             {/* 메뉴 드롭다운 */}
             {isMenuOpen && (
               <div ref={menuRef} className='absolute top-full right-0 -mt-1 z-20'>
-                <AccountMenu onClose={closeMenu} />
+                <AccountMenu onClose={closeMenu} accountNumber={accountNumber} userId={userId} />
               </div>
             )}
           </div>
@@ -171,7 +172,7 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
         </div>
       )}
 
-      {/* 하단 중앙 펼치기/접기 버튼 */}
+      {/* 펼치기/접기 버튼 */}
       <div className='flex justify-center mt-2'>
         <button onClick={toggleExpand}>
           <img
