@@ -9,4 +9,6 @@ public interface AutoDonationService {
 	ResponseDTO.ReadAllAutoDonationDTO readAllAutoDonation(Integer userId);
 
 	void changeActive(Integer userId, Integer autoDonationId);
+
+	void deleteAutoDonation(Integer userId, Integer autoDonationId);
 }
