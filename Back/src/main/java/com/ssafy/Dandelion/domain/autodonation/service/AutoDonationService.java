@@ -7,5 +7,4 @@ import jakarta.validation.Valid;
 public interface AutoDonationService {
 	void createAutoDonation(Integer userId, RequestDTO.CreateAutoDonationDTO request);
 
-	void readAllAutoDonation(Integer userId);
 }

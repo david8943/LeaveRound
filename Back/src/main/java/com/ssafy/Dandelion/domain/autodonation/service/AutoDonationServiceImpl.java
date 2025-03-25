@@ -37,8 +37,4 @@ public class AutoDonationServiceImpl implements AutoDonationService{
 		autoDonationRepository.save(autoDonation);
 	}
 
-	@Override
-	public void readAllAutoDonation(Integer userId) {
-
-	}
 }
