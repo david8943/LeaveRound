@@ -66,4 +66,16 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 		return AutoDonationConverter.toRealAllAutoDonationDTO(accountDTOList);
 	}
 
+	@Transactional
+	@Override
+	public void changeActive(Integer userId, Integer autoDonationId) {
+		// TODO: USER 인증 부분
+
+		AutoDonation target = autoDonationRepository.findById(autoDonationId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_AUTO_DONATION));
+
+		target.changeActive();
+		autoDonationRepository.save(target);
+	}
+
 }

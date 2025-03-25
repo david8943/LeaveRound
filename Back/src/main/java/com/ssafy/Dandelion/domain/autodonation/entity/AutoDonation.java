@@ -59,4 +59,8 @@ public class AutoDonation extends BaseTimeEntityWithUpdatedAt {
 
 	@Column(nullable = false)
 	private boolean isActive;
+
+	public void changeActive() {
+		this.isActive = !this.isActive;
+	}
 }
