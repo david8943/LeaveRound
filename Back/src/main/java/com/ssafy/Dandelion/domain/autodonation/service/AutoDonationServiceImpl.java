@@ -36,4 +36,9 @@ public class AutoDonationServiceImpl implements AutoDonationService{
 		AutoDonation autoDonation = AutoDonationConverter.toAutoDonation(userId, request);
 		autoDonationRepository.save(autoDonation);
 	}
+
+	@Override
+	public void readAllAutoDonation(Integer userId) {
+
+	}
 }
