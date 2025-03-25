@@ -16,8 +16,8 @@ public class ResponseDTO {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class ReadAllAutoDonationDTO {
-		List<AccountDTO> activeAmounts;
-		List<AccountDTO> inactiveAmounts;
+		List<AccountDTO> activeAccounts;
+		List<AccountDTO> inactiveAccounts;
 	}
 
 	@Getter

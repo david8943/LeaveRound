@@ -2,6 +2,7 @@ package com.ssafy.Dandelion.domain.autodonation.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -47,16 +48,21 @@ public class AutoDonationServiceImpl implements AutoDonationService{
 	public ResponseDTO.ReadAllAutoDonationDTO readAllAutoDonation(Integer userId) {
 		// TODO: USER 인증 부분
 
-		List<AutoDonation> autoDonationList = autoDonationRepository.findAllByUserId(userId);
+		List<ResponseDTO.AccountDTO> accountDTOList = autoDonationRepository.findAllByUserId(userId).stream()
+			.map(autoDonation -> {
+				Integer organizationId = organizationProjectRepository.findById(autoDonation.getOrganizationProjectId())
+					.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT))
+					.getOrganizationId();
 
-		List<ResponseDTO.AccountDTO> accountDTOList = new ArrayList<>();
-		for(AutoDonation autoDonation : autoDonationList) {
-			Integer organizationId = organizationProjectRepository.findById(autoDonation.getOrganizationProjectId()).get().getOrganizationId();
-			String organizationName = organizationRepository.findById(organizationId).get().getOrganizationName();
-			ResponseDTO.AccountDTO accountDTO = AutoDonationConverter.toAccountDTO(autoDonation, organizationName);
-			accountDTOList.add(accountDTO);
-		}
-		return AutoDonationConverter.toRealAllAutoDonationDTO(autoDonationList);
+				String organizationName = organizationRepository.findById(organizationId)
+					.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION))
+					.getOrganizationName();
+
+				return AutoDonationConverter.toAccountDTO(autoDonation, organizationName);
+			})
+			.toList();
+
+		return AutoDonationConverter.toRealAllAutoDonationDTO(accountDTOList);
 	}
 
 }

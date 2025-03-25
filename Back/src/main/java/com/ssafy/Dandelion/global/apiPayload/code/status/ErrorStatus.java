@@ -32,7 +32,10 @@ public enum ErrorStatus implements BaseErrorCode {
     // OrganizationProject 관련 에러
     NOT_FOUND_ORGANIZATION_PROJECT(HttpStatus.NOT_FOUND, "PROJECT4001", "존재하지 않는 기부 프로젝트입니다."),
 
-    // Ror test
+    // Organization 관련 에러
+    NOT_FOUND_ORGANIZATION(HttpStatus.NOT_FOUND, "ORGANIZATION4001", "존재하지 않는 기부 단체입니다."),
+
+    // For test
     TEMP_EXCEPTION(HttpStatus.BAD_REQUEST, "TEMP4001", "이거는 테스트")
     ;
 

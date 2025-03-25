@@ -25,12 +25,21 @@ public class AutoDonationConverter {
 
 	}
 
-	public static ResponseDTO.ReadAllAutoDonationDTO toRealAllAutoDonationDTO(List<AutoDonation> autoDonationList) {
+	public static ResponseDTO.ReadAllAutoDonationDTO toRealAllAutoDonationDTO(List<ResponseDTO.AccountDTO> accountDTOList) {
 		ResponseDTO.ReadAllAutoDonationDTO result = ResponseDTO.ReadAllAutoDonationDTO
 			.builder()
-			.activeAmounts(new ArrayList<>())
-			.inactiveAmounts(new ArrayList<>())
+			.activeAccounts(new ArrayList<>())
+			.inactiveAccounts(new ArrayList<>())
 			.build();
+
+		accountDTOList.forEach(accountDTO -> {
+			if (accountDTO.getIsActive()) {
+				result.getActiveAccounts().add(accountDTO);
+			} else {
+				result.getInactiveAccounts().add(accountDTO);
+			}
+		});
+
 		return result;
 	}
 
