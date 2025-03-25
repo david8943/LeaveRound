@@ -23,8 +23,8 @@ import lombok.NoArgsConstructor;
 @Table(indexes = {
 	@Index(name = "idx_auto_donation_id", columnList = "autoDonationId"),
 	@Index(name = "idx_organization_project_id", columnList = "organizationProjectId"),
-	@Index(name = "idx_user_id", columnList = "userId")
-})
+	@Index(name = "idx_user_id", columnList = "userId")},
+	name = "auto_donation_infos")
 public class AutoDonationInfo extends BaseTimeEntity {
 
 	@Id

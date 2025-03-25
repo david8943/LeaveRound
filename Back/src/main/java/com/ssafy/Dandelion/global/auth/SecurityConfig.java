@@ -4,26 +4,19 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.Dandelion.global.apiPayload.exception.handler.AuthHandler;
-import com.ssafy.Dandelion.global.auth.filter.ExceptionHandlerFilter;
-import com.ssafy.Dandelion.global.auth.filter.JwtAuthenticationFilter;
-import com.ssafy.Dandelion.global.auth.filter.LoginFilter;
 import com.ssafy.Dandelion.global.auth.filter.LogoutFilter;
 import com.ssafy.Dandelion.global.auth.util.JwtTokenProvider;
 

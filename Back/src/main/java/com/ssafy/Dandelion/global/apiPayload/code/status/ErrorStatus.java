@@ -29,8 +29,12 @@ public enum ErrorStatus implements BaseErrorCode {
     UNAUTHORIZED(HttpStatus.FORBIDDEN, "AUTH4006", "인증된 사용자가 아닙니다."),
     INVALID_CREDENTIALS(HttpStatus.FORBIDDEN, "AUTH4007", "인가된 사용자가 아닙니다."),
 
+    // OrganizationProject 관련 에러
+    NOT_FOUND_ORGANIZATION_PROJECT(HttpStatus.NOT_FOUND, "PROJECT4001", "존재하지 않는 기부 프로젝트입니다."),
+
     // Ror test
-    TEMP_EXCEPTION(HttpStatus.BAD_REQUEST, "TEMP4001", "이거는 테스트");
+    TEMP_EXCEPTION(HttpStatus.BAD_REQUEST, "TEMP4001", "이거는 테스트")
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;
