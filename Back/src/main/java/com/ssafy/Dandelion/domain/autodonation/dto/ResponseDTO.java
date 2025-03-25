@@ -2,6 +2,8 @@ package com.ssafy.Dandelion.domain.autodonation.dto;
 
 import java.util.List;
 
+import com.ssafy.Dandelion.domain.autodonation.entity.constant.SliceMoney;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,16 +16,21 @@ public class ResponseDTO {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class ReadAllAutoDonationDTO {
-		List<AmountDTO> activeAmounts;
-		List<AmountDTO> inactiveAmounts;
+		List<AccountDTO> activeAmounts;
+		List<AccountDTO> inactiveAmounts;
 	}
 
 	@Getter
 	@Builder
 	@NoArgsConstructor
 	@AllArgsConstructor
-	public static class AmountDTO {
+	public static class AccountDTO {
 		Integer autoDonationId;
 		String bankName;
+		String acountNo;
+		String sliceMoney;
+		String donationTime;
+		String organizationName;
+		Boolean isActive;
 	}
 }

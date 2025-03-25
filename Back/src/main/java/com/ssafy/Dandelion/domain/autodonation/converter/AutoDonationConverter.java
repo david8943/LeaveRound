@@ -1,6 +1,10 @@
 package com.ssafy.Dandelion.domain.autodonation.converter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ssafy.Dandelion.domain.autodonation.dto.RequestDTO;
+import com.ssafy.Dandelion.domain.autodonation.dto.ResponseDTO;
 import com.ssafy.Dandelion.domain.autodonation.entity.AutoDonation;
 import com.ssafy.Dandelion.domain.autodonation.entity.constant.Bank;
 import com.ssafy.Dandelion.domain.autodonation.entity.constant.DonationTime;
@@ -19,5 +23,25 @@ public class AutoDonationConverter {
 			.isActive(true)
 			.build();
 
+	}
+
+	public static ResponseDTO.ReadAllAutoDonationDTO toRealAllAutoDonationDTO(List<AutoDonation> autoDonationList) {
+		ResponseDTO.ReadAllAutoDonationDTO result = ResponseDTO.ReadAllAutoDonationDTO
+			.builder()
+			.activeAmounts(new ArrayList<>())
+			.inactiveAmounts(new ArrayList<>())
+			.build();
+		return result;
+	}
+
+	public static ResponseDTO.AccountDTO toAccountDTO(AutoDonation autoDonation, String organizationName) {
+		return ResponseDTO.AccountDTO.builder()
+			.autoDonationId(autoDonation.getAutoDonationId())
+			.bankName(Bank.fromBankCode(autoDonation.getBankCode()).getBankName())
+			.sliceMoney(autoDonation.getSliceMoney().toString())
+			.donationTime(autoDonation.getDonateTime().toString())
+			.organizationName(organizationName)
+			.isActive(autoDonation.isActive())
+			.build();
 	}
 }

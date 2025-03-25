@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.Dandelion.domain.autodonation.dto.RequestDTO;
+import com.ssafy.Dandelion.domain.autodonation.dto.ResponseDTO;
 import com.ssafy.Dandelion.domain.autodonation.service.AutoDonationService;
 import com.ssafy.Dandelion.global.apiPayload.ApiResponse;
 import com.ssafy.Dandelion.global.auth.user.CustomUserDetails;
@@ -33,11 +34,11 @@ public class AutoDonationController {
 	}
 
 	@GetMapping("")
-	public ApiResponse<Void> readAllAutoDonation(
+	public ApiResponse<ResponseDTO.ReadAllAutoDonationDTO> readAllAutoDonation(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
 		//autoDonationService.readAllAutoDonation(customUserDetails.getUserId());
-		//autoDonationService.readAllAutoDonation(1);
-		return ApiResponse.onSuccess(null);
+
+		return ApiResponse.onSuccess(autoDonationService.readAllAutoDonation(1));
 	}
 }

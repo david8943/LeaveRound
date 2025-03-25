@@ -36,4 +36,13 @@ public enum Bank {
 		}
 		return null;
 	}
+
+	public static Bank fromBankCode(String bankCode) {
+		for (Bank bank : Bank.values()) {
+			if (bank.getBankCode().equals(bankCode)) {
+				return bank;
+			}
+		}
+		return null;
+	}
 }
