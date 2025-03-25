@@ -2,8 +2,6 @@ package com.ssafy.Dandelion.domain.autodonation.dto;
 
 import java.util.List;
 
-import com.ssafy.Dandelion.domain.autodonation.entity.constant.SliceMoney;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
