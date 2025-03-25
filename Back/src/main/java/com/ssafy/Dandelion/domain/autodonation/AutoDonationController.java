@@ -1,12 +1,14 @@
 package com.ssafy.Dandelion.domain.autodonation;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.Dandelion.domain.autodonation.dto.RequestDTO;
+import com.ssafy.Dandelion.domain.autodonation.dto.ResponseDTO;
 import com.ssafy.Dandelion.domain.autodonation.service.AutoDonationService;
 import com.ssafy.Dandelion.global.apiPayload.ApiResponse;
 import com.ssafy.Dandelion.global.auth.user.CustomUserDetails;
@@ -29,5 +31,14 @@ public class AutoDonationController {
 		//autoDonationService.createAutoDonation(customUserDetails.getUserId(), request);
 		autoDonationService.createAutoDonation(1, request);
 		return ApiResponse.onSuccess(null);
+	}
+
+	@GetMapping("")
+	public ApiResponse<ResponseDTO.ReadAllAutoDonationDTO> readAllAutoDonation(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails
+	) {
+		//autoDonationService.readAllAutoDonation(customUserDetails.getUserId());
+
+		return ApiResponse.onSuccess(autoDonationService.readAllAutoDonation(1));
 	}
 }

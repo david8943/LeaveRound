@@ -2,6 +2,7 @@ package com.ssafy.Dandelion.domain.autodonation.dto;
 
 import org.checkerframework.checker.units.qual.N;
 
+import com.ssafy.Dandelion.global.validation.annotation.ExistBank;
 import com.ssafy.Dandelion.global.validation.annotation.ExistDonationTime;
 import com.ssafy.Dandelion.global.validation.annotation.ExistSliceMoney;
 
@@ -12,6 +13,7 @@ public class RequestDTO {
 	@Getter
 	public static class CreateAutoDonationDTO {
 		@NotBlank
+		@ExistBank
 		String bankName;
 
 		@NotBlank
@@ -25,6 +27,6 @@ public class RequestDTO {
 		@ExistDonationTime
 		String donationTime;
 
-		Integer organizationId;
+		Integer organizationProjectId;
 	}
 }

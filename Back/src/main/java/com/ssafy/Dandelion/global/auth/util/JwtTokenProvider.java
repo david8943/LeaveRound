@@ -11,7 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
-import com.ssafy.Dandelion.global.apiPayload.exception.handler.AuthHandler;
+import com.ssafy.Dandelion.global.apiPayload.exception.handler.ForbiddenHandler;
 import com.ssafy.Dandelion.global.auth.user.CustomUserDetails;
 
 import io.jsonwebtoken.Claims;
@@ -102,7 +102,7 @@ public class JwtTokenProvider {
 			Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
 		} catch (JwtException e) {
 			log.info("Invalid JWT Token", e);
-			throw new AuthHandler(determineErrorCode(e));
+			throw new ForbiddenHandler(determineErrorCode(e));
 		}
 	}
 
@@ -120,7 +120,7 @@ public class JwtTokenProvider {
 	public String extractAccessToken(HttpServletRequest request) {
 		return Optional.ofNullable(request.getCookies())
 			.flatMap(cookies -> Optional.ofNullable(findToken(cookies)))
-			.orElseThrow(() -> new AuthHandler(ErrorStatus.UNAUTHORIZED));
+			.orElseThrow(() -> new ForbiddenHandler(ErrorStatus.UNAUTHORIZED));
 	}
 
 	private String findToken(Cookie[] cookies) {

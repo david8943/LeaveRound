@@ -19,11 +19,11 @@ public class ExistBankValidator implements ConstraintValidator<ExistBank, String
 
 	@Override
 	public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
-		try {
-			Bank.valueOf(s);
-			return true;
-		} catch (IllegalArgumentException e) {
-			return false;
+		for (Bank bank : Bank.values()) {
+			if (bank.getBankName().equals(s)) {
+				return true;
+			}
 		}
+		return false;
 	}
 }
