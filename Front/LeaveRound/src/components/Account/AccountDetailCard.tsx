@@ -1,5 +1,7 @@
 interface AccouontDeatilCardProps {
   accountDetailInfo: {
+    userId: string;
+    accountId: string;
     donateDate: string;
     donateAmount: number;
     donatePurpose: string;

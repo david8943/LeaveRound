@@ -1,10 +1,16 @@
+import { useNavigate } from 'react-router-dom';
+
 interface AccountMenuProps {
   onClose: () => void;
+  accountNumber: string;
+  userId: string;
 }
 
-export const AccountMenu = ({ onClose }: AccountMenuProps) => {
+export const AccountMenu = ({ onClose, accountNumber, userId }: AccountMenuProps) => {
+  const navigate = useNavigate();
+
   const handleDetail = () => {
-    console.log('상세 내역 페이지 이동');
+    navigate(`/${userId}/donate/${accountNumber}`);
     onClose();
   };
 
