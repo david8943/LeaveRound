@@ -14,7 +14,8 @@ import jakarta.persistence.Table;
 @Table(indexes = {
 	@Index(name = "idx_organization_project_id", columnList = "organizationProjectId"),
 	@Index(name = "idx_user_id", columnList = "userId")
-})
+},
+	name = "donation_certifications")
 public class DonationCertification extends BaseTimeEntity {
 
 	@Id
