@@ -13,7 +13,8 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(indexes = @Index(name = "idx_user_id", columnList = "userId"))
+@Table(indexes = @Index(name = "idx_user_id", columnList = "userId"),
+	name = "dandelions")
 public class Dandelion extends BaseTimeEntity {
 
 	@Id
