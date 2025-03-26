@@ -13,4 +13,6 @@ public interface AutoDonationService {
 	void deleteAutoDonation(Integer userId, Integer autoDonationId);
 
 	void UpdateAutoDonation(Integer userId, Integer autoDonationId, RequestDTO.AutoDonationDTO request);
+
+	ResponseDTO.ReadAutoDonationDTO ReadAutoDonation(Integer userId, Integer autoDonationId);
 }

@@ -110,4 +110,36 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 		autoDonationRepository.save(target);
 	}
 
+	@Override
+	public ResponseDTO.ReadAutoDonationDTO ReadAutoDonation(Integer userId, Integer autoDonationId) {
+		List<ResponseDTO.AutoDonationInfoDTO> autoDonationInfoDTOList = autoDonationInfoRepository.findAllByAutoDonationId(
+				autoDonationId).stream()
+			.map(autoDonationInfo -> {
+				Integer organizationId = organizationProjectRepository.findById(
+						autoDonationInfo.getOrganizationProjectId())
+					.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT))
+					.getOrganizationId();
+
+				String organizationName = organizationRepository.findById(organizationId)
+					.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION))
+					.getOrganizationName();
+
+				return AutoDonationConverter.toAutoDonationInfoDTO(autoDonationInfo, organizationName);
+			})
+			.toList();
+
+		AutoDonation target = autoDonationRepository.findById(autoDonationId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_AUTO_DONATION));
+
+		Integer organizationId = organizationProjectRepository.findById(target.getAutoDonationId())
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT))
+			.getOrganizationId();
+
+		String organizationName = organizationRepository.findById(organizationId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION))
+			.getOrganizationName();
+
+		return AutoDonationConverter.toAutoDonationDTO(target, autoDonationInfoDTOList, organizationName);
+	}
+
 }
