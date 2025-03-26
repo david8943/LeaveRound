@@ -29,7 +29,7 @@ public class AutoDonationInfo extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long autoDonationInfoId;
+	private Integer autoDonationInfoId;
 
 	@Column(nullable = false)
 	private Integer autoDonationId;

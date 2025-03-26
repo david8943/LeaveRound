@@ -74,4 +74,12 @@ public class AutoDonationController {
 		autoDonationService.UpdateAutoDonation(1, autoDonationId, request);
 		return ApiResponse.onSuccess(null);
 	}
+
+	@GetMapping("/{autoDonationId}")
+	public ApiResponse<ResponseDTO.ReadAutoDonationDTO> UpdateAutoDonation(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@PathVariable Integer autoDonationId
+	) {
+		return ApiResponse.onSuccess(autoDonationService.ReadAutoDonation(1, autoDonationId));
+	}
 }
