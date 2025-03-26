@@ -32,7 +32,6 @@ public class AutoDonationController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@RequestBody @Valid RequestDTO.AutoDonationDTO request
 	) {
-		//autoDonationService.createAutoDonation(customUserDetails.getUserId(), request);
 		autoDonationService.createAutoDonation(1, request);
 		return ApiResponse.onSuccess(null);
 	}
@@ -41,7 +40,6 @@ public class AutoDonationController {
 	public ApiResponse<ResponseDTO.ReadAllAutoDonationDTO> readAllAutoDonation(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
-		//autoDonationService.readAllAutoDonation(customUserDetails.getUserId());
 		return ApiResponse.onSuccess(autoDonationService.readAllAutoDonation(1));
 	}
 
@@ -50,36 +48,34 @@ public class AutoDonationController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Integer autoDonationId
 	) {
-		//autoDonationService.changeActive(customUserDetails.getUserId(), autoDonationId);
 		autoDonationService.changeActive(1, autoDonationId);
 		return ApiResponse.onSuccess(null);
 	}
 
 	@DeleteMapping("/{autoDonationId}")
-	public ApiResponse<Void> DeleteAutoDonation(
+	public ApiResponse<Void> deleteAutoDonation(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Integer autoDonationId
 	) {
-		//autoDonationService.deleteAutoDonation(customUserDetails.getUserId(), autoDonationId);
 		autoDonationService.deleteAutoDonation(1, autoDonationId);
 		return ApiResponse.onSuccess(null);
 	}
 
 	@PutMapping("/{autoDonationId}")
-	public ApiResponse<Void> UpdateAutoDonation(
+	public ApiResponse<Void> updateAutoDonation(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Integer autoDonationId,
 		@RequestBody @Valid RequestDTO.AutoDonationDTO request
 	) {
-		autoDonationService.UpdateAutoDonation(1, autoDonationId, request);
+		autoDonationService.updateAutoDonation(1, autoDonationId, request);
 		return ApiResponse.onSuccess(null);
 	}
 
 	@GetMapping("/{autoDonationId}")
-	public ApiResponse<ResponseDTO.ReadAutoDonationDTO> UpdateAutoDonation(
+	public ApiResponse<ResponseDTO.ReadAutoDonationDTO> updateAutoDonation(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Integer autoDonationId
 	) {
-		return ApiResponse.onSuccess(autoDonationService.ReadAutoDonation(1, autoDonationId));
+		return ApiResponse.onSuccess(autoDonationService.readAutoDonation(1, autoDonationId));
 	}
 }

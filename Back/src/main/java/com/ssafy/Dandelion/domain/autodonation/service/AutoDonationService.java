@@ -12,7 +12,7 @@ public interface AutoDonationService {
 
 	void deleteAutoDonation(Integer userId, Integer autoDonationId);
 
-	void UpdateAutoDonation(Integer userId, Integer autoDonationId, RequestDTO.AutoDonationDTO request);
+	void updateAutoDonation(Integer userId, Integer autoDonationId, RequestDTO.AutoDonationDTO request);
 
-	ResponseDTO.ReadAutoDonationDTO ReadAutoDonation(Integer userId, Integer autoDonationId);
+	ResponseDTO.ReadAutoDonationDTO readAutoDonation(Integer userId, Integer autoDonationId);
 }

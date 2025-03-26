@@ -34,9 +34,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void createAutoDonation(Integer userId, RequestDTO.AutoDonationDTO request) {
-		// TODO: USER 인증 부분
 
-		// TODO: ProjectID 인증 부분
 		if (!organizationProjectRepository.existsById(request.getOrganizationProjectId()))
 			throw new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT);
 
@@ -49,7 +47,6 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 
 	@Override
 	public ResponseDTO.ReadAllAutoDonationDTO readAllAutoDonation(Integer userId) {
-		// TODO: USER 인증 부분
 
 		List<ResponseDTO.AccountDTO> accountDTOList = autoDonationRepository.findAllByUserId(userId).stream()
 			.map(autoDonation -> {
@@ -71,7 +68,6 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void changeActive(Integer userId, Integer autoDonationId) {
-		// TODO: USER 인증 부분
 
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
 			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_AUTO_DONATION));
@@ -83,7 +79,6 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void deleteAutoDonation(Integer userId, Integer autoDonationId) {
-		// TODO: USER 인증 부분
 
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
 			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_AUTO_DONATION));
@@ -96,7 +91,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 
 	@Transactional
 	@Override
-	public void UpdateAutoDonation(Integer userId, Integer autoDonationId, RequestDTO.AutoDonationDTO request) {
+	public void updateAutoDonation(Integer userId, Integer autoDonationId, RequestDTO.AutoDonationDTO request) {
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
 			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_AUTO_DONATION));
 
@@ -111,7 +106,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	}
 
 	@Override
-	public ResponseDTO.ReadAutoDonationDTO ReadAutoDonation(Integer userId, Integer autoDonationId) {
+	public ResponseDTO.ReadAutoDonationDTO readAutoDonation(Integer userId, Integer autoDonationId) {
 		List<ResponseDTO.AutoDonationInfoDTO> autoDonationInfoDTOList = autoDonationInfoRepository.findAllByAutoDonationId(
 				autoDonationId).stream()
 			.map(autoDonationInfo -> {
