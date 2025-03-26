@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
      */
     public void signup(UserSignUpRequestDTO userSignUpRequestDTO) {
         // 이메일 중복 체크
-        if (userRepository.exitsByEmail(userSignUpRequestDTO.getEmail())) {
+        if (userRepository.existsByEmail(userSignUpRequestDTO.getEmail())) {
             throw new MemberHandler(ErrorStatus.MEMBER_DUPLICATE_EMAIL);
         }
         //SSAFY API를 통해 userKey 발급
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
     private String createUser(String email) {
         try {
             //API 호출을 위한 URL 및 요청 객체 생성
-            String url = ssafyApiProperties.createApiUrl("/api/vi/member");
+            String url = ssafyApiProperties.createApiUrl("/ssafy/api/v1/member/");
             UserCreateRequestDTO requestDTO = UserCreateRequestDTO.builder()
                     .apiKey(ssafyApiProperties.getApiKey())
                     .userId(email)
