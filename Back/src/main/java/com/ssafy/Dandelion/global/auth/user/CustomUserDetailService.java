@@ -6,7 +6,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.Dandelion.domain.user.entity.User;
-import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
 
 import lombok.RequiredArgsConstructor;
 
