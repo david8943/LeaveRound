@@ -66,7 +66,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public User authenticate(UserLoginRequestDTO userLoginRequestDTO) {
 
-
         return null;
     }
 
@@ -86,7 +85,6 @@ public class UserServiceImpl implements UserService {
      */
     private String createUser(String email) {
 
+        return email;
     }
-
-
 }
