@@ -1,6 +1,5 @@
 package com.ssafy.Dandelion.global.auth.user;
 
-
 import com.ssafy.Dandelion.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,10 +14,9 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-
         // return userRepository.findByEmail(email)
-        // 	.map(this::createUserDetails)
-        // 	.orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
+        //     .map(this::createUserDetails)
+        //     .orElseThrow(() -> new UserHandler(ErrorStatus.USER_NOT_FOUND));
         return null;
     }
 
@@ -31,5 +29,4 @@ public class CustomUserDetailService implements UserDetailsService {
                 .userKey(user.getUserKey())
                 .build();
     }
-
 }
