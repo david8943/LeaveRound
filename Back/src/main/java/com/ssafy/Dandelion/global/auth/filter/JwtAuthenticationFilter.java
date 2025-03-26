@@ -30,7 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain
-
     ) throws ServletException, IOException {
         logger.info("JwtAuthenticationFilter.doFilterInternal");
         String token = jwtTokenProvider.extractAccessToken(request);

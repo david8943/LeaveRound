@@ -1,6 +1,5 @@
 package com.ssafy.Dandelion.global.auth;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.Dandelion.global.auth.filter.JwtAuthenticationFilter;
 import com.ssafy.Dandelion.global.auth.filter.LoginFilter;
@@ -111,7 +110,4 @@ public class SecurityConfig {
 
         return source;
     }
-
 }
-
-

@@ -1,6 +1,5 @@
 package com.ssafy.Dandelion.global.auth.filter;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.Dandelion.global.apiPayload.ApiResponse;
 import jakarta.servlet.ServletException;
