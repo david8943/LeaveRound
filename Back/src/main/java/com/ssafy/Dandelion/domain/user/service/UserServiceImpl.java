@@ -1,18 +1,26 @@
 package com.ssafy.Dandelion.domain.user.service;
 
+import com.ssafy.Dandelion.domain.user.dto.request.UserCreateRequestDTO;
 import com.ssafy.Dandelion.domain.user.dto.request.UserLoginRequestDTO;
 import com.ssafy.Dandelion.domain.user.dto.request.UserSignUpRequestDTO;
+import com.ssafy.Dandelion.domain.user.dto.response.SsafyUserResponseDTO;
 import com.ssafy.Dandelion.domain.user.dto.response.UserInfoResponseDTO;
 import com.ssafy.Dandelion.domain.user.entity.User;
 import com.ssafy.Dandelion.domain.user.repository.UserRepository;
 import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
 import com.ssafy.Dandelion.global.apiPayload.exception.handler.MemberHandler;
+import com.ssafy.Dandelion.global.apiPayload.exception.handler.SsafyApiHandler;
 import com.ssafy.Dandelion.global.config.SsafyApiProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +70,13 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    // 로그인
+    /**
+     * 사용자 인증(로그인) 처리
+     *
+     * @param userLoginRequestDTO 로그인 요청 정보
+     * @return 인증된 사용자 엔티티
+     * @throws MemberHandler 인증 실패 시 예외 발생
+     */
     @Override
     public User authenticate(UserLoginRequestDTO userLoginRequestDTO) {
 
@@ -84,7 +98,31 @@ public class UserServiceImpl implements UserService {
      * @throws SsafyApiHandler API 호출 실패 시 예외 발생
      */
     private String createUser(String email) {
+        try {
+            //API 호출을 위한 URL 및 요청 객체 생성
+            String url = ssafyApiProperties.createApiUrl("/api/vi/member");
+            UserCreateRequestDTO requestDTO = UserCreateRequestDTO.builder()
+                    .apiKey(ssafyApiProperties.getApiKey())
+                    .userId(email)
+                    .build();
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+            HttpEntity<UserCreateRequestDTO> requestEntity = new HttpEntity<>(requestDTO, headers);
 
-        return email;
+            // API 호출
+            ResponseEntity<SsafyUserResponseDTO> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    requestEntity,
+                    SsafyUserResponseDTO.class
+            );
+            // 응답 처리
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return response.getBody().getUserKey();
+            }
+            throw new SsafyApiHandler(ErrorStatus.SSAFY_API_ERROR);
+        } catch (Exception e) {
+            throw new SsafyApiHandler(ErrorStatus.SSAFY_API_CONNECTION_ERROR);
+        }
     }
 }

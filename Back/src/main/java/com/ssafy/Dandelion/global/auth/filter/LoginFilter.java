@@ -3,7 +3,7 @@ package com.ssafy.Dandelion.global.auth.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.Dandelion.global.apiPayload.ApiResponse;
 import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
-import com.ssafy.Dandelion.global.apiPayload.exception.handler.AuthHandler;
+import com.ssafy.Dandelion.global.apiPayload.exception.handler.ForbiddenHandler;
 import com.ssafy.Dandelion.global.auth.util.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,7 +33,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.objectMapper = objectMapper;
-        setFilterProcessesUrl("/api/users/login");
+        setFilterProcessesUrl("api/users/login");
     }
 
     @Override
@@ -61,7 +61,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                               AuthenticationException failed) throws IOException, ServletException {
-        throw new AuthHandler(ErrorStatus.INVALID_CREDENTIALS);
+        throw new ForbiddenHandler(ErrorStatus.INVALID_CREDENTIALS);
     }
 
     @Override
