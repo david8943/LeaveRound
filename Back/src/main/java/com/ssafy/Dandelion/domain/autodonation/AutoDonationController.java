@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +30,7 @@ public class AutoDonationController {
 	@PostMapping("")
 	public ApiResponse<Void> createAutoDonation(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@RequestBody @Valid RequestDTO.CreateAutoDonationDTO request
+		@RequestBody @Valid RequestDTO.AutoDonationDTO request
 	) {
 		//autoDonationService.createAutoDonation(customUserDetails.getUserId(), request);
 		autoDonationService.createAutoDonation(1, request);
@@ -61,6 +62,16 @@ public class AutoDonationController {
 	) {
 		//autoDonationService.deleteAutoDonation(customUserDetails.getUserId(), autoDonationId);
 		autoDonationService.deleteAutoDonation(1, autoDonationId);
+		return ApiResponse.onSuccess(null);
+	}
+
+	@PutMapping("/{autoDonationId}")
+	public ApiResponse<Void> UpdateAutoDonation(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@PathVariable Integer autoDonationId,
+		@RequestBody @Valid RequestDTO.AutoDonationDTO request
+	) {
+		autoDonationService.UpdateAutoDonation(1, autoDonationId, request);
 		return ApiResponse.onSuccess(null);
 	}
 }
