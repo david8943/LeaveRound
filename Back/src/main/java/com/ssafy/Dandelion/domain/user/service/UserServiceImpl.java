@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
 
 
     /**
-     * 사용자 인증(로그인) 처리
+     * 로그인 처리
      *
      * @param userLoginRequestDTO 로그인 요청 정보
      * @return 인증된 사용자 엔티티
@@ -79,14 +79,29 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User authenticate(UserLoginRequestDTO userLoginRequestDTO) {
+        // 이메일로 사용자 조회
+        User user = userRepository.findByEmail(userLoginRequestDTO.getEmail())
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
-        return null;
+        // 비밀번호 검증
+        if (!passwordEncoder.matches(userLoginRequestDTO.getPassword(), user.getPassword())) {
+            throw new MemberHandler(ErrorStatus.MEMBER_INVALID_PASSWORD);
+        }
+        return user;
     }
 
-    // 사용자 정보 조회
+    /**
+     * 사용자 정보 조회
+     *
+     * @param userId 조회할 사용자 ID
+     * @return 사용자 정보 DTO
+     * @throws MemberHandler 사용자가 존재하지 않는 경우 예외 발생
+     */
     @Override
     public UserInfoResponseDTO getUserInfo(Integer userId) {
-        return null;
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+        return UserInfoResponseDTO.fromEntity(user);
     }
 
 
