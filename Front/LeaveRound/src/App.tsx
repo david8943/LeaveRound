@@ -2,7 +2,6 @@ import { MenuBar } from '@/components/common/MenuBar';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { AccountDonate } from './pages/AccountDonatePage.tsx';
 import { AccountDetail } from './pages/AccountDetailPage.tsx';
-import { HomePage } from './pages/HomePage.tsx';
 import Onboarding from './pages/OnboardingPage.tsx';
 
 function App() {
@@ -19,7 +18,6 @@ function App() {
       <div className='App relative flex flex-col min-h-screen'>
         <main className='flex-1 pb-[5rem]'>
           <Routes>
-            {/* <Route path='/' element={<HomePage />} /> */}
             <Route path='/' element={<Onboarding />} />
             <Route path='/:userId/donate' element={<AccountDonate />} />
             <Route path='/:userId/donate/:id' element={<AccountDetail />} />
