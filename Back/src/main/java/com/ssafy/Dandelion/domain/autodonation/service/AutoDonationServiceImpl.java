@@ -33,7 +33,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 
 	@Transactional
 	@Override
-	public void createAutoDonation(Integer userId, RequestDTO.CreateAutoDonationDTO request) {
+	public void createAutoDonation(Integer userId, RequestDTO.AutoDonationDTO request) {
 		// TODO: USER 인증 부분
 
 		// TODO: ProjectID 인증 부분
@@ -92,6 +92,22 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 			.forEach(autoDonationInfoRepository::delete);
 
 		autoDonationRepository.delete(target);
+	}
+
+	@Transactional
+	@Override
+	public void UpdateAutoDonation(Integer userId, Integer autoDonationId, RequestDTO.AutoDonationDTO request) {
+		AutoDonation target = autoDonationRepository.findById(autoDonationId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_AUTO_DONATION));
+
+		if (!organizationProjectRepository.existsById(request.getOrganizationProjectId()))
+			throw new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT);
+
+		if (autoDonationRepository.existsByAccountNo(request.getAccountNo()))
+			throw new BadRequestHandler(ErrorStatus.ALREADY_EXIST_AUTO_DONATION);
+
+		target.updateAutoDonation(AutoDonationConverter.toAutoDonation(userId, request));
+		autoDonationRepository.save(target);
 	}
 
 }

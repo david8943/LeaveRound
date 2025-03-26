@@ -11,7 +11,7 @@ import com.ssafy.Dandelion.domain.autodonation.entity.constant.DonationTime;
 import com.ssafy.Dandelion.domain.autodonation.entity.constant.SliceMoney;
 
 public class AutoDonationConverter {
-	public static AutoDonation toAutoDonation(Integer userId, RequestDTO.CreateAutoDonationDTO request) {
+	public static AutoDonation toAutoDonation(Integer userId, RequestDTO.AutoDonationDTO request) {
 		return AutoDonation.builder()
 			.organizationProjectId(request.getOrganizationProjectId())
 			.userId(userId)
@@ -25,7 +25,8 @@ public class AutoDonationConverter {
 
 	}
 
-	public static ResponseDTO.ReadAllAutoDonationDTO toRealAllAutoDonationDTO(List<ResponseDTO.AccountDTO> accountDTOList) {
+	public static ResponseDTO.ReadAllAutoDonationDTO toRealAllAutoDonationDTO(
+		List<ResponseDTO.AccountDTO> accountDTOList) {
 		ResponseDTO.ReadAllAutoDonationDTO result = ResponseDTO.ReadAllAutoDonationDTO
 			.builder()
 			.activeAccounts(new ArrayList<>())

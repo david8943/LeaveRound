@@ -63,4 +63,12 @@ public class AutoDonation extends BaseTimeEntityWithUpdatedAt {
 	public void changeActive() {
 		this.isActive = !this.isActive;
 	}
+
+	public void updateAutoDonation(AutoDonation autoDonation) {
+		this.accountNo = autoDonation.getAccountNo();
+		this.sliceMoney = autoDonation.getSliceMoney();
+		this.donateTime = autoDonation.getDonateTime();
+		this.bankCode = autoDonation.getBankCode();
+		this.organizationProjectId = autoDonation.getOrganizationProjectId();
+	}
 }
