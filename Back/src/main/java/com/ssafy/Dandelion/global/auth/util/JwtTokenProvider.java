@@ -1,6 +1,5 @@
 package com.ssafy.Dandelion.global.auth.util;
 
-
 import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
 import com.ssafy.Dandelion.global.apiPayload.exception.handler.AuthHandler;
 import com.ssafy.Dandelion.global.auth.user.CustomUserDetails;
@@ -73,18 +72,18 @@ public class JwtTokenProvider {
         Claims claims = parseClaims(accessToken);
         CustomUserDetails userDetails = buildUserDetails(claims);
 
-		/*
-		userRepository.findByMemberId(userDetails.getUserrId()).orElseThrow(
-			() -> new AuthHandler(ErrorCode.INVALID_TOKEN)
-		);
-		 */
+        /*
+        userRepository.findByMemberId(userDetails.getUserId()).orElseThrow(
+            () -> new AuthHandler(ErrorStatus.INVALID_TOKEN)
+        );
+        */
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
     private CustomUserDetails buildUserDetails(Claims claims) {
         return CustomUserDetails.builder()
-                .userId(claims.get("userId", Integer.class))
+                .userId(claims.get("userId", Long.class))
                 .email(claims.getSubject())
                 .name(claims.get("name", String.class))
                 .email(claims.get("email", String.class))
