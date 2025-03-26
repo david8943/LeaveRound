@@ -1,21 +1,31 @@
 import { MenuBar } from '@/components/common/MenuBar';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { AccountDonate } from './pages/AccountDonatePage.tsx';
 import { AccountDetail } from './pages/AccountDetailPage.tsx';
-import { HomePage } from './pages/HomePage.tsx';
+import Onboarding from './pages/OnboardingPage.tsx';
 
 function App() {
+  const location = useLocation();
+
+  // MenuBar를 숨길 경로들
+  const hideMenuBarPaths = ['/'];
+
+  // 현재 경로가 해당 배열에 포함되는지 확인
+  const shouldShowMenuBar = !hideMenuBarPaths.includes(location.pathname);
+
   return (
     <div className='min-h-screen bg-background'>
       <div className='App relative flex flex-col min-h-screen'>
         <main className='flex-1 pb-[5rem]'>
           <Routes>
-            <Route path='/' element={<HomePage />} />
+            <Route path='/' element={<Onboarding />} />
             <Route path='/:userId/donate' element={<AccountDonate />} />
             <Route path='/:userId/donate/:id' element={<AccountDetail />} />
           </Routes>
         </main>
-        <MenuBar />
+        
+        {/* 조건부 렌더링 */}
+        {shouldShowMenuBar && <MenuBar />}
       </div>
     </div>
   );
