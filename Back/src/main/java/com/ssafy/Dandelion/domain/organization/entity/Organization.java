@@ -35,6 +35,9 @@ public class Organization extends BaseTimeEntityWithUpdatedAt {
 	@Column(nullable = false)
 	private String address;
 
+	@Column
+	private String homepageUrl;
+
 	@Column(nullable = false, length = 20)
 	private String representative;
 }
