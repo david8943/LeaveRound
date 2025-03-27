@@ -15,13 +15,13 @@ export const BasicButton = ({
   onClick,
 }: BasicButtonProps) => {
   return (
-    <div className='flex justify-center items-center'>
+    <div className={`flex justify-center items-center ${className}`}>
       <button
         disabled={disabled}
         onClick={onClick}
-        className={`w-full h-[3rem] text-white bg-[var(--primary)] disabled:bg-[var(--text-disabled)] ${
+        className={`w-full h-full text-white bg-[var(--primary)] disabled:bg-[var(--text-disabled)] ${
           rounded ? 'rounded-[1.5rem]' : 'rounded-[0.5rem]'
-        } border-none ${className}`}
+        } border-none`}
       >
         {text}
       </button>
