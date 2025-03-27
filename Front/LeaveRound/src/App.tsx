@@ -10,11 +10,13 @@ function App() {
       <div className='App relative flex flex-col min-h-screen'>
         <main className='flex-1 pb-[5rem]'>
           <Routes>
+            {/* 임시 라우터 */}
             <Route path='/' element={<HomePage />} />
             <Route path='/:userId/donate' element={<AccountDonate />} />
             <Route path='/:userId/donate/:id' element={<AccountDetail />} />
           </Routes>
         </main>
+
         <MenuBar />
       </div>
     </div>
