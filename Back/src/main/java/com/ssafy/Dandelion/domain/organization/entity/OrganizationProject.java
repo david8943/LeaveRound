@@ -4,10 +4,15 @@ import java.time.LocalDateTime;
 
 import org.checkerframework.common.aliasing.qual.Unique;
 
+import com.ssafy.Dandelion.domain.autodonation.entity.constant.Bank;
+import com.ssafy.Dandelion.domain.organization.entity.constant.ProjectCategory;
+import com.ssafy.Dandelion.domain.organization.entity.constant.Status;
 import com.ssafy.Dandelion.global.audit.BaseTimeEntityWithUpdatedAt;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,21 +48,28 @@ public class OrganizationProject extends BaseTimeEntityWithUpdatedAt {
 	private Long currentAmount;
 
 	@Column(nullable = false)
-	//TODO: ENUM 설정 필요
-	private String bankCode;
+	private Long totalUseAmount;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Bank bankCode;
 
 	@Column(nullable = false, length = 20)
 	private String accountNo;
 
-	@Column(nullable = true)
-	//TODO: ENUM 설정 필요
-	private String projectCategory;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private ProjectCategory projectCategory;
 
 	@Column(nullable = false)
 	private String title;
 
 	@Column(nullable = false, columnDefinition = "TEXT")
 	private String content;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private Status status;
 
 	@Column
 	private LocalDateTime endDatedAt;
