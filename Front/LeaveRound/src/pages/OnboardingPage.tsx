@@ -16,12 +16,12 @@ const Onboarding: React.FC = () => {
         dots: false,
         infinite: true,
         speed: 500,
-        slidesToShow: 1,
+        slidesToShow: 3,
         slidesToScroll: 1,
         autoplay: true,
         autoplaySpeed: 3000,
-        // centerMode: true,
-        // centerPadding: "0px",
+        centerMode: true,
+        centerPadding: "0%",
     };
 
 
@@ -39,31 +39,30 @@ const Onboarding: React.FC = () => {
             </p>
 
             {/* 캐러셀 */}
-            <Slider {...settings} className="w-full">
+            <Slider {...settings} className="w-[195vw] mt-20">
                 {[Card1, Card2, Card3].map((card, index) => (
-                    <div key={index}>
+                    <div key={index} className="p-4">
                         <img
+                            className="shadow-lg rounded-xl"
                             src={card}
                             alt={`Card ${index + 1}`}
-                            className="mx-auto w-full"
                         />
                     </div>
                 ))}
             </Slider>
 
 
-
             {/* 로그인 버튼 */}
             <div className="absolute bottom-[95px]">
-                <button
-                    className="w-[313px] h-[48px] bg-[var(--primary)] text-white rounded-[24px] text-base font-medium disabled:bg-[var(--text-disabled)]"
+                <button onClick={() => navigate('/login')}
+                    className="w-[313px] h-[48px] bg-[var(--primary)] text-white rounded-[24px]"
                 >
                     로그인
                 </button>
             </div>
 
             {/* 회원가입 링크 */}
-            <p className="absolute bottom-[53px] text-detail">
+            <p className="absolute bottom-[53px] text-detail text-deepgray">
                 아직 회원이 아니신가요?{" "}
                 <span
                     className="text-primary cursor-pointer"
