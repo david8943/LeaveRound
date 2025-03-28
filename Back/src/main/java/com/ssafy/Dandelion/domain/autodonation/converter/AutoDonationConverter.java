@@ -2,10 +2,12 @@ package com.ssafy.Dandelion.domain.autodonation.converter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.ssafy.Dandelion.domain.autodonation.dto.RequestDTO;
 import com.ssafy.Dandelion.domain.autodonation.dto.ResponseDTO;
 import com.ssafy.Dandelion.domain.autodonation.entity.AutoDonation;
+import com.ssafy.Dandelion.domain.autodonation.entity.AutoDonationInfo;
 import com.ssafy.Dandelion.domain.autodonation.entity.constant.Bank;
 import com.ssafy.Dandelion.domain.autodonation.entity.constant.DonationTime;
 import com.ssafy.Dandelion.domain.autodonation.entity.constant.SliceMoney;
@@ -54,5 +56,38 @@ public class AutoDonationConverter {
 			.organizationName(organizationName)
 			.isActive(autoDonation.isActive())
 			.build();
+	}
+
+	public static ResponseDTO.AutoDonationInfoDTO toAutoDonationInfoDTO(AutoDonationInfo autoDonationInfo,
+		String organizationName) {
+		return ResponseDTO.AutoDonationInfoDTO.builder()
+			.autoDonationInfoId(autoDonationInfo.getAutoDonationInfoId())
+			.transactionBalance(autoDonationInfo.getTransactionBalance())
+			.createTime(autoDonationInfo.getCreatedAt())
+			.organizationName(organizationName)
+			.build();
+	}
+
+	public static ResponseDTO.ReadAutoDonationDTO toAutoDonationDTO(AutoDonation autoDonation,
+		List<ResponseDTO.AutoDonationInfoDTO> autoDonationInfoDTOList,
+		String organizationName) {
+
+		Long totalBalance = autoDonationInfoDTOList.stream()
+			.map(ResponseDTO.AutoDonationInfoDTO::getTransactionBalance)
+			.filter(Objects::nonNull)
+			.reduce(0L, Long::sum);
+
+		return ResponseDTO.ReadAutoDonationDTO.builder()
+			.autoDonationId(autoDonation.getAutoDonationId())
+			.bankName(Bank.fromBankCode(autoDonation.getBankCode()).toString())
+			.acountNo(autoDonation.getAccountNo())
+			.sliceMoney(autoDonation.getSliceMoney().toString())
+			.donationTime(autoDonation.getDonateTime().toString())
+			.isActive(autoDonation.isActive())
+			.totalBalance(totalBalance)
+			.organizationName(organizationName)
+			.autoDonationInfos(autoDonationInfoDTOList)
+			.build();
+
 	}
 }
