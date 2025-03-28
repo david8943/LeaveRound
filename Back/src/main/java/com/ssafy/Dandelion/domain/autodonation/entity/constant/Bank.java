@@ -1,7 +1,7 @@
 package com.ssafy.Dandelion.domain.autodonation.entity.constant;
 
+import java.security.SecureRandom;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.IntStream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,7 +31,7 @@ public enum Bank {
 	private final String bankName;
 	private final String accountTypeUniqueNo;
 
-	private static final Random RANDOM = new Random();
+	private static final SecureRandom RANDOM = new SecureRandom();
 
 	public static Bank fromBankName(String bankName) {
 		for (Bank bank : Bank.values()) {
