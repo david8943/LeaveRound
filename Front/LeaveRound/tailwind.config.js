@@ -48,4 +48,5 @@ export default {
       heading: ['BobaesumJindo', 'serif'],
     },
   },
+  plugins: [require('tailwind-scrollbar-hide')],
 };

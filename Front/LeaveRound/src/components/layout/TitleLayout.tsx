@@ -17,7 +17,7 @@ const TitleLayout: React.FC<TitleLayoutProps> = ({ title, children }) => {
           <div className='w-full text-center font-semibold'>{title}</div>
         </div>
       </div>
-      <div className='h-[calc(100%-5rem)] overflow-y-auto'>{children}</div>
+      <div className='h-[calc(100%-5rem)] overflow-y-auto scrollbar-hide'>{children}</div>
     </div>
   );
 };

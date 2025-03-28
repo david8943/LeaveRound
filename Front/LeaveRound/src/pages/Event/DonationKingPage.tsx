@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import GoldenDandelionTab from './GoldenDandelionTab';
 import WeeklyRankingTab from './WeeklyRankingTab';
-import TitleLayout from '@/components/layout/TitleLayout';
 import MagicWand from '@/assets/icons/magic-wand.svg';
 
 interface TabHeaderProps {
@@ -32,9 +31,9 @@ const DonationKingPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'golden' | 'weekly'>('weekly');
 
   return (
-    <TitleLayout title='최고의 기부왕'>
+    <div className='h-[calc(100%-5rem)]'>
       <TabHeader activeTab={activeTab} onChangeTab={setActiveTab} />
-      <div className='h-[calc(100%-108px-5rem)]'>
+      <div className='h-[calc(100%-108px)] overflow-y-auto scrollbar-hide'>
         {activeTab === 'golden' ? <GoldenDandelionTab /> : <WeeklyRankingTab />}
       </div>
       <div className='w-full h-[58px] flex justify-center items-center'>
@@ -43,7 +42,7 @@ const DonationKingPage: React.FC = () => {
           <div>기부하기</div>
         </div>
       </div>
-    </TitleLayout>
+    </div>
   );
 };
 
