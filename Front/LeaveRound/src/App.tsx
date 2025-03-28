@@ -5,6 +5,7 @@ import { AccountDetail } from './pages/AccountDetailPage.tsx';
 import Onboarding from '@/pages/OnboardingPage.tsx';
 import Login from '@/pages/LoginPage.tsx';
 import Signup from '@/pages/SignupPage.tsx';
+import Organization from '@/pages/OrganizationPage.tsx';
 
 function App() {
   const location = useLocation();
@@ -23,6 +24,7 @@ function App() {
             <Route path='/' element={<Onboarding />} />
             <Route path='/login' element={<Login />} />
             <Route path='/signup' element={<Signup />} />
+            <Route path='/organization' element={<Organization />} />
             <Route path='/:userId/donate' element={<AccountDonate />} />
             <Route path='/:userId/donate/:id' element={<AccountDetail />} />
           </Routes>
