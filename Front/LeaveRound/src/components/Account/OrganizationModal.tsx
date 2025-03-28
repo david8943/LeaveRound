@@ -47,6 +47,8 @@ export const OrganizationModal = ({ onClose, onSave, currentPurpose }: Organizat
     <AccountModal onClose={onClose}>
       <div className='flex flex-col items-center w-full'>
         <div className='w-full mb-4'>
+          <p className='flex justify-center items-center mb-4'>기부처를 지정해주세요!</p>
+
           <input
             type='text'
             placeholder='검색어를 입력하세요'
@@ -84,7 +86,6 @@ export const OrganizationModal = ({ onClose, onSave, currentPurpose }: Organizat
             </button>
           ))}
         </div>
-
         <div className='flex gap-2 mt-4'>
           <BasicButton text='저장하기' onClick={handleSave} className='w-[313px] h-[48px]' />
         </div>
