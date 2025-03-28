@@ -54,6 +54,7 @@ public class OrganizationProject extends BaseTimeEntityWithUpdatedAt {
 	@Column(nullable = false)
 	private Bank bankCode;
 
+	@Unique
 	@Column(nullable = false, length = 20)
 	private String accountNo;
 
