@@ -109,59 +109,11 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<UserResponseDTO.AccountDTO> readUserAllAccounts(Integer userId) {
-		String userKey = userRepository.findById(userId)
-			.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND)).getUserKey();
+		String userKey = getUserKeyById(userId);
+		List<UserResponseDTO.AccountDTO> accountDTOS = getAccountDTOs(userKey);
+		Map<String, AutoDonation> autoDonationMap = getAutoDonationMap(userId);
 
-		List<UserResponseDTO.AccountDTO> accountDTOS;
-
-		String url = ssafyApiProperties.createApiUrl("/ssafy/api/v1/edu/demandDeposit/inquireDemandDepositAccountList");
-
-		Map<String, Object> body = new HashMap<>();
-		body.put("Header", SsafyApiProperties.SsafyApiHeader.createSsafyApiHeaderTemplate(
-			"inquireDemandDepositAccountList",
-			ssafyApiProperties.getApiKey(),
-			userKey
-		));
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Content-Type", "application/json");
-		HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-		// API 호출
-		ResponseEntity<UserRequestDTO.AccountInfos> accountInfos = restTemplate.exchange(
-			url,
-			HttpMethod.POST,
-			requestEntity,
-			UserRequestDTO.AccountInfos.class
-		);
-
-		accountDTOS = accountInfos.getBody().getRec().stream()
-			.map(accountInfo -> UserResponseDTO.AccountDTO.builder()
-				.bankName(accountInfo.getBankName())
-				.accountNo(accountInfo.getAccountNo())
-				.accountMoney(accountInfo.getAccountBalance())
-				.accountStatus(AccountStatus.AUTO_DISABLED.toString())
-				.build())
-			.toList();
-
-		List<AutoDonation> autoDonations = autoDonationRepository.findAllByUserId(userId);
-
-		log.info(autoDonations.get(0).getAccountNo());
-
-		Map<String, AutoDonation> autoDonationMap = autoDonations.stream()
-			.collect(Collectors.toMap(AutoDonation::getAccountNo, Function.identity()));
-
-		// 계좌 정보 업데이트
-		for (UserResponseDTO.AccountDTO accountDTO : accountDTOS) {
-			AutoDonation autoDonation = autoDonationMap.get(accountDTO.getAccountNo());
-
-			if (autoDonation != null) {
-				accountDTO.setAutoDonationId(autoDonation.getAutoDonationId());
-				accountDTO.setAccountStatus(autoDonation.isActive()
-					? AccountStatus.AUTO_ENABLED.toString()
-					: AccountStatus.AUTO_PAUSED.toString());
-			}
-		}
+		updateAccountStatus(accountDTOS, autoDonationMap);
 
 		return accountDTOS;
 	}
@@ -242,4 +194,71 @@ public class UserServiceImpl implements UserService {
 		restTemplate.exchange(url, HttpMethod.POST, requestEntity, void.class);
 
 	}
+
+	private String getUserKeyById(Integer userId) {
+		String userKey = userRepository.findById(userId)
+			.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND)).getUserKey();
+		return userKey;
+	}
+
+	private List<UserResponseDTO.AccountDTO> getAccountDTOs(String userKey) {
+		ResponseEntity<UserRequestDTO.AccountInfos> accountInfos = getUserAllAcounts(userKey);
+
+		return accountInfos.getBody().getRec().stream()
+			.map(accountInfo -> UserResponseDTO.AccountDTO.builder()
+				.bankName(accountInfo.getBankName())
+				.accountNo(accountInfo.getAccountNo())
+				.accountMoney(accountInfo.getAccountBalance())
+				.accountStatus(AccountStatus.AUTO_DISABLED.toString())
+				.build())
+			.toList();
+	}
+
+	private Map<String, AutoDonation> getAutoDonationMap(Integer userId) {
+		List<AutoDonation> autoDonations = autoDonationRepository.findAllByUserId(userId);
+
+		return autoDonations.stream()
+			.collect(Collectors.toMap(AutoDonation::getAccountNo, Function.identity()));
+	}
+
+	private ResponseEntity<UserRequestDTO.AccountInfos> getUserAllAcounts(String userKey) {
+		String url = ssafyApiProperties.createApiUrl("/ssafy/api/v1/edu/demandDeposit/inquireDemandDepositAccountList");
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("Header", SsafyApiProperties.SsafyApiHeader.createSsafyApiHeaderTemplate(
+			"inquireDemandDepositAccountList",
+			ssafyApiProperties.getApiKey(),
+			userKey
+		));
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", "application/json");
+		HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+		// API 호출
+
+		ResponseEntity<UserRequestDTO.AccountInfos> accountInfos = restTemplate.exchange(
+			url,
+			HttpMethod.POST,
+			requestEntity,
+			UserRequestDTO.AccountInfos.class
+		);
+		return accountInfos;
+
+	}
+
+	private void updateAccountStatus(List<UserResponseDTO.AccountDTO> accountDTOS,
+		Map<String, AutoDonation> autoDonationMap) {
+		for (UserResponseDTO.AccountDTO accountDTO : accountDTOS) {
+			AutoDonation autoDonation = autoDonationMap.get(accountDTO.getAccountNo());
+
+			if (autoDonation != null) {
+				accountDTO.setAutoDonationId(autoDonation.getAutoDonationId());
+				accountDTO.setAccountStatus(autoDonation.isActive()
+					? AccountStatus.AUTO_ENABLED.toString()
+					: AccountStatus.AUTO_PAUSED.toString());
+			}
+		}
+	}
+
 }
