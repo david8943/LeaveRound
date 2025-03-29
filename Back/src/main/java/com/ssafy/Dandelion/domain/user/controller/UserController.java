@@ -1,5 +1,14 @@
 package com.ssafy.Dandelion.domain.user.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.ssafy.Dandelion.domain.user.dto.UserResponseDTO;
 import com.ssafy.Dandelion.domain.user.dto.request.UserLoginRequestDTO;
 import com.ssafy.Dandelion.domain.user.dto.request.UserSignUpRequestDTO;
@@ -7,15 +16,9 @@ import com.ssafy.Dandelion.domain.user.dto.response.UserInfoResponseDTO;
 import com.ssafy.Dandelion.domain.user.service.UserService;
 import com.ssafy.Dandelion.global.apiPayload.ApiResponse;
 import com.ssafy.Dandelion.global.apiPayload.code.status.SuccessStatus;
+
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,7 +63,7 @@ public class UserController {
 	}
 
 	@GetMapping("/{userId}/accounts")
-	public ApiResponse<List<UserResponseDTO.AccountDTO>> readUserAllAccounts(@PathVariable Integer userId) {
+	public ApiResponse<List<UserResponseDTO.AccountDTO>> readUserAllAccounts(@PathVariable("userId") Integer userId) {
 		List<UserResponseDTO.AccountDTO> accountList = userService.readUserAllAccounts(userId);
 		return ApiResponse.of(SuccessStatus.USERINFO_SUCCESS, accountList);
 	}
