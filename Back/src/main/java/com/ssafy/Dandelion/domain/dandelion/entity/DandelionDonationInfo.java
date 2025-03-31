@@ -9,6 +9,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(indexes = {
@@ -16,6 +21,11 @@ import jakarta.persistence.Table;
 	@Index(name = "idx_user_id", columnList = "userId")
 },
 	name = "dandelion_donation_infos")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class DandelionDonationInfo extends BaseTimeEntity {
 
 	@Id

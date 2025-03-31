@@ -8,18 +8,14 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Getter
-@ToString
-@EqualsAndHashCode
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class LocationRequestDTO {
+public class DandelionLocationRequestDTO {
 
 	/**
 	 * 위도(-90도 ~ 90도)
@@ -52,7 +48,7 @@ public class LocationRequestDTO {
 	 * @param latitude 새 위도 값
 	 * @return 현재 객체
 	 */
-	public LocationRequestDTO updateLatitude(BigDecimal latitude) {
+	public DandelionLocationRequestDTO updateLatitude(BigDecimal latitude) {
 		this.myLatitude = latitude;
 		return this;
 	}
@@ -63,7 +59,7 @@ public class LocationRequestDTO {
 	 * @param longitude 새 위도 값
 	 * @return 현재 객체
 	 */
-	public LocationRequestDTO updateLongitude(BigDecimal longitude) {
+	public DandelionLocationRequestDTO updateLongitude(BigDecimal longitude) {
 		this.myLongitude = longitude;
 		return this;
 	}
