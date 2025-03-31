@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import GoldenDandelionTab from './GoldenDandelionTab';
 import WeeklyRankingTab from './WeeklyRankingTab';
 import MagicWand from '@/assets/icons/magic-wand.svg';
+import { useNavigate } from 'react-router-dom';
 
 interface TabHeaderProps {
   activeTab: 'golden' | 'weekly';
@@ -29,6 +30,7 @@ const TabHeader: React.FC<TabHeaderProps> = ({ activeTab, onChangeTab }) => {
 
 const DonationKingPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'golden' | 'weekly'>('weekly');
+  const navigate = useNavigate();
 
   return (
     <div className='h-[calc(100%-5rem)]'>
@@ -36,7 +38,7 @@ const DonationKingPage: React.FC = () => {
       <div className='h-[calc(100%-108px)] overflow-y-auto scrollbar-hide'>
         {activeTab === 'golden' ? <GoldenDandelionTab /> : <WeeklyRankingTab />}
       </div>
-      <div className='w-full h-[58px] flex justify-center items-center'>
+      <div className='w-full h-[58px] flex justify-center items-center' onClick={() => navigate('/event/donate')}>
         <div className='flex gap-1 items-center'>
           <img src={MagicWand} className='w-4 h-4' />
           <div>기부하기</div>
