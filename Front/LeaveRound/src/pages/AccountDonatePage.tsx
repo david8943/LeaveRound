@@ -14,11 +14,8 @@ export const AccountDonate = () => {
 
   // 모든 계좌 정보를 배열로 관리
   const allAccounts = [
-    sampleDonationAccountInfo,
-    sampleDonationAccountInfo,
-    sampleDonationAccountInfo,
-    sampleDonationAccountInfo2,
-    sampleDonationAccountInfo2,
+    { ...sampleDonationAccountInfo, id: '1' },
+    { ...sampleDonationAccountInfo2, id: '2' },
   ];
 
   const activeAccounts = allAccounts.filter((account) => account.autoDonation === 'active');
@@ -39,11 +36,7 @@ export const AccountDonate = () => {
                 <span className='ml-[2rem] mb-[0.75rem]'>자동 기부중인 계좌</span>
                 <div>
                   {activeAccounts.map((account) => (
-                    <DonationAccountCard
-                      key={account.accountNumber} // 계좌번호를 key로 사용
-                      accountInfo={account}
-                      id={account.accountNumber} // id도 동일한 계좌번호 사용
-                    />
+                    <DonationAccountCard key={account.id} accountInfo={account} id={account.id} />
                   ))}
                 </div>
               </div>
@@ -53,11 +46,7 @@ export const AccountDonate = () => {
                 <span className='ml-[2rem] mb-[0.75rem]'>기부 일시중지된 계좌</span>
                 <div>
                   {inactiveAccounts.map((account) => (
-                    <DonationAccountCard
-                      key={account.accountNumber} // 계좌번호를 key로 사용
-                      accountInfo={account}
-                      id={account.accountNumber} // id도 동일한 계좌번호 사용
-                    />
+                    <DonationAccountCard key={account.id} accountInfo={account} id={account.id} />
                   ))}
                 </div>
               </div>

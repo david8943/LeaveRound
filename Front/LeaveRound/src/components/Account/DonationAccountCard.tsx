@@ -3,6 +3,8 @@ import { tossIcon } from '@/assets/aseets';
 import bracketsIcon from '@/assets/icons/brackets.svg';
 import menuIcon from '@/assets/icons/menu.svg';
 import { AccountMenu } from '@/components/Account/AccountMenu';
+import { AccountSettingModal } from './AccountSettingModal';
+import { createPortal } from 'react-dom';
 
 // 전역 상태를 관리하기 위한 변수
 let activeMenuId: string | null = null;
@@ -27,6 +29,7 @@ interface DonationAccountCardProps {
 export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -99,7 +102,11 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
     // 현재 메뉴 상태 토글
     setIsMenuOpen(!isMenuOpen);
     activeMenuId = isMenuOpen ? null : id;
-    console.log('메뉴 클릭');
+  };
+
+  const handleModify = () => {
+    closeMenu();
+    setIsSettingModalOpen(true);
   };
 
   // 자동기부 상태에 따른 스타일 결정
@@ -120,68 +127,98 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
   };
 
   return (
-    <div className={`flex flex-col mx-8 p-4 mb-[12px] rounded-[8px] border ${cardStyle()}`}>
-      <div className='relative ml-[1rem]'>
-        {/* 계좌 정보 */}
-        <div className='flex items-center gap-[21px] flex-shrink-0'>
-          <div className='flex items-center justify-center'>
-            <img src={bankIcon} alt={`${bankName} 아이콘`} className='w-9 h-9' />
-          </div>
-          <div className='flex flex-col flex-grow'>
-            <div className='flex flex-col'>
-              <span className='text-[var(--text-deepgray)] text-[0.75rem]'>
-                {bankName} {accountNumber}
-              </span>
+    <>
+      <div className={`flex flex-col mx-8 p-4 mb-[12px] rounded-[8px] border ${cardStyle()}`}>
+        <div className='relative ml-[1rem]'>
+          {/* 계좌 정보 */}
+          <div className='flex items-center gap-[21px] flex-shrink-0'>
+            <div className='flex items-center justify-center'>
+              <img src={bankIcon} alt={`${bankName} 아이콘`} className='w-9 h-9' />
             </div>
-            <div className='mt-1'>
-              <span className='text-[20px] font-semibold'>{formattedBalance}원</span>
-            </div>
-          </div>
-
-          {/* 메뉴 버튼 (오른쪽 상단) */}
-          <div className='absolute top-0 right-0'>
-            <button ref={buttonRef} onClick={handleMenuClick} className='relative'>
-              <img src={menuIcon} alt='메뉴' className='w-5 h-5' />
-            </button>
-            {/* 메뉴 드롭다운 */}
-            {isMenuOpen && (
-              <div ref={menuRef} className='absolute top-full right-0 -mt-1 z-20'>
-                <AccountMenu onClose={closeMenu} accountNumber={accountNumber} userId={userId} />
+            <div className='flex flex-col flex-grow'>
+              <div className='flex flex-col'>
+                <span className='text-[var(--text-deepgray)] text-[0.75rem]'>
+                  {bankName} {accountNumber}
+                </span>
               </div>
-            )}
+              <div className='mt-1'>
+                <span className='text-[20px] font-semibold'>{formattedBalance}원</span>
+              </div>
+            </div>
+
+            {/* 메뉴 버튼 (오른쪽 상단) */}
+            <div className='absolute top-0 right-0'>
+              <button ref={buttonRef} onClick={handleMenuClick} className='relative'>
+                <img src={menuIcon} alt='메뉴' className='w-5 h-5' />
+              </button>
+              {/* 메뉴 드롭다운 */}
+              {isMenuOpen && (
+                <div ref={menuRef} className='absolute top-full right-0 mt-1 z-20'>
+                  <AccountMenu
+                    onClose={closeMenu}
+                    accountNumber={accountNumber}
+                    userId={userId}
+                    accountInfo={{
+                      bankName,
+                      balance,
+                      paymentUnit,
+                      paymentFrequency,
+                      paymentPurpose,
+                      paymentAmount,
+                    }}
+                    onModify={handleModify}
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* 상세 정보 (펼쳐졌을 때만 표시) */}
-      {isExpanded && (
-        <div className='mt-4 pt-4 border-t border-gray-500'>
-          <div className='grid grid-cols-2 gap-y-2 ml-3 mr-3'>
-            <div className='text-gray-700'>기부 금액 단위</div>
-            <div className='text-right'>{paymentUnit}</div>
+        {/* 상세 정보 (펼쳐졌을 때만 표시) */}
+        {isExpanded && (
+          <div className='mt-4 pt-4 border-t border-gray-500'>
+            <div className='grid grid-cols-2 gap-y-2 ml-3 mr-3'>
+              <div className='text-gray-700'>기부 금액 단위</div>
+              <div className='text-right'>{paymentUnit}</div>
 
-            <div className='text-gray-700'>기부 주기</div>
-            <div className='text-right'>{paymentFrequency}</div>
+              <div className='text-gray-700'>기부 주기</div>
+              <div className='text-right'>{paymentFrequency}</div>
 
-            <div className='text-gray-700'>기부하는 곳</div>
-            <div className='text-right'>{paymentPurpose}</div>
+              <div className='text-gray-700'>기부하는 곳</div>
+              <div className='text-right'>{paymentPurpose}</div>
 
-            <div className='text-gray-700 font-semibold'>기부한 금액</div>
-            <div className='text-right font-semibold'>{formattedPaymentAmount}원</div>
+              <div className='text-gray-700 font-semibold'>기부한 금액</div>
+              <div className='text-right font-semibold'>{formattedPaymentAmount}원</div>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 펼치기/접기 버튼 */}
-      <div className='flex justify-center mt-2'>
-        <button onClick={toggleExpand}>
-          <img
-            src={bracketsIcon}
-            alt={isExpanded ? '접기' : '펼치기'}
-            className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-          />
-        </button>
+        {/* 펼치기/접기 버튼 */}
+        <div className='flex justify-center mt-2'>
+          <button onClick={toggleExpand}>
+            <img
+              src={bracketsIcon}
+              alt={isExpanded ? '접기' : '펼치기'}
+              className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            />
+          </button>
+        </div>
       </div>
-    </div>
+      {isSettingModalOpen &&
+        createPortal(
+          <AccountSettingModal
+            onClose={() => setIsSettingModalOpen(false)}
+            accountInfo={{
+              bankName,
+              balance,
+              paymentUnit,
+              paymentFrequency,
+              paymentPurpose,
+              paymentAmount,
+            }}
+          />,
+          document.body,
+        )}
+    </>
   );
 }

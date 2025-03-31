@@ -13,6 +13,8 @@ import homeActiveIcon from '@/assets/icons/home-click.svg';
 import eventActiveIcon from '@/assets/icons/event-click.svg';
 import donateActiveIcon from '@/assets/icons/donate-click.svg';
 
+import dollarIcon from '@/assets/dollar.png';
+
 export {
   tossIcon,
   brackets,
@@ -25,4 +27,5 @@ export {
   homeActiveIcon,
   eventActiveIcon,
   donateActiveIcon,
+  dollarIcon,
 };
