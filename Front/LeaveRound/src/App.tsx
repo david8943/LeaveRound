@@ -1,11 +1,15 @@
 import { MenuBar } from '@/components/common/MenuBar';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Route, Routes, Outlet } from 'react-router-dom';
 import { AccountDonate } from './pages/AccountDonatePage.tsx';
 import { AccountDetail } from './pages/AccountDetailPage.tsx';
+import DonationKingPage from './pages/Event/DonationKingPage.tsx';
+import DonatePage from './pages/Event/DonatePage.tsx';
 import Onboarding from '@/pages/OnboardingPage.tsx';
 import Login from '@/pages/LoginPage.tsx';
 import Signup from '@/pages/SignupPage.tsx';
 import Organization from '@/pages/OrganizationPage.tsx';
+import TitleLayout from '@/components/layout/TitleLayout.tsx';
+import { useLocation } from 'react-router-dom';
 
 function App() {
   const location = useLocation();
@@ -18,8 +22,8 @@ function App() {
 
   return (
     <div className='min-h-screen bg-background'>
-      <div className='App relative flex flex-col min-h-screen'>
-        <main className='flex-1 pb-[5rem]'>
+      <div className='flex flex-col min-h-screen'>
+        <main className=''>
           <Routes>
             <Route path='/' element={<Onboarding />} />
             <Route path='/login' element={<Login />} />
@@ -27,6 +31,19 @@ function App() {
             <Route path='/organization' element={<Organization />} />
             <Route path='/:userId/donate' element={<AccountDonate />} />
             <Route path='/:userId/donate/:id' element={<AccountDetail />} />
+            <Route path='/event'>
+              <Route index element={<div>hi</div>} />
+              <Route
+                element={
+                  <TitleLayout title='hihi'>
+                    <Outlet />
+                  </TitleLayout>
+                }
+              >
+                <Route path='donationking' element={<DonationKingPage />} />
+                <Route path='donate' element={<DonatePage />} />
+              </Route>
+            </Route>
           </Routes>
         </main>
 

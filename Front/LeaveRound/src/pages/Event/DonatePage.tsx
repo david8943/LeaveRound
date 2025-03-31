@@ -63,8 +63,8 @@ const DonatePage = () => {
           </div>
         </div>
       </div>
-      <div>
-        <BasicButton className='w-[80%]' text='기부하기' />
+      <div className='px-10'>
+        <BasicButton text='기부하기' />
       </div>
     </div>
   );
