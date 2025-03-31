@@ -373,29 +373,33 @@ public class DandelionServiceImpl implements DandelionService {
 		LocalDateTime startDate = currentMonth.atDay(1).atStartOfDay();
 		LocalDateTime endDate = currentMonth.atEndOfMonth().atTime(23, 59, 59);
 
-		// 기간 내 황금 민들레 수집 데이터 조회 (현재 보유 + 기부한 것 포함)
-		// 현재 보유한 황금 민들레: userKey -> goldDandelionCount
-		// 이번 달에 기부한 황금 민들레: useGoldDandelionCount
-
-		// TODO: 이번 달에 사용자가 수집한 황금 민들레 총 개수를 조회하는 메서드 필요
-		// 현재는 기부 데이터만 사용하여 랭킹 생성
-		List<Object[]> goldDonationRankingData = donationInfoRepository.findMonthlyGoldDonationRanking(startDate,
+		// 1. 이번 달에 사용자가 수집한 황금 민들레 데이터 조회
+		List<Object[]> goldCollectionData = goldDandelionRepository.findGoldDandelionCollectionRankingBetween(startDate,
 			endDate);
 
-		// 사용자별 황금 민들레 수집 맵 생성
+		// 2. 이번 달에 사용자가 기부한 황금 민들레 데이터 조회
+		List<Object[]> goldDonationData = donationInfoRepository.findMonthlyGoldDonationRanking(startDate, endDate);
+
+		// 사용자별 황금 민들레 합산 맵 생성 (수집 + 기부)
 		Map<Integer, Integer> userGoldCountMap = new HashMap<>();
 
-		// 기부 데이터 합산
-		for (Object[] data : goldDonationRankingData) {
-			Integer donorId = (Integer)data[0];
-			Long goldDonationCount = ((Number)data[1]).longValue();
-			userGoldCountMap.put(donorId, goldDonationCount.intValue());
+		// 수집 데이터 합산
+		for (Object[] data : goldCollectionData) {
+			Integer userID = (Integer)data[0];
+			Long collectionCount = ((Number)data[1]).longValue();
+			userGoldCountMap.put(userID, collectionCount.intValue());
 		}
 
-		// 현재 보유 개수도 추가 (이 부분은 실제 구현 필요)
-		// 사용자별 황금 민들레 현재 보유 개수 조회 로직 필요
+		// 기부 데이터 합산 (이미 기부한 것도 수집한 것으로 간주)
+		for (Object[] data : goldDonationData) {
+			Integer userID = (Integer)data[0];
+			Long donationCount = ((Number)data[1]).longValue();
 
-		// 사용자별 수집 정보를 내림차순으로 정렬
+			// 이미 해당 사용자의 데이터가 있으면 합산, 없으면 새로 추가
+			userGoldCountMap.merge(userID, donationCount.intValue(), Integer::sum);
+		}
+
+		// 합산 데이터를 내림차순으로 정렬
 		List<Map.Entry<Integer, Integer>> sortedGoldCounts = userGoldCountMap.entrySet().stream()
 			.sorted(Map.Entry.<Integer, Integer>comparingByValue().reversed())
 			.collect(Collectors.toList());
