@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.ssafy.Dandelion.domain.autodonation.dto.ResponseDTO;
+import com.ssafy.Dandelion.domain.autodonation.entity.AutoDonation;
 import com.ssafy.Dandelion.domain.user.dto.UserRequestDTO;
 
 import lombok.AllArgsConstructor;
@@ -124,4 +126,63 @@ public class SsafyApiProperties {
 		return accountInfos;
 
 	}
+
+	public long getAccountInfo(String userKey, String accountNo) {
+		String url = createApiUrl("/ssafy/api/v1/edu/demandDeposit/inquireDemand");
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("Header", SsafyApiProperties.SsafyApiHeader.createSsafyApiHeaderTemplate(
+			"inquireDemandDepositAccountBalance",
+			getApiKey(),
+			userKey
+		));
+
+		body.put("accountNo", accountNo);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", "application/json");
+		HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+		// API 호출
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<UserRequestDTO.AccountInfos> accountInfos = restTemplate.exchange(
+			url,
+			HttpMethod.POST,
+			requestEntity,
+			UserRequestDTO.AccountInfos.class
+		);
+		return Long.parseLong(accountInfos.getBody().getRec().get(0).getAccountBalance());
+	}
+
+	public void sendAutoDonation(String userKey, AutoDonation autoDonation, String accountBalance,
+		String organizationAccount) {
+		String url = createApiUrl("/ssafy/api/v1/edu/demandDeposit/updateDemand");
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("Header", SsafyApiProperties.SsafyApiHeader.createSsafyApiHeaderTemplate(
+			"updateDemandDepositAccountTransfer",
+			getApiKey(),
+			userKey
+		));
+
+		body.put("depositAccountNo", organizationAccount);
+		body.put("depositTransactionSummary", "(수시입출금) : 입금(이체)");
+		body.put("transactionBalance", accountBalance);
+		body.put("withdrawalAccountNo", autoDonation.getAccountNo());
+		body.put("withdrawalTransactionSummary", "(수시입출금) : 출금(이체)");
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", "application/json");
+		HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+		// API 호출
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<ResponseDTO.TransactionInfos> accountInfos = restTemplate.exchange(
+			url,
+			HttpMethod.POST,
+			requestEntity,
+			ResponseDTO.TransactionInfos.class
+		);
+	}
+
 }

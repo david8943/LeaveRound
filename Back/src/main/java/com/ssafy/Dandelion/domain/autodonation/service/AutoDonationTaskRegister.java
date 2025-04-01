@@ -22,7 +22,7 @@ public class AutoDonationTaskRegister {
 
 	private final TaskScheduler taskScheduler; // 스프링 스케줄러
 	private final AutoDonationRepository autoDonationRepository;
-
+	private final AutoDonationService autoDonationService;
 	private final Map<Integer, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
 
 	@PostConstruct
@@ -36,12 +36,11 @@ public class AutoDonationTaskRegister {
 	}
 
 	public void scheduleAutoDonation(AutoDonation autoDonation) {
-		long interval = 10;
-		//autoDonation.getDonateTime().getDays() * 24 * 60 * 60 * 1000L;
+		long interval = autoDonation.getDonateTime().getDays() * 24 * 60 * 60 * 1000L;
 
 		Runnable task = () -> {
 			try {
-				//autoDonationService.executeAutoDonation(autoDonation);
+				autoDonationService.executeAutoDonation(autoDonation);
 			} catch (Exception e) {
 				log.error("AutoDonation 실패: userId={}, 이유={}", autoDonation.getUserId(), e.getMessage());
 			}

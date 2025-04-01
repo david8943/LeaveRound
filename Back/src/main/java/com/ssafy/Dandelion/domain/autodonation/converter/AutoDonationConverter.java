@@ -103,4 +103,14 @@ public class AutoDonationConverter {
 			.build();
 
 	}
+
+	public static AutoDonationInfo toAutoDonationInfo(AutoDonation autoDonation, Long transactionBalance) {
+		return AutoDonationInfo.builder()
+			.autoDonationId(autoDonation.getAutoDonationId())
+			.organizationProjectId(autoDonation.getOrganizationProjectId())
+			.userId(autoDonation.getUserId())
+			.transactionBalance(transactionBalance)
+			.build();
+	}
+
 }
