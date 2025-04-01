@@ -13,6 +13,11 @@ import com.ssafy.Dandelion.domain.autodonation.entity.constant.DonationTime;
 import com.ssafy.Dandelion.domain.autodonation.entity.constant.SliceMoney;
 
 public class AutoDonationConverter {
+
+	private AutoDonationConverter() {
+		throw new IllegalStateException("AutoDonationConverter Not Public Constructor");
+	}
+
 	public static AutoDonation toAutoDonation(Integer userId, RequestDTO.AutoDonationDTO request) {
 		return AutoDonation.builder()
 			.organizationProjectId(request.getOrganizationProjectId())
@@ -87,6 +92,17 @@ public class AutoDonationConverter {
 			.totalBalance(totalBalance)
 			.organizationName(organizationName)
 			.autoDonationInfos(autoDonationInfoDTOList)
+			.build();
+
+	}
+
+	public static ResponseDTO.AutoDonationTotalAccountDTO totalAccountDTO(List<AutoDonation> autoDonationList) {
+		long sum = autoDonationList.stream()
+			.mapToLong(AutoDonation::getAmountSum)
+			.reduce(0L, Long::sum);
+
+		return ResponseDTO.AutoDonationTotalAccountDTO.builder()
+			.totalAccount(sum)
 			.build();
 
 	}

@@ -137,4 +137,10 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 		return AutoDonationConverter.toAutoDonationDTO(target, autoDonationInfoDTOList, organizationName);
 	}
 
+	public ResponseDTO.AutoDonationTotalAccountDTO readTotalBalance(Integer userId) {
+		List<AutoDonation> findAutoDonations = autoDonationRepository.findAllByUserId(userId);
+
+		return AutoDonationConverter.totalAccountDTO(findAutoDonations);
+	}
+
 }
