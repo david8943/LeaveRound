@@ -1,8 +1,28 @@
 package com.ssafy.Dandelion.domain.user.service;
 
 import static com.ssafy.Dandelion.domain.autodonation.entity.constant.Bank.getRandomBanks;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+
+import com.ssafy.Dandelion.domain.autodonation.entity.AutoDonation;
 import com.ssafy.Dandelion.domain.autodonation.entity.constant.Bank;
-import com.ssafy.Dandelion.domain.user.dto.ResponseDTO;
+import com.ssafy.Dandelion.domain.autodonation.repository.AutoDonationRepository;
+import com.ssafy.Dandelion.domain.user.dto.UserRequestDTO;
+import com.ssafy.Dandelion.domain.user.dto.UserResponseDTO;
+import com.ssafy.Dandelion.domain.user.dto.constant.AccountStatus;
 import com.ssafy.Dandelion.domain.user.dto.request.UserCreateRequestDTO;
 import com.ssafy.Dandelion.domain.user.dto.request.UserLoginRequestDTO;
 import com.ssafy.Dandelion.domain.user.dto.request.UserSignUpRequestDTO;
@@ -14,23 +34,18 @@ import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
 import com.ssafy.Dandelion.global.apiPayload.exception.handler.MemberHandler;
 import com.ssafy.Dandelion.global.apiPayload.exception.handler.SsafyApiHandler;
 import com.ssafy.Dandelion.global.config.SsafyApiProperties;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
+	private final AutoDonationRepository autoDonationRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final RestTemplate restTemplate;
 	private final SsafyApiProperties ssafyApiProperties;
@@ -44,7 +59,7 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	@Transactional
-	/**
+	/*
 	 * 회원가입 처리
 	 * @param userSignUpRequestDTO 회원가입 요청 정보
 	 * @throws MemberHandler 이메일이 이미 존재하는 경우 예외 발생
@@ -90,6 +105,17 @@ public class UserServiceImpl implements UserService {
 			throw new MemberHandler(ErrorStatus.MEMBER_INVALID_PASSWORD);
 		}
 		return user;
+	}
+
+	@Override
+	public List<UserResponseDTO.AccountDTO> readUserAllAccounts(Integer userId) {
+		String userKey = getUserKeyById(userId);
+		List<UserResponseDTO.AccountDTO> accountDTOS = getAccountDTOs(userKey);
+		Map<String, AutoDonation> autoDonationMap = getAutoDonationMap(userId);
+
+		updateAccountStatus(accountDTOS, autoDonationMap);
+
+		return accountDTOS;
 	}
 
 	/**
@@ -152,7 +178,7 @@ public class UserServiceImpl implements UserService {
 
 	private void createUserAccount(String userKey, Bank bank) {
 		String url = ssafyApiProperties.createApiUrl("/ssafy/api/v1/edu/demandDeposit/createDemandDepositAccount");
-		ResponseDTO.AccountCreateDTO body = ResponseDTO.AccountCreateDTO.builder()
+		UserResponseDTO.AccountCreateDTO body = UserResponseDTO.AccountCreateDTO.builder()
 			.header(SsafyApiProperties.SsafyApiHeader.createSsafyApiHeaderTemplate(
 				"createDemandDepositAccount",
 				ssafyApiProperties.getApiKey(),
@@ -163,9 +189,76 @@ public class UserServiceImpl implements UserService {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", "application/json");
-		HttpEntity<ResponseDTO.AccountCreateDTO> requestEntity = new HttpEntity<>(body, headers);
+		HttpEntity<UserResponseDTO.AccountCreateDTO> requestEntity = new HttpEntity<>(body, headers);
 
-		restTemplate.exchange(url, HttpMethod.POST, requestEntity, SsafyUserResponseDTO.class);
+		restTemplate.exchange(url, HttpMethod.POST, requestEntity, void.class);
 
 	}
+
+	private String getUserKeyById(Integer userId) {
+		String userKey = userRepository.findById(userId)
+			.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND)).getUserKey();
+		return userKey;
+	}
+
+	private List<UserResponseDTO.AccountDTO> getAccountDTOs(String userKey) {
+		ResponseEntity<UserRequestDTO.AccountInfos> accountInfos = getUserAllAcounts(userKey);
+
+		return accountInfos.getBody().getRec().stream()
+			.map(accountInfo -> UserResponseDTO.AccountDTO.builder()
+				.bankName(accountInfo.getBankName())
+				.accountNo(accountInfo.getAccountNo())
+				.accountMoney(accountInfo.getAccountBalance())
+				.accountStatus(AccountStatus.AUTO_DISABLED.toString())
+				.build())
+			.toList();
+	}
+
+	private Map<String, AutoDonation> getAutoDonationMap(Integer userId) {
+		List<AutoDonation> autoDonations = autoDonationRepository.findAllByUserId(userId);
+
+		return autoDonations.stream()
+			.collect(Collectors.toMap(AutoDonation::getAccountNo, Function.identity()));
+	}
+
+	private ResponseEntity<UserRequestDTO.AccountInfos> getUserAllAcounts(String userKey) {
+		String url = ssafyApiProperties.createApiUrl("/ssafy/api/v1/edu/demandDeposit/inquireDemandDepositAccountList");
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("Header", SsafyApiProperties.SsafyApiHeader.createSsafyApiHeaderTemplate(
+			"inquireDemandDepositAccountList",
+			ssafyApiProperties.getApiKey(),
+			userKey
+		));
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", "application/json");
+		HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+		// API 호출
+
+		ResponseEntity<UserRequestDTO.AccountInfos> accountInfos = restTemplate.exchange(
+			url,
+			HttpMethod.POST,
+			requestEntity,
+			UserRequestDTO.AccountInfos.class
+		);
+		return accountInfos;
+
+	}
+
+	private void updateAccountStatus(List<UserResponseDTO.AccountDTO> accountDTOS,
+		Map<String, AutoDonation> autoDonationMap) {
+		for (UserResponseDTO.AccountDTO accountDTO : accountDTOS) {
+			AutoDonation autoDonation = autoDonationMap.get(accountDTO.getAccountNo());
+
+			if (autoDonation != null) {
+				accountDTO.setAutoDonationId(autoDonation.getAutoDonationId());
+				accountDTO.setAccountStatus(autoDonation.isActive()
+					? AccountStatus.AUTO_ENABLED.toString()
+					: AccountStatus.AUTO_PAUSED.toString());
+			}
+		}
+	}
+
 }
