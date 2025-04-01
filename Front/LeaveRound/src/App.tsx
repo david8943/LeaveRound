@@ -18,7 +18,7 @@ function App() {
   const location = useLocation();
 
   // MenuBar를 숨길 경로들
-  const hideMenuBarPaths = ['/', '/login', '/signup'];
+  const hideMenuBarPaths = ['/start', '/login', '/signup'];
 
   // 현재 경로가 해당 배열에 포함되는지 확인
   const shouldShowMenuBar = !hideMenuBarPaths.includes(location.pathname);
