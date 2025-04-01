@@ -9,4 +9,6 @@ public interface OrganizationCustomRepository {
 
 	List<OrganizationResponseDTO.OrganizationInfo> findAllOrganizations(
 		OrganizationRequestDTO.OrganizationSearchCondition condition);
+
+	OrganizationResponseDTO.OrganizationInfo getOrganizationInfo(Integer organizationProjectId);
 }

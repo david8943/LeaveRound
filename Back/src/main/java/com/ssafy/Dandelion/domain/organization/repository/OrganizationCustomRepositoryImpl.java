@@ -65,6 +65,34 @@ public class OrganizationCustomRepositoryImpl implements OrganizationCustomRepos
 			.fetch();
 	}
 
+	@Override
+	public OrganizationResponseDTO.OrganizationInfo getOrganizationInfo(Integer organizationProjectId) {
+		return queryFactory
+			.select(new QOrganizationResponseDTO_OrganizationInfo(
+				organization.organizationId.longValue(),
+				organization.organizationName,
+				organization.address,
+				organization.representative,
+				organization.homepageUrl,
+				organizationProject.organizationProjectId.longValue(),
+				organizationProject.goalAmount,
+				organizationProject.totalUseAmount,
+				organizationProject.currentAmount,
+				organizationProject.title,
+				organizationProject.content,
+				getProjectCategoryExpression(),
+				getStatusExpression(),
+				organization.createdAt,
+				organization.updatedAt,
+				organizationProject.endDatedAt
+			))
+			.from(organization)
+			.leftJoin(organizationProject)
+			.on(organizationProject.organizationId.eq(organization.organizationId))
+			.where(organizationProject.organizationProjectId.eq(organizationProjectId))
+			.fetchOne();
+	}
+
 	private Expression<String> getProjectCategoryExpression() {
 		return new CaseBuilder()
 			.when(organizationProject.projectCategory.eq(ProjectCategory.ENVIRONMENT))

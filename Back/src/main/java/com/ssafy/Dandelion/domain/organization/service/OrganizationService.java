@@ -7,4 +7,6 @@ public interface OrganizationService {
 
 	OrganizationResponseDTO.OrganizationInfoList getOrganizationInfos(
 		OrganizationRequestDTO.OrganizationSearchCondition condition);
+
+	OrganizationResponseDTO.OrganizationInfo getOrganizationInfo(Integer organizationProjectId);
 }
