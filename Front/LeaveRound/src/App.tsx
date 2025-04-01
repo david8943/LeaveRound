@@ -10,6 +10,7 @@ import Signup from '@/pages/SignupPage.tsx';
 import Organization from '@/pages/OrganizationPage.tsx';
 import TitleLayout from '@/components/layout/TitleLayout.tsx';
 import { useLocation } from 'react-router-dom';
+import DandelionPage from './pages/Event/DandelionPage.tsx';
 
 function App() {
   const location = useLocation();
@@ -23,7 +24,7 @@ function App() {
   return (
     <div className='min-h-screen bg-background'>
       <div className='flex flex-col min-h-screen'>
-        <main className=''>
+        <main>
           <Routes>
             <Route path='/' element={<Onboarding />} />
             <Route path='/login' element={<Login />} />
@@ -32,7 +33,7 @@ function App() {
             <Route path='/:userId/donate' element={<AccountDonate />} />
             <Route path='/:userId/donate/:id' element={<AccountDetail />} />
             <Route path='/event'>
-              <Route index element={<div>hi</div>} />
+              <Route index element={<DandelionPage />} />
               <Route
                 element={
                   <TitleLayout title='hihi'>
@@ -46,7 +47,6 @@ function App() {
             </Route>
           </Routes>
         </main>
-
         {/* 조건부 렌더링 */}
         {shouldShowMenuBar && <MenuBar />}
       </div>
