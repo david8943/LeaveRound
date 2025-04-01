@@ -15,4 +15,6 @@ public interface AutoDonationService {
 	void updateAutoDonation(Integer userId, Integer autoDonationId, RequestDTO.AutoDonationDTO request);
 
 	ResponseDTO.ReadAutoDonationDTO readAutoDonation(Integer userId, Integer autoDonationId);
+
+	ResponseDTO.AutoDonationTotalAccountDTO readTotalBalance(Integer userId);
 }

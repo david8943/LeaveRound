@@ -10,6 +10,10 @@ import lombok.NoArgsConstructor;
 
 public class ResponseDTO {
 
+	private ResponseDTO() {
+		throw new IllegalStateException("ResponseDTO Not Public Constructor");
+	}
+
 	@Getter
 	@Builder
 	@NoArgsConstructor
@@ -58,5 +62,13 @@ public class ResponseDTO {
 		Long transactionBalance;
 		LocalDateTime createTime;
 		String organizationName;
+	}
+
+	@Getter
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class AutoDonationTotalAccountDTO {
+		Long totalAccount;
 	}
 }

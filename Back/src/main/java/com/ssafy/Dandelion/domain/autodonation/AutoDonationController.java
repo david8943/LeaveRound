@@ -78,4 +78,12 @@ public class AutoDonationController {
 	) {
 		return ApiResponse.onSuccess(autoDonationService.readAutoDonation(1, autoDonationId));
 	}
+
+	@GetMapping("/user/{userId}/total")
+	public ApiResponse<ResponseDTO.AutoDonationTotalAccountDTO> readTotalBalance(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@PathVariable Integer userId
+	) {
+		return ApiResponse.onSuccess(autoDonationService.readTotalBalance(userId));
+	}
 }
