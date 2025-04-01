@@ -28,6 +28,9 @@ const useAxios = <T = any>({
   const [error, setError] = useState<AxiosError | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
+  const baseURL = import.meta.env.VITE_BASE_URL;
+  const fullURL = `${baseURL}${url}`;
+
   const fetchData = useCallback(
     async (overrideData: any = data) => {
       setLoading(true);
@@ -35,9 +38,10 @@ const useAxios = <T = any>({
 
       try {
         const res = await axios<T>({
-          url,
+          url: fullURL,
           method,
           data: overrideData,
+          withCredentials: true,
           ...config,
         });
         setResponse(res.data);
@@ -47,7 +51,7 @@ const useAxios = <T = any>({
         setLoading(false);
       }
     },
-    [url, method, data, config],
+    [fullURL, method, data, config],
   );
 
   useEffect(() => {
