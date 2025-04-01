@@ -9,7 +9,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -36,12 +35,8 @@ public class Organization extends BaseTimeEntityWithUpdatedAt {
 	@Column(nullable = false)
 	private String address;
 
-	@Column(nullable = false)
-	//TODO: ENUM 설정 필요
-	private String field;
-
-	@Column(nullable = false)
-	private boolean isAbnormal;
+	@Column
+	private String homepageUrl;
 
 	@Column(nullable = false, length = 20)
 	private String representative;

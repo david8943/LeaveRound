@@ -9,14 +9,19 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.Dandelion.global.auth.filter.ExceptionHandlerFilter;
+import com.ssafy.Dandelion.global.auth.filter.JwtAuthenticationFilter;
+import com.ssafy.Dandelion.global.auth.filter.LoginFilter;
 import com.ssafy.Dandelion.global.auth.filter.LogoutFilter;
 import com.ssafy.Dandelion.global.auth.util.JwtTokenProvider;
 
@@ -31,55 +36,35 @@ public class SecurityConfig {
 	private final ObjectMapper objectMapper;
 
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity httpSecurity,
-		CorsConfigurationSource corsConfigurationSource) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+		// 인증 매니저 설정
+		AuthenticationManager authenticationManager = authenticationManager(authenticationConfiguration);
+
+		// 로그인 필터 생성
+		LoginFilter loginFilter = new LoginFilter(authenticationManager, jwtTokenProvider, objectMapper);
+
 		return httpSecurity
 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 			.csrf(AbstractHttpConfigurer::disable)
+			// 세션 비활성화
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			// 로그아웃 URL
 			.logout(logout -> logout
-				.logoutUrl("logouturl")
+				.logoutUrl("/api/users/logout")
 				.addLogoutHandler(new LogoutFilter(objectMapper))
 				.logoutSuccessHandler(new LogoutFilter(objectMapper))
 			)
-			.authorizeHttpRequests(
-				authHttp -> authHttp
-					.anyRequest().permitAll()
-					/*
-					.requestMatchers(
-						HttpMethod.GET
-					)
-					.permitAll()
-					.requestMatchers(
-						HttpMethod.POST
-					)
-					.permitAll()
-					.requestMatchers(
-						HttpMethod.PUT
-					)
-					.permitAll()
-					.anyRequest().authenticated()
-					 */
+			// 요청 권한 설정
+			.authorizeHttpRequests(authHttp -> authHttp
+				// 회원가입, 로그인은 인증 없이 접근 가능
+				.requestMatchers("/api/users", "/api/users/login").permitAll()
+				// 그 외 모든 요청은 인증 필요
+				.anyRequest().authenticated()
 			)
-			// .sessionManagement(
-			// 	sessionManagement -> sessionManagement
-			// 		.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			// )
-			// .addFilterBefore(
-			// 	new ExceptionHandlerFilter(objectMapper),
-			// 	UsernamePasswordAuthenticationFilter.class
-			// )
-			// .addFilterBefore(
-			// 	new LoginFilter(
-			// 		authenticationManager(authenticationConfiguration),
-			// 		jwtTokenProvider,
-			// 		objectMapper
-			// 	),
-			// 	UsernamePasswordAuthenticationFilter.class
-			// )
-			// .addFilterBefore(
-			// 	new JwtAuthenticationFilter(jwtTokenProvider),
-			// 	UsernamePasswordAuthenticationFilter.class
-			// )
+			// 필터 추가
+			.addFilterBefore(new ExceptionHandlerFilter(objectMapper), UsernamePasswordAuthenticationFilter.class)
+			.addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
+			.addFilterAfter(new JwtAuthenticationFilter(jwtTokenProvider), LoginFilter.class)
 			.build();
 	}
 
@@ -113,6 +98,4 @@ public class SecurityConfig {
 
 		return source;
 	}
-
 }
-

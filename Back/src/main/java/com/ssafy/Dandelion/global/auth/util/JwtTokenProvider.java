@@ -31,22 +31,20 @@ public class JwtTokenProvider {
 
 	private final Key key;
 	private final int expirationTime;
-	//private final UserRepository userRepository;
 
 	public JwtTokenProvider(
 		@Value("${jwt.secret}") String secretKey,
 		@Value("${jwt.token-validity-in-seconds}") int expirationTime
-		//UserRepository userRepository
-		) {
+	) {
 		this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
 		this.expirationTime = expirationTime;
-		//this.userRepository = userRepository;
 	}
 
 	public ResponseCookie generateToken(Authentication authentication) {
 		CustomUserDetails userDetails = (CustomUserDetails)authentication.getPrincipal();
 		Claims claims = buildClaims(userDetails);
 		String accessToken = createToken(claims);
+		log.info("Generated access token: {}", accessToken);
 
 		return ResponseCookie.from("access_token", accessToken)
 			.httpOnly(true)
@@ -77,12 +75,6 @@ public class JwtTokenProvider {
 	public Authentication getAuthentication(String accessToken) {
 		Claims claims = parseClaims(accessToken);
 		CustomUserDetails userDetails = buildUserDetails(claims);
-
-		/*
-		userRepository.findByMemberId(userDetails.getUserrId()).orElseThrow(
-			() -> new AuthHandler(ErrorCode.INVALID_TOKEN)
-		);
-		 */
 
 		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 	}

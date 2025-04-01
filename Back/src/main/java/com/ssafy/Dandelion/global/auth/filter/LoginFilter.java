@@ -35,7 +35,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		this.authenticationManager = authenticationManager;
 		this.jwtTokenProvider = jwtTokenProvider;
 		this.objectMapper = objectMapper;
-		setFilterProcessesUrl("api/users/login");
+		setFilterProcessesUrl("/api/users/login");
 	}
 
 	@Override
@@ -44,7 +44,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		logger.info("LoginFilter.attemptAuthentication");
 		String email = obtainUsername(request);
 		String password = obtainPassword(request);
-
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(email, password, List.of());
 		return authenticationManager.authenticate(token);
 	}
@@ -83,4 +82,3 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		response.getWriter().write(result);
 	}
 }
-

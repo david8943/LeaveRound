@@ -32,7 +32,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		HttpServletRequest request,
 		HttpServletResponse response,
 		FilterChain filterChain
-
 	) throws ServletException, IOException {
 		logger.info("JwtAuthenticationFilter.doFilterInternal");
 		String token = jwtTokenProvider.extractAccessToken(request);
@@ -47,14 +46,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private Map<HttpMethod, List<String>> methodUrlPatterns = new HashMap<HttpMethod, List<String>>() {{
 		put(
 			HttpMethod.GET, Arrays.asList(
+				"/error",
+				"/favicon.ico"
 			)
 		);
 		put(
 			HttpMethod.POST, Arrays.asList(
+				"/api/users",
+				"/api/users/login"
 			)
 		);
 		put(
 			HttpMethod.PUT, Arrays.asList(
+				"/**"
 			)
 		);
 	}};

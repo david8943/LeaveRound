@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,9 +30,8 @@ public class AutoDonationController {
 	@PostMapping("")
 	public ApiResponse<Void> createAutoDonation(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
-		@RequestBody @Valid RequestDTO.CreateAutoDonationDTO request
+		@RequestBody @Valid RequestDTO.AutoDonationDTO request
 	) {
-		//autoDonationService.createAutoDonation(customUserDetails.getUserId(), request);
 		autoDonationService.createAutoDonation(1, request);
 		return ApiResponse.onSuccess(null);
 	}
@@ -40,8 +40,7 @@ public class AutoDonationController {
 	public ApiResponse<ResponseDTO.ReadAllAutoDonationDTO> readAllAutoDonation(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
-		//autoDonationService.readAllAutoDonation(customUserDetails.getUserId());
-		return ApiResponse.onSuccess(autoDonationService.readAllAutoDonation(1));
+		return ApiResponse.onSuccess(autoDonationService.readAllAutoDonation(customUserDetails.getUserId()));
 	}
 
 	@PatchMapping("/{autoDonationId}/active")
@@ -49,18 +48,43 @@ public class AutoDonationController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Integer autoDonationId
 	) {
-		//autoDonationService.changeActive(customUserDetails.getUserId(), autoDonationId);
-		autoDonationService.changeActive(1, autoDonationId);
+		autoDonationService.changeActive(customUserDetails.getUserId(), autoDonationId);
 		return ApiResponse.onSuccess(null);
 	}
 
 	@DeleteMapping("/{autoDonationId}")
-	public ApiResponse<Void> DeleteAutoDonation(
+	public ApiResponse<Void> deleteAutoDonation(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Integer autoDonationId
 	) {
-		//autoDonationService.deleteAutoDonation(customUserDetails.getUserId(), autoDonationId);
-		autoDonationService.deleteAutoDonation(1, autoDonationId);
+		autoDonationService.deleteAutoDonation(customUserDetails.getUserId(), autoDonationId);
 		return ApiResponse.onSuccess(null);
+	}
+
+	@PutMapping("/{autoDonationId}")
+	public ApiResponse<Void> updateAutoDonation(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@PathVariable Integer autoDonationId,
+		@RequestBody @Valid RequestDTO.AutoDonationDTO request
+	) {
+		autoDonationService.updateAutoDonation(customUserDetails.getUserId(), autoDonationId, request);
+		return ApiResponse.onSuccess(null);
+	}
+
+	@GetMapping("/{autoDonationId}")
+	public ApiResponse<ResponseDTO.ReadAutoDonationDTO> updateAutoDonation(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@PathVariable Integer autoDonationId
+	) {
+		return ApiResponse.onSuccess(
+			autoDonationService.readAutoDonation(customUserDetails.getUserId(), autoDonationId));
+	}
+
+	@GetMapping("/user/{userId}/total")
+	public ApiResponse<ResponseDTO.AutoDonationTotalAccountDTO> readTotalBalance(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@PathVariable Integer userId
+	) {
+		return ApiResponse.onSuccess(autoDonationService.readTotalBalance(userId));
 	}
 }

@@ -9,7 +9,7 @@ import lombok.Getter;
 
 public class RequestDTO {
 	@Getter
-	public static class CreateAutoDonationDTO {
+	public static class AutoDonationDTO {
 		@NotBlank
 		@ExistBank
 		String bankName;
@@ -27,4 +27,5 @@ public class RequestDTO {
 
 		Integer organizationProjectId;
 	}
+
 }
