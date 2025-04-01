@@ -13,6 +13,7 @@ import com.ssafy.Dandelion.domain.autodonation.repository.AutoDonationInfoReposi
 import com.ssafy.Dandelion.domain.autodonation.repository.AutoDonationRepository;
 import com.ssafy.Dandelion.domain.organization.repository.OrganizationProjectRepository;
 import com.ssafy.Dandelion.domain.organization.repository.OrganizationRepository;
+import com.ssafy.Dandelion.domain.user.repository.UserRepository;
 import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
 import com.ssafy.Dandelion.global.apiPayload.exception.handler.BadRequestHandler;
 import com.ssafy.Dandelion.global.apiPayload.exception.handler.NotFoundHandler;
@@ -30,10 +31,13 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	private final AutoDonationInfoRepository autoDonationInfoRepository;
 	private final OrganizationRepository organizationRepository;
 	private final OrganizationProjectRepository organizationProjectRepository;
+	private final UserRepository userRepository;
 
 	@Transactional
 	@Override
 	public void createAutoDonation(Integer userId, RequestDTO.AutoDonationDTO request) {
+		if (userRepository.existsById(userId))
+			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		if (!organizationProjectRepository.existsById(request.getOrganizationProjectId()))
 			throw new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT);
@@ -47,6 +51,8 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 
 	@Override
 	public ResponseDTO.ReadAllAutoDonationDTO readAllAutoDonation(Integer userId) {
+		if (userRepository.existsById(userId))
+			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		List<ResponseDTO.AccountDTO> accountDTOList = autoDonationRepository.findAllByUserId(userId).stream()
 			.map(autoDonation -> {
@@ -68,6 +74,8 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void changeActive(Integer userId, Integer autoDonationId) {
+		if (userRepository.existsById(userId))
+			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
 			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_AUTO_DONATION));
@@ -79,6 +87,8 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void deleteAutoDonation(Integer userId, Integer autoDonationId) {
+		if (userRepository.existsById(userId))
+			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
 			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_AUTO_DONATION));
@@ -92,6 +102,9 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void updateAutoDonation(Integer userId, Integer autoDonationId, RequestDTO.AutoDonationDTO request) {
+		if (userRepository.existsById(userId))
+			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
+
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
 			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_AUTO_DONATION));
 
@@ -107,6 +120,9 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 
 	@Override
 	public ResponseDTO.ReadAutoDonationDTO readAutoDonation(Integer userId, Integer autoDonationId) {
+		if (userRepository.existsById(userId))
+			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
+
 		List<ResponseDTO.AutoDonationInfoDTO> autoDonationInfoDTOList = autoDonationInfoRepository.findAllByAutoDonationId(
 				autoDonationId).stream()
 			.map(autoDonationInfo -> {
