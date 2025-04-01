@@ -173,4 +173,9 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 		return AutoDonationConverter.totalAccountDTO(findAutoDonations);
 	}
 
+	@Override
+	public void executeAutoDonation(AutoDonation autoDonation) {
+		log.info("스케줄러작동============================");
+	}
+
 }
