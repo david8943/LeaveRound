@@ -22,7 +22,7 @@ public interface DandelionDonationInfoRepository extends JpaRepository<Dandelion
 	List<Object[]> findDonationsByTypeInPeriod(@Param("startDate") LocalDateTime startDate,
 		@Param("endDate") LocalDateTime endDate);
 
-	// 특정 기간 동안의 사용자별 활금 민들레 기부 랭킹 조회(기부 많은 순으로 정렬)
+	// 특정 기간 동안의 사용자별 황금 민들레 기부 랭킹 조회(기부 많은 순으로 정렬)
 	@Query("SELECT d.userId, SUM(d.useGoldDandelionCount) as totalGoldDonation " +
 		"FROM DandelionDonationInfo d " +
 		"WHERE d.createdAt BETWEEN :startDate AND :endDate " +
@@ -30,4 +30,13 @@ public interface DandelionDonationInfoRepository extends JpaRepository<Dandelion
 		"ORDER BY totalGoldDonation DESC")
 	List<Object[]> findMonthlyGoldDonationRanking(@Param("startDate") LocalDateTime startDate,
 		@Param("endDate") LocalDateTime endDate);
+
+	// 사용자가 기부한 총 일반 민들레 개수 조회
+	@Query("SELECT SUM(d.useDandelionCount) FROM DandelionDonationInfo d WHERE d.userId = :userId")
+	Integer sumUseDandelionCountByUserId(@Param("userId") Integer userId);
+
+	// 사용자가 기부한 총 황금 민들레 개수 조회
+	@Query("SELECT SUM(d.useGoldDandelionCount) FROM DandelionDonationInfo d WHERE d.userId = :userId")
+	Integer sumUseGoldDandelionCountByUserId(@Param("userId") Integer userId);
+
 }

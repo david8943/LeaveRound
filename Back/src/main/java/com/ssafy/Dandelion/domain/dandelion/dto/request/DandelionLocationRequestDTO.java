@@ -41,26 +41,4 @@ public class DandelionLocationRequestDTO {
 	public boolean isValidLocation() {
 		return myLatitude != null && myLongitude != null;
 	}
-
-	/**
-	 * 위도 값 설정
-	 *
-	 * @param latitude 새 위도 값
-	 * @return 현재 객체
-	 */
-	public DandelionLocationRequestDTO updateLatitude(BigDecimal latitude) {
-		this.myLatitude = latitude;
-		return this;
-	}
-
-	/**
-	 * 경도 값 설정
-	 *
-	 * @param longitude 새 위도 값
-	 * @return 현재 객체
-	 */
-	public DandelionLocationRequestDTO updateLongitude(BigDecimal longitude) {
-		this.myLongitude = longitude;
-		return this;
-	}
 }

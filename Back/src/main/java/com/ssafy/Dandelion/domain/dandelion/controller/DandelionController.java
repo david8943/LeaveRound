@@ -16,10 +16,9 @@ import com.ssafy.Dandelion.domain.dandelion.dto.response.DandelionLocationRespon
 import com.ssafy.Dandelion.domain.dandelion.dto.response.GoldDandelionLocationResponseDTO;
 import com.ssafy.Dandelion.domain.dandelion.dto.response.MonthlyGoldRankingResponseDTO;
 import com.ssafy.Dandelion.domain.dandelion.dto.response.WeeklyRankingResponseDTO;
-import com.ssafy.Dandelion.domain.dandelion.entity.Dandelion;
-import com.ssafy.Dandelion.domain.dandelion.entity.GoldDandelion;
 import com.ssafy.Dandelion.domain.dandelion.service.DandelionService;
 import com.ssafy.Dandelion.global.apiPayload.ApiResponse;
+import com.ssafy.Dandelion.global.apiPayload.code.status.SuccessStatus;
 import com.ssafy.Dandelion.global.auth.user.CustomUserDetails;
 
 import jakarta.validation.Valid;
@@ -34,129 +33,58 @@ public class DandelionController {
 
 	private final DandelionService dandelionService;
 
-	/**
-	 * 사용자 주변의 일반 민들레 위치 정보를 조회합니다.
-	 * 클라이언트에서 POST 요청으로 현재 위치 정보를 전송하면 주변 민들레 정보를 반환합니다.
-	 *
-	 * @param userDetails 인증된 사용자 정보
-	 * @param locationRequestDTO 사용자의 현재 위치 정보
-	 * @return 주변 민들레 위치 목록
-	 */
-	@PostMapping("/nearby")
-	public ApiResponse<List<DandelionLocationResponseDTO>> getNearbyDandelions(
+	// 일반 민들레 수집
+	@PostMapping("/collections/personal/{dandelionId}")
+	public ApiResponse<Void> collectPersonalDandelion(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable Integer dandelionId,
+		@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
+		Integer userId = userDetails.getUserId().intValue();
+		dandelionService.collectDandelionWithDistanceCheck(userId, dandelionId, locationRequestDTO);
+		return ApiResponse.of(SuccessStatus.DANDELION_COLLECT_SUCCESS, null);
+	}
+
+	// 황금 민들레 수집
+	@PostMapping("/collections/gold/{dandelionId}")
+	public ApiResponse<Void> collectGoldDandelion(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable Integer dandelionId,
+		@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
+		Integer userId = userDetails.getUserId().intValue();
+		dandelionService.collectGoldDandelionWithDistanceCheck(userId, dandelionId, locationRequestDTO);
+		return ApiResponse.of(SuccessStatus.GOLD_DANDELION_COLLECT_SUCCESS, null);
+	}
+
+	// 일반 민들레 위치 조회(10개)
+	@GetMapping("/locations/personal")
+	public ApiResponse<List<DandelionLocationResponseDTO>> getPersonalDandelions(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
 		Integer userId = userDetails.getUserId().intValue();
-		List<DandelionLocationResponseDTO> nearbyDandelions = dandelionService.getNearbyDandelions(userId,
+		List<DandelionLocationResponseDTO> personalDandelions = dandelionService.getAndRelocatePersonalDandelions(
+			userId,
 			locationRequestDTO);
-		return ApiResponse.onSuccess(nearbyDandelions);
+		return ApiResponse.of(SuccessStatus.DANDELION_LOCATION_SUCCESS, personalDandelions);
 	}
 
-	/**
-	 * 사용자 주변의 황금 민들레 위치 정보를 조회합니다.
-	 * 클라이언트에서 POST 요청으로 현재 위치 정보를 전송하면 주변 황금 민들레 정보를 반환합니다.
-	 *
-	 * @param userDetails 인증된 사용자 정보
-	 * @param locationRequestDTO 사용자의 현재 위치 정보
-	 * @return 주변 황금 민들레 위치 목록
-	 */
-	@PostMapping("/gold/nearby")
-	public ApiResponse<List<GoldDandelionLocationResponseDTO>> getNearbyGoldDandelions(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
-		List<GoldDandelionLocationResponseDTO> nearbyGoldDandelions = dandelionService.getNearbyGoldDandelions(
-			locationRequestDTO);
-		return ApiResponse.onSuccess(nearbyGoldDandelions);
+	// 황금 민들레 조회(한 달에 5개 새로 생성)
+	@GetMapping("/locations/gold")
+	public ApiResponse<List<GoldDandelionLocationResponseDTO>> getUncollectedGoldDandelions() {
+		List<GoldDandelionLocationResponseDTO> goldDandelions = dandelionService.getMonthlyUncollectedGoldDandelions();
+		return ApiResponse.of(SuccessStatus.GOLD_DANDELION_LOCATION_SUCCESS, goldDandelions);
 	}
 
-	/**
-	 * 특정 일반 민들레를 수집합니다.
-	 * 클라이언트에서 지정한 민들레 ID에 해당하는 민들레를 현재 로그인한 사용자의 소유로 설정합니다.
-	 *
-	 * @param userDetails 인증된 사용자 정보
-	 * @param dandelionId 수집할 민들레 ID
-	 * @return 수집 결과
-	 */
-	@PostMapping("/{dandelionId}/collect")
-	public ApiResponse<Dandelion> collectDandelion(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable Integer dandelionId) {
-		Integer userId = userDetails.getUserId().intValue();
-		Dandelion collectedDandelion = dandelionService.collectDandelion(userId, dandelionId);
-		return ApiResponse.onSuccess(collectedDandelion);
-	}
-
-	/**
-	 * 특정 황금 민들레를 수집합니다.
-	 * 클라이언트에서 지정한 황금 민들레 ID에 해당하는 민들레를 현재 로그인한 사용자의 소유로 설정합니다.
-	 *
-	 * @param userDetails 인증된 사용자 정보
-	 * @param goldDandelionId 수집할 황금 민들레 ID
-	 * @return 수집 결과
-	 */
-	@PostMapping("/gold/{goldDandelionId}/collect")
-	public ApiResponse<GoldDandelion> collectGoldDandelion(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable Integer goldDandelionId) {
-		Integer userId = userDetails.getUserId().intValue();
-		GoldDandelion collectedGoldDandelion = dandelionService.collectGoldDandelion(userId, goldDandelionId);
-		return ApiResponse.onSuccess(collectedGoldDandelion);
-	}
-
-	/**
-	 * 민들레를 기부합니다.
-	 * 클라이언트에서 전송한 기부 정보에 따라 현재 로그인한 사용자의 민들레를 기부 처리합니다.
-	 *
-	 * @param userDetails 인증된 사용자 정보
-	 * @param donationRequestDTO 기부 정보
-	 * @return 기부 결과
-	 */
-	@PostMapping("/donate")
-	public ApiResponse<Void> donateDandelions(
+	// 민들레 기부(일반 민들레, 황금 민들레)
+	@PostMapping("/donations/organizations")
+	public ApiResponse<Void> donateToOrganizations(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@Valid @RequestBody DandelionDonationRequestDTO donationRequestDTO) {
 		Integer userId = userDetails.getUserId().intValue();
 		dandelionService.donateDandelions(userId, donationRequestDTO);
-		return ApiResponse.onSuccess(null);
+		return ApiResponse.of(SuccessStatus.DANDELION_DONATION_SUCCESS, null);
 	}
 
-	/**
-	 * 사용자가 보유한 일반 민들레 개수를 조회합니다.
-	 * 현재 로그인한 사용자가 보유한 일반 민들레의 총 개수를 반환합니다.
-	 *
-	 * @param userDetails 인증된 사용자 정보
-	 * @return 보유한 일반 민들레 개수
-	 */
-	@GetMapping("/count")
-	public ApiResponse<Integer> getUserDandelionCount(
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		Integer userId = userDetails.getUserId().intValue();
-		int count = dandelionService.getUserDandelionCount(userId);
-		return ApiResponse.onSuccess(count);
-	}
-
-	/**
-	 * 사용자가 보유한 황금 민들레 개수를 조회합니다.
-	 * 현재 로그인한 사용자가 보유한 황금 민들레의 총 개수를 반환합니다.
-	 *
-	 * @param userDetails 인증된 사용자 정보
-	 * @return 보유한 황금 민들레 개수
-	 */
-	@GetMapping("/gold/count")
-	public ApiResponse<Integer> getUserGoldDandelionCount(
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		Integer userId = userDetails.getUserId().intValue();
-		int count = dandelionService.getUserGoldDandelionCount(userId);
-		return ApiResponse.onSuccess(count);
-	}
-
-	/**
-	 * 주간 기부 랭킹을 조회합니다.
-	 * 최근 7일간의 민들레 기부 내역을 기준으로 순위를 집계하여 반환합니다.
-	 *
-	 * @param userDetails 인증된 사용자 정보
-	 * @return 주간 기부 랭킹 정보
-	 */
+	// 주간 기부 랭킹 조회
 	@GetMapping("/donations/rankings/weekly")
 	public ApiResponse<WeeklyRankingResponseDTO> getWeeklyRanking(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -165,13 +93,7 @@ public class DandelionController {
 		return ApiResponse.onSuccess(weeklyRanking);
 	}
 
-	/**
-	 * 월간 황금 민들레 랭킹을 조회합니다.
-	 * 이번 달의 황금 민들레 기부 내역을 기준으로 순위를 집계하여 반환합니다.
-	 *
-	 * @param userDetails 인증된 사용자 정보
-	 * @return 월간 황금 민들레 랭킹 정보
-	 */
+	// 월간 황금 민들레 랭킹 조회
 	@GetMapping("/donations/rankings/gold/monthly")
 	public ApiResponse<MonthlyGoldRankingResponseDTO> getMonthlyGoldRanking(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {

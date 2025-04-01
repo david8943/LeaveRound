@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 public class GoldDandelionLocationResponseDTO {
+	private Integer goldDandelionId;
 	private BigDecimal latitude;
 	private BigDecimal longitude;
-
 }

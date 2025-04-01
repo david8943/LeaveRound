@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.springframework.data.geo.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ import com.ssafy.Dandelion.domain.dandelion.repository.DandelionDonationInfoRepo
 import com.ssafy.Dandelion.domain.dandelion.repository.DandelionLocationRepository;
 import com.ssafy.Dandelion.domain.dandelion.repository.DandelionRepository;
 import com.ssafy.Dandelion.domain.dandelion.repository.GoldDandelionRepository;
+import com.ssafy.Dandelion.domain.organization.repository.OrganizationProjectRepository;
 import com.ssafy.Dandelion.domain.user.repository.UserRepository;
 import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
 import com.ssafy.Dandelion.global.apiPayload.exception.handler.DandelionHandler;
@@ -48,177 +51,19 @@ public class DandelionServiceImpl implements DandelionService {
 	private final GoldDandelionRepository goldDandelionRepository;
 	private final DandelionLocationRepository dandelionLocationRepository;
 	private final DandelionDonationInfoRepository donationInfoRepository;
+	private final OrganizationProjectRepository organizationProjectRepository;
 	private final UserRepository userRepository;
 
-	/**
-	 * 사용자가 일반 민들레를 수집합니다.
-	 * 이미 수집된 민들레는 예외를 발생시킵니다.
-	 *
-	 * @param userId 수집하는 사용자 ID
-	 * @param dandelionId 수집할 민들레 ID
-	 * @return 수집된 민들레 엔티티
-	 * @throws NotFoundHandler 민들레가 존재하지 않는 경우
-	 * @throws DandelionHandler 이미 수집된 민들레인 경우, 수집 거리가 너무 먼 경우
-	 */
-	@Override
-	@Transactional
-	public Dandelion collectDandelion(Integer userId, Integer dandelionId) {
-		// 해당 사용자와 민들레 ID가 유효한지 확인
-		Dandelion dandelion = dandelionRepository.findById(dandelionId)
-			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.DANDELION_NOT_FOUND));
+	// 민들레 거리 제한 상수 (미터 단위)
+	private static final double MAX_COLLECTION_DISTANCE = 100.0;
+	// 사용자당 제공할 민들레 개수
+	private static final int TARGET_DANDELION_COUNT = 10;
+	// 월별 생성할 황금 민들레 개수
+	private static final int MONTHLY_GOLD_DANDELIONS = 5;
+	// 주간 랭킹 표시 개수
+	private static final int WEEKLY_RANKING_LIMIT = 10;
 
-		// 이미 수집된 민들레인지 확인
-		if (dandelion.getUserId() != null) {
-			throw new DandelionHandler(ErrorStatus.DANDELION_ALREADY_COLLECT);
-		}
-
-		// TODO: 민들레 수집 거리 체크 추가
-		// 이 부분은 실제 사용자 위치와 민들레 위치를 계산하여 거리가 일정 범위 내인지 확인해야 함
-		// if (거리가 너무 멀면) {
-		//     throw new DandelionHandler(ErrorStatus.DANDELION_TOO_FAR_TO_COLLECT);
-		// }
-
-		// 민들레 수집 처리 (사용자 ID 설정)
-		dandelion.setUserId(userId);
-
-		// Redis에서 해당 민들레 위치 정보 삭제
-		dandelionLocationRepository.removeDandelion(userId, dandelionId);
-
-		// 업데이트된 민들레 정보 저장
-		return dandelionRepository.save(dandelion);
-	}
-
-	/**
-	 * 사용자가 황금 민들레를 수집합니다.
-	 * 이미 수집된 황금 민들레는 예외를 발생시킵니다.
-	 *
-	 * @param userId 수집하는 사용자 ID
-	 * @param goldDandelionId 수집할 황금 민들레 ID
-	 * @return 수집된 황금 민들레 엔티티
-	 * @throws NotFoundHandler 황금 민들레가 존재하지 않는 경우
-	 * @throws DandelionHandler 이미 수집된 황금 민들레인 경우, 수집 거리가 너무 먼 경우
-	 */
-	@Override
-	@Transactional
-	public GoldDandelion collectGoldDandelion(Integer userId, Integer goldDandelionId) {
-		// 해당 황금 민들레 ID가 유효한지 확인
-		GoldDandelion goldDandelion = goldDandelionRepository.findById(goldDandelionId)
-			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.GOLD_DANDELION_NOT_FOUND));
-
-		// 이미 수집된 황금 민들레인지 확인
-		if (goldDandelion.getUserId() != null) {
-			throw new DandelionHandler(ErrorStatus.GOLD_DANDLION_ALREADY_COLLECT);
-		}
-
-		// TODO: 황금 민들레 수집 거리 체크 추가
-		// 이 부분은 실제 사용자 위치와 황금 민들레 위치를 계산하여 거리가 일정 범위 내인지 확인해야 함
-		// if (거리가 너무 멀면) {
-		//     throw new DandelionHandler(ErrorStatus.GOLD_DANDELION_TOO_FAR_TO_COLLECT);
-		// }
-
-		// 황금 민들레 수집 처리 (사용자 ID 설정 및 수집 시간 기록)
-		goldDandelion.setUserId(userId);
-		goldDandelion.setAcquiredAt(LocalDateTime.now());
-
-		// Redis에서 해당 황금 민들레 위치 정보 삭제
-		dandelionLocationRepository.removeGoldDandelion(goldDandelionId);
-
-		// 업데이트된 황금 민들레 정보 저장
-		return goldDandelionRepository.save(goldDandelion);
-	}
-
-	/**
-	 * 사용자 주변의 일반 민들레 위치 정보를 조회합니다.
-	 * 100m 반경 내의 민들레를 검색합니다.
-	 *
-	 * @param userId 조회하는 사용자 ID
-	 * @param locationRequestDTO 사용자의 현재 위치 정보
-	 * @return 주변 민들레 위치 목록
-	 * @throws DandelionHandler 위치 정보가 유효하지 않은 경우
-	 */
-	@Override
-	public List<DandelionLocationResponseDTO> getNearbyDandelions(Integer userId,
-		DandelionLocationRequestDTO locationRequestDTO) {
-		// 위치 정보가 유효한지 확인
-		if (!locationRequestDTO.isValidLocation()) {
-			throw new DandelionHandler(ErrorStatus.INVALID_LOCATION);
-		}
-
-		// 현재 사용자 위치 주변의 민들레 검색
-		var nearbyDandelions = dandelionLocationRepository.findDandelionsNearby(
-			userId,
-			locationRequestDTO.getMyLatitude(),
-			locationRequestDTO.getMyLongitude()
-		);
-
-		// 결과가 없는 경우 빈 리스트 반환
-		if (nearbyDandelions == null) {
-			return new ArrayList<>();
-		}
-
-		// 검색 결과를 DTO로 변환
-		return nearbyDandelions.getContent().stream()
-			.map(geoLocation -> {
-				Integer dandelionId = (Integer)geoLocation.getContent().getName();
-				var position = geoLocation.getContent().getPoint();
-
-				return DandelionLocationResponseDTO.builder()
-					.dandelionId(dandelionId)
-					.latitude(BigDecimal.valueOf(position.getY()))
-					.longitude(BigDecimal.valueOf(position.getX()))
-					.build();
-			})
-			.collect(Collectors.toList());
-	}
-
-	/**
-	 * 사용자 주변의 황금 민들레 위치 정보를 조회합니다.
-	 * 100m 반경 내의 황금 민들레를 검색합니다.
-	 *
-	 * @param locationRequestDTO 사용자의 현재 위치 정보
-	 * @return 주변 황금 민들레 위치 목록
-	 * @throws DandelionHandler 위치 정보가 유효하지 않은 경우
-	 */
-	@Override
-	public List<GoldDandelionLocationResponseDTO> getNearbyGoldDandelions(
-		DandelionLocationRequestDTO locationRequestDTO) {
-		// 위치 정보가 유효한지 확인
-		if (!locationRequestDTO.isValidLocation()) {
-			throw new DandelionHandler(ErrorStatus.INVALID_LOCATION);
-		}
-
-		// 현재 위치 주변의 황금 민들레 검색
-		var nearbyGoldDandelions = dandelionLocationRepository.findGoldDandelionsNearby(
-			locationRequestDTO.getMyLatitude(),
-			locationRequestDTO.getMyLongitude()
-		);
-
-		// 결과가 없는 경우 빈 리스트 반환
-		if (nearbyGoldDandelions == null) {
-			return new ArrayList<>();
-		}
-
-		// 검색 결과를 DTO로 변환
-		return nearbyGoldDandelions.getContent().stream()
-			.map(geoLocation -> {
-				var position = geoLocation.getContent().getPoint();
-
-				return GoldDandelionLocationResponseDTO.builder()
-					.latitude(BigDecimal.valueOf(position.getY()))
-					.longitude(BigDecimal.valueOf(position.getX()))
-					.build();
-			})
-			.collect(Collectors.toList());
-	}
-
-	/**
-	 * 사용자가 민들레를 기부합니다.
-	 * 일반 민들레와 황금 민들레를 특정 프로젝트에 기부할 수 있습니다.
-	 *
-	 * @param userId 기부하는 사용자 ID
-	 * @param donationRequestDTO 기부 정보 (일반 민들레 개수, 황금 민들레 개수, 기부처 ID)
-	 * @throws DandelionHandler 기부할 민들레가 없거나, 보유량보다 많이 기부하려는 경우, 기부처가 존재하지 않는 경우
-	 */
+	// 민들레 기부
 	@Override
 	@Transactional
 	public void donateDandelions(Integer userId, DandelionDonationRequestDTO donationRequestDTO) {
@@ -232,69 +77,69 @@ public class DandelionServiceImpl implements DandelionService {
 			throw new DandelionHandler(ErrorStatus.EMPTY_DONATION);
 		}
 
-		// 사용자가 가진 민들레 개수 확인
-		int userNormalCount = dandelionRepository.countByUserId(userId);
-		int userGoldCount = goldDandelionRepository.countByUserId(userId);
+		// 기부 가능한 민들레 개수 확인
+		int availableNormal = getAvailableDandelionCount(userId);
+		int availableGold = getAvailableGoldDandelionCount(userId);
 
 		// 사용자가 가진 민들레보다 많은 개수를 기부하려는 경우 예외 처리
-		if (normalCount > 0 && normalCount > userNormalCount) {
+		if (normalCount > 0 && normalCount > availableNormal) {
 			throw new DandelionHandler(ErrorStatus.DANDELION_OVER_COUNT);
 		}
 
-		if (goldCount > 0 && goldCount > userGoldCount) {
+		if (goldCount > 0 && goldCount > availableGold) {
 			throw new DandelionHandler(ErrorStatus.GOLD_DANDELION_OVER_COUNT);
 		}
 
-		// 기부처 ID가 유효한지 확인 (0이면 랜덤 기부)
-		if (donationRequestDTO.getProjectId() != null && donationRequestDTO.getProjectId() != 0) {
-			// TODO: 기부처 존재 여부 확인
-			// organizationProjectRepository.findById(donationRequestDTO.getProjectId())
-			//    .orElseThrow(() -> new DandelionHandler(ErrorStatus.ORGANIZATION_EMPTY));
+		// 기부처 ID 처리
+		Integer projectId = donationRequestDTO.getProjectId();
+		if (projectId == null || projectId == 0) {
+			// 기본 기부처 설정 (시스템 기본값)
+			projectId = 1;
 		}
 
 		// 기부 정보 생성 및 저장
 		DandelionDonationInfo donationInfo = DandelionDonationInfo.builder()
 			.userId(userId)
-			.organizationProjectId(donationRequestDTO.getProjectId() != null ? donationRequestDTO.getProjectId() : 0)
+			.organizationProjectId(projectId)
 			.useDandelionCount(normalCount)
 			.useGoldDandelionCount(goldCount)
 			.build();
 
 		donationInfoRepository.save(donationInfo);
 
-		// TODO: 민들레 기부 후 처리 (실제 민들레 삭제 로직이 필요할 수 있음)
+		log.info("{} 사용자가 {} 일반 민들레랑 {} 황금 민들레를 {} 프로젝트에 기부함",
+			userId, normalCount, goldCount, projectId);
 	}
 
-	/**
-	 * 사용자가 보유한 일반 민들레 개수를 조회합니다.
-	 *
-	 * @param userId 조회할 사용자 ID
-	 * @return 보유한 일반 민들레 개수
-	 */
+	// 보유한 일반 민들레 개수 조회
 	@Override
-	public int getUserDandelionCount(Integer userId) {
+	public int getTotalDandelionCount(Integer userId) {
 		return dandelionRepository.countByUserId(userId);
 	}
 
-	/**
-	 * 사용자가 보유한 황금 민들레 개수를 조회합니다.
-	 *
-	 * @param userId 조회할 사용자 ID
-	 * @return 보유한 황금 민들레 개수
-	 */
+	// 보유한 황금 민들레 총 개수 조회
 	@Override
-	public int getUserGoldDandelionCount(Integer userId) {
+	public int getTotalGoldDandelionCount(Integer userId) {
 		return goldDandelionRepository.countByUserId(userId);
 	}
 
-	/**
-	 * 주간 기부 랭킹을 조회합니다.
-	 * 최근 7일간의 민들레 기부 내역을 기준으로 순위를 집계합니다.
-	 * 황금 민들레는 일반 민들레 100개로 환산됩니다.
-	 *
-	 * @param userId 현재 사용자 ID
-	 * @return 주간 기부 랭킹 정보와 사용자의 랭킹 정보
-	 */
+	// 기부 가능한 일반 민들레 개수
+	@Override
+	public int getAvailableDandelionCount(Integer userId) {
+		int totalCollected = getTotalDandelionCount(userId);
+		Integer totalDonated = donationInfoRepository.sumUseDandelionCountByUserId(userId);
+		return totalCollected - (totalDonated != null ? totalDonated : 0);
+	}
+
+	// 기부 가능한 황금 민들레 개수
+	@Override
+	public int getAvailableGoldDandelionCount(Integer userId) {
+		int totalCollected = getTotalGoldDandelionCount(userId);
+		Integer totalDonated = donationInfoRepository.sumUseGoldDandelionCountByUserId(userId);
+		return totalCollected - (totalDonated != null ? totalDonated : 0);
+	}
+
+	// 주간 기부 랭킹 조회
 	@Override
 	public WeeklyRankingResponseDTO getWeeklyRanking(Integer userId) {
 		// 일주일 기간 설정 (현재 시점에서 7일 전까지)
@@ -308,15 +153,32 @@ public class DandelionServiceImpl implements DandelionService {
 		MyDandelionRankDTO myRankInfo = null;
 		int myRank = 0;
 
-		// 랭킹 정보 생성
-		for (int i = 0; i < donationRankingData.size(); i++) {
-			Object[] data = donationRankingData.get(i);
+		// 랭킹 정보 생성 및 모든 사용자의 랭킹 계산
+		Map<Integer, Integer> userTotalDonationMap = new HashMap<>();
+
+		for (Object[] data : donationRankingData) {
 			Integer donorId = (Integer)data[0];
 			Long normalDonation = ((Number)data[1]).longValue();
 			Long goldDonation = ((Number)data[2]).longValue();
 
 			// 황금 민들레 1개 = 일반 민들레 100개로 계산 (DandelionValue 적용)
 			Long totalDonation = normalDonation + (goldDonation * DandelionValue.GOLD.getValue());
+
+			// 사용자별 총 기부 개수 합산
+			userTotalDonationMap.merge(donorId, totalDonation.intValue(), Integer::sum);
+		}
+
+		// 기부 개수 내림차순으로 정렬
+		List<Map.Entry<Integer, Integer>> sortedDonations = userTotalDonationMap.entrySet().stream()
+			.sorted(Map.Entry.<Integer, Integer>comparingByValue().reversed())
+			.collect(Collectors.toList());
+
+		// 상위 10명만 랭킹에 포함
+		int limit = Math.min(WEEKLY_RANKING_LIMIT, sortedDonations.size());
+		for (int i = 0; i < limit; i++) {
+			Map.Entry<Integer, Integer> entry = sortedDonations.get(i);
+			Integer donorId = entry.getKey();
+			Integer totalDonation = entry.getValue();
 
 			// 사용자 정보 조회
 			String userName = userRepository.findById(donorId)
@@ -326,7 +188,7 @@ public class DandelionServiceImpl implements DandelionService {
 			DandelionRankDTO rankDTO = DandelionRankDTO.builder()
 				.rank(i + 1)
 				.name(userName)
-				.donateCount(totalDonation.intValue())
+				.donateCount(totalDonation)
 				.build();
 
 			rankInfos.add(rankDTO);
@@ -337,20 +199,43 @@ public class DandelionServiceImpl implements DandelionService {
 				myRankInfo = MyDandelionRankDTO.builder()
 					.myRank(myRank)
 					.myName(userName)
-					.myDonateCount(totalDonation.intValue())
+					.myDonateCount(totalDonation)
 					.build();
 			}
 		}
 
-		// 현재 사용자의 랭킹 정보가 없는 경우 기본값 설정
+		// 상위 10명에 현재 사용자가 없는 경우 추가 확인
 		if (myRankInfo == null) {
-			myRankInfo = MyDandelionRankDTO.builder()
-				.myRank(0)
-				.myName(userRepository.findById(userId)
-					.map(user -> user.getName())
-					.orElse("Unknown User"))
-				.myDonateCount(0)
-				.build();
+			// 전체 랭킹에서 현재 사용자 찾기
+			for (int i = limit; i < sortedDonations.size(); i++) {
+				Map.Entry<Integer, Integer> entry = sortedDonations.get(i);
+				Integer donorId = entry.getKey();
+
+				if (donorId.equals(userId)) {
+					Integer totalDonation = entry.getValue();
+					String userName = userRepository.findById(donorId)
+						.map(user -> user.getName())
+						.orElse("Unknown User");
+
+					myRankInfo = MyDandelionRankDTO.builder()
+						.myRank(i + 1)
+						.myName(userName)
+						.myDonateCount(totalDonation)
+						.build();
+					break;
+				}
+			}
+
+			// 랭킹에 사용자가 없는 경우 기본값 설정
+			if (myRankInfo == null) {
+				myRankInfo = MyDandelionRankDTO.builder()
+					.myRank(0)
+					.myName(userRepository.findById(userId)
+						.map(user -> user.getName())
+						.orElse("Unknown User"))
+					.myDonateCount(0)
+					.build();
+			}
 		}
 
 		return WeeklyRankingResponseDTO.builder()
@@ -359,13 +244,7 @@ public class DandelionServiceImpl implements DandelionService {
 			.build();
 	}
 
-	/**
-	 * 월간 황금 민들레 수집 랭킹을 조회합니다.
-	 * 이번 달에 사용자들이 수집한 황금 민들레의 총 개수(기부한 것도 포함)를 기준으로 순위를 집계합니다.
-	 *
-	 * @param userId 현재 사용자 ID
-	 * @return 월간 황금 민들레 수집 랭킹 정보와 사용자의 랭킹 정보
-	 */
+	// 월간 황금 민들레 순위
 	@Override
 	public MonthlyGoldRankingResponseDTO getMonthlyGoldRanking(Integer userId) {
 		// 현재 달의 시작일과 마지막일 설정
@@ -406,7 +285,6 @@ public class DandelionServiceImpl implements DandelionService {
 
 		List<GoldDandelionRankDTO> goldInfos = new ArrayList<>();
 		MyGoldDandelionRankDTO myGoldInfo = null;
-		int myRank = 0;
 
 		// 랭킹 정보 생성
 		for (int i = 0; i < sortedGoldCounts.size(); i++) {
@@ -428,7 +306,6 @@ public class DandelionServiceImpl implements DandelionService {
 
 			// 현재 사용자의 랭킹 정보 저장
 			if (userID.equals(userId)) {
-				myRank = i + 1;
 				myGoldInfo = MyGoldDandelionRankDTO.builder()
 					.myName(userName)
 					.myGoldCount(goldCount)
@@ -450,5 +327,368 @@ public class DandelionServiceImpl implements DandelionService {
 			.goldInfos(goldInfos)
 			.myGoldInfo(myGoldInfo)
 			.build();
+	}
+
+	// 사용자 주변 민들레 조회 및 재배치
+	@Override
+	@Transactional
+	public List<DandelionLocationResponseDTO> getAndRelocatePersonalDandelions(Integer userId,
+		DandelionLocationRequestDTO locationRequestDTO) {
+		// 위치 정보가 유효한지 확인
+		if (!locationRequestDTO.isValidLocation()) {
+			throw new DandelionHandler(ErrorStatus.INVALID_LOCATION);
+		}
+
+		// 주변 민들레 조회
+		List<DandelionLocationResponseDTO> nearbyDandelions = getNearbyDandelions(userId, locationRequestDTO);
+
+		// 민들레가 없거나 10개 미만인 경우 새로 생성
+		if (nearbyDandelions.isEmpty()) {
+			// 처음 사용자라면 10개 민들레 생성
+			createInitialDandelions(userId, locationRequestDTO);
+
+			// 생성 후 다시 조회
+			return getNearbyDandelions(userId, locationRequestDTO);
+		} else if (nearbyDandelions.size() < TARGET_DANDELION_COUNT) {
+			// 부족한 민들레 개수
+			int needToRelocateCount = TARGET_DANDELION_COUNT - nearbyDandelions.size();
+
+			// 재배치할 민들레 선택 및 재배치
+			relocateFarDandelions(userId, locationRequestDTO, needToRelocateCount);
+
+			// 재배치 후 다시 조회
+			return getNearbyDandelions(userId, locationRequestDTO);
+		}
+
+		// 이미 충분한 민들레가 있으면 그냥 반환
+		return nearbyDandelions;
+	}
+
+	// 미수집 된 황금 민들레 조회
+	@Override
+	public List<GoldDandelionLocationResponseDTO> getMonthlyUncollectedGoldDandelions() {
+		// 이번 달의 시작일과 마지막일 설정
+		YearMonth currentMonth = YearMonth.now();
+		LocalDateTime startDate = currentMonth.atDay(1).atStartOfDay();
+		LocalDateTime endDate = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+
+		// 이번 달 미수집 황금 민들레 조회
+		List<GoldDandelion> uncollectedGoldDandelions =
+			goldDandelionRepository.findUncollectedGoldDandelionsBetween(startDate, endDate);
+
+		// DTO로 변환하여 반환
+		return uncollectedGoldDandelions.stream()
+			.map(dandelion -> GoldDandelionLocationResponseDTO.builder()
+				.goldDandelionId(dandelion.getGoldDandelionId())
+				.latitude(dandelion.getLatitude())
+				.longitude(dandelion.getLongitude())
+				.build())
+			.collect(Collectors.toList());
+	}
+
+	// 일반 민들레 수집, 사용자와 민들레 간의 거리를 확인해서 100 미터 이내인 경우에만 수집 가능
+	@Override
+	@Transactional
+	public void collectDandelionWithDistanceCheck(Integer userId, Integer dandelionId,
+		DandelionLocationRequestDTO locationRequestDTO) {
+		// 해당 사용자와 민들레 ID가 유효한지 확인
+		Dandelion dandelion = dandelionRepository.findById(dandelionId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.DANDELION_NOT_FOUND));
+
+		// 이미 수집된 민들레인지 확인
+		if (dandelion.getUserId() != null) {
+			throw new DandelionHandler(ErrorStatus.DANDELION_ALREADY_COLLECT);
+		}
+
+		// 거리 계산
+		double distance = calculateDistance(
+			locationRequestDTO.getMyLatitude().doubleValue(),
+			locationRequestDTO.getMyLongitude().doubleValue(),
+			dandelion.getLatitude().doubleValue(),
+			dandelion.getLongitude().doubleValue()
+		);
+
+		// 거리가 너무 멀면 예외 발생
+		if (distance > MAX_COLLECTION_DISTANCE) {
+			throw new DandelionHandler(ErrorStatus.DANDELION_TOO_FAR_TO_COLLECT);
+		}
+
+		// 민들레 수집 처리 (사용자 ID 설정)
+		dandelion.setUserId(userId);
+
+		// Redis에서 해당 민들레 위치 정보 삭제
+		dandelionLocationRepository.removeDandelion(userId, dandelionId);
+
+		// 업데이트된 민들레 정보 저장
+		dandelionRepository.save(dandelion);
+	}
+
+	// 황금 민들레 수집, 사용자와 황금 민들레 위치 거리가 100미터 이내여야 성공
+	@Override
+	@Transactional
+	public void collectGoldDandelionWithDistanceCheck(Integer userId, Integer goldDandelionId,
+		DandelionLocationRequestDTO locationRequestDTO) {
+		// 해당 황금 민들레 ID가 유효한지 확인
+		GoldDandelion goldDandelion = goldDandelionRepository.findById(goldDandelionId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.GOLD_DANDELION_NOT_FOUND));
+
+		// 이미 수집된 황금 민들레인지 확인
+		if (goldDandelion.getUserId() != null) {
+			throw new DandelionHandler(ErrorStatus.GOLD_DANDELION_ALREADY_COLLECT);
+		}
+
+		// 거리 계산
+		double distance = calculateDistance(
+			locationRequestDTO.getMyLatitude().doubleValue(),
+			locationRequestDTO.getMyLongitude().doubleValue(),
+			goldDandelion.getLatitude().doubleValue(),
+			goldDandelion.getLongitude().doubleValue()
+		);
+
+		// 거리가 너무 멀면 예외 발생
+		if (distance > MAX_COLLECTION_DISTANCE) {
+			throw new DandelionHandler(ErrorStatus.GOLD_DANDELION_TOO_FAR_TO_COLLECT);
+		}
+
+		// 황금 민들레 수집 처리 (사용자 ID 설정 및 수집 시간 기록)
+		goldDandelion.setUserId(userId);
+		goldDandelion.setAcquiredAt(LocalDateTime.now());
+
+		// Redis에서 해당 황금 민들레 위치 정보 삭제
+		dandelionLocationRepository.removeGoldDandelion(goldDandelionId);
+
+		// 업데이트된 황금 민들레 정보 저장
+		goldDandelionRepository.save(goldDandelion);
+	}
+
+	// 월별 황금 민들레 생성 및 관리(스케줄러에 의해 매월 초에 실행됨)
+	@Override
+	@Transactional
+	public void generateMonthlyGoldDandelions() {
+		// 이전 달의 시작일과 마지막일 설정
+		YearMonth lastMonth = YearMonth.now().minusMonths(1);
+		LocalDateTime startOfLastMonth = lastMonth.atDay(1).atStartOfDay();
+		LocalDateTime endOfLastMonth = lastMonth.atEndOfMonth().atTime(23, 59, 59);
+
+		// 이전 달의 미수집 황금 민들레 조회 및 삭제
+		List<GoldDandelion> previousGoldDandelions =
+			goldDandelionRepository.findUncollectedGoldDandelionsBetween(startOfLastMonth, endOfLastMonth);
+
+		log.info("{} 지난달에 수집 안된 황금 민들레 삭제", previousGoldDandelions.size());
+
+		// Redis에서 해당 황금 민들레 위치 정보 삭제 후 DB에서도 삭제
+		for (GoldDandelion goldDandelion : previousGoldDandelions) {
+			dandelionLocationRepository.removeGoldDandelion(goldDandelion.getGoldDandelionId());
+			goldDandelionRepository.delete(goldDandelion);
+		}
+
+		// 새로운 황금 민들레 5개 생성
+		log.info("{}개 이번 달 새로운 황금 민들레 생성", MONTHLY_GOLD_DANDELIONS);
+
+		Map<Integer, Point> newGoldDandelions = new HashMap<>();
+		Random random = new Random();
+
+		// 전국 범위 내 랜덤 위치 생성 (한국 대략적 범위)
+		double minLat = 33.0; // 제주도 남단
+		double maxLat = 38.5; // 최북단
+		double minLng = 125.0; // 서해안
+		double maxLng = 131.0; // 동해안
+
+		for (int i = 0; i < MONTHLY_GOLD_DANDELIONS; i++) {
+			// 랜덤 위치 생성
+			double lat = minLat + (maxLat - minLat) * random.nextDouble();
+			double lng = minLng + (maxLng - minLng) * random.nextDouble();
+
+			// 새 황금 민들레 엔티티 생성 및 저장
+			GoldDandelion goldDandelion = GoldDandelion.builder()
+				.userId(null) // 아직 수집되지 않음
+				.latitude(BigDecimal.valueOf(lat))
+				.longitude(BigDecimal.valueOf(lng))
+				.acquiredAt(null) // 아직 수집되지 않음
+				.build();
+
+			goldDandelion = goldDandelionRepository.save(goldDandelion);
+
+			// Redis에 저장하기 위한 맵에 추가
+			newGoldDandelions.put(goldDandelion.getGoldDandelionId(), new Point(lng, lat));
+		}
+
+		// Redis에 저장
+		dandelionLocationRepository.saveGoldDandelionLocations(newGoldDandelions);
+
+		log.info("새로운 월별 황금 민들레 생성 성공");
+	}
+
+	// 내부 유틸리티 메소드들
+
+	// 사용자 주변의 일반 민들레 위치 정보 조회
+	private List<DandelionLocationResponseDTO> getNearbyDandelions(Integer userId,
+		DandelionLocationRequestDTO locationRequestDTO) {
+		// 현재 사용자 위치 주변의 민들레 검색
+		var nearbyDandelions = dandelionLocationRepository.findDandelionsNearby(
+			userId,
+			locationRequestDTO.getMyLatitude(),
+			locationRequestDTO.getMyLongitude()
+		);
+
+		// 결과가 없는 경우 빈 리스트 반환
+		if (nearbyDandelions == null) {
+			return new ArrayList<>();
+		}
+
+		// 검색 결과를 DTO로 변환
+		return nearbyDandelions.getContent().stream()
+			.map(geoLocation -> {
+				Integer dandelionId = (Integer)geoLocation.getContent().getName();
+				var position = geoLocation.getContent().getPoint();
+
+				return DandelionLocationResponseDTO.builder()
+					.dandelionId(dandelionId)
+					.latitude(BigDecimal.valueOf(position.getY()))
+					.longitude(BigDecimal.valueOf(position.getX()))
+					.build();
+			})
+			.collect(Collectors.toList());
+	}
+
+	// 초기 10개 민들레 생성
+	private void createInitialDandelions(Integer userId, DandelionLocationRequestDTO locationRequestDTO) {
+		// 사용자 주변에 10개 민들레 랜덤 생성
+		Map<Integer, Point> newDandelions = new HashMap<>();
+		Random random = new Random();
+
+		for (int i = 0; i < TARGET_DANDELION_COUNT; i++) {
+			// 현재 위치에서 100m 이내 랜덤 위치 생성
+			double radius = random.nextDouble() * 100; // 0-100m
+			double angle = random.nextDouble() * 2 * Math.PI; // 0-360도
+
+			double lat = locationRequestDTO.getMyLatitude().doubleValue();
+			double lng = locationRequestDTO.getMyLongitude().doubleValue();
+
+			// 위도 1도 = 약 111km, 경도 1도 = 약 111km * cos(위도)
+			double latChange = radius / 111000 * Math.sin(angle);
+			double lngChange = radius / (111000 * Math.cos(Math.toRadians(lat))) * Math.cos(angle);
+
+			double newLat = lat + latChange;
+			double newLng = lng + lngChange;
+
+			// 새 민들레 엔티티 생성 및 저장
+			Dandelion dandelion = Dandelion.builder()
+				.userId(null) // 아직 수집되지 않음
+				.latitude(BigDecimal.valueOf(newLat))
+				.longitude(BigDecimal.valueOf(newLng))
+				.build();
+
+			dandelion = dandelionRepository.save(dandelion);
+
+			// Redis에 저장하기 위한 맵에 추가
+			newDandelions.put(dandelion.getDandelionId(), new Point(newLng, newLat));
+		}
+
+		// Redis에 저장
+		dandelionLocationRepository.saveDandelionLocations(userId, newDandelions);
+	}
+
+	// 100미터 범위 밖에 있는 민들레를 사용자 주변으로 재배치함
+	private void relocateFarDandelions(Integer userId, DandelionLocationRequestDTO locationRequestDTO, int count) {
+		// 현재 범위 내에 없는 민들레들 가져오기
+		List<Dandelion> farDandelions = dandelionRepository.findByUserId(null);
+
+		// 재배치할 민들레가 충분하지 않으면 새로 생성
+		if (farDandelions.size() < count) {
+			int needToCreate = count - farDandelions.size();
+			createAdditionalDandelions(userId, locationRequestDTO, needToCreate);
+		}
+
+		// 재배치할 민들레 맵 생성
+		Map<Integer, Point> dandelionsToRelocate = new HashMap<>();
+		Random random = new Random();
+
+		for (int i = 0; i < Math.min(count, farDandelions.size()); i++) {
+			Dandelion dandelion = farDandelions.get(i);
+
+			// 현재 위치에서 100m 이내 랜덤 위치 생성
+			double radius = random.nextDouble() * 100; // 0-100m
+			double angle = random.nextDouble() * 2 * Math.PI; // 0-360도
+
+			double lat = locationRequestDTO.getMyLatitude().doubleValue();
+			double lng = locationRequestDTO.getMyLongitude().doubleValue();
+
+			// 위도 1도 = 약 111km, 경도 1도 = 약 111km * cos(위도)
+			double latChange = radius / 111000 * Math.sin(angle);
+			double lngChange = radius / (111000 * Math.cos(Math.toRadians(lat))) * Math.cos(angle);
+
+			double newLat = lat + latChange;
+			double newLng = lng + lngChange;
+
+			// 민들레 위치 업데이트
+			dandelion.setLatitude(BigDecimal.valueOf(newLat));
+			dandelion.setLongitude(BigDecimal.valueOf(newLng));
+			dandelionRepository.save(dandelion);
+
+			// Redis에 저장하기 위한 맵에 추가
+			dandelionsToRelocate.put(dandelion.getDandelionId(), new Point(newLng, newLat));
+		}
+
+		// Redis 위치 정보 업데이트
+		dandelionLocationRepository.saveDandelionLocations(userId, dandelionsToRelocate);
+	}
+	
+	// 민들레 주가 생성
+	private void createAdditionalDandelions(Integer userId, DandelionLocationRequestDTO locationRequestDTO, int count) {
+		// 부족한 개수만큼 추가 민들레 생성
+		Map<Integer, Point> newDandelions = new HashMap<>();
+		Random random = new Random();
+
+		for (int i = 0; i < count; i++) {
+			// 현재 위치에서 100m 이내 랜덤 위치 생성
+			double radius = random.nextDouble() * 100; // 0-100m
+			double angle = random.nextDouble() * 2 * Math.PI; // 0-360도
+
+			double lat = locationRequestDTO.getMyLatitude().doubleValue();
+			double lng = locationRequestDTO.getMyLongitude().doubleValue();
+
+			// 위도 1도 = 약 111km, 경도 1도 = 약 111km * cos(위도)
+			double latChange = radius / 111000 * Math.sin(angle);
+			double lngChange = radius / (111000 * Math.cos(Math.toRadians(lat))) * Math.cos(angle);
+
+			double newLat = lat + latChange;
+			double newLng = lng + lngChange;
+
+			// 새 민들레 엔티티 생성 및 저장
+			Dandelion dandelion = Dandelion.builder()
+				.userId(null) // 아직 수집되지 않음
+				.latitude(BigDecimal.valueOf(newLat))
+				.longitude(BigDecimal.valueOf(newLng))
+				.build();
+
+			dandelion = dandelionRepository.save(dandelion);
+
+			// Redis에 저장하기 위한 맵에 추가
+			newDandelions.put(dandelion.getDandelionId(), new Point(newLng, newLat));
+		}
+
+		// Redis에 저장
+		dandelionLocationRepository.saveDandelionLocations(userId, newDandelions);
+	}
+
+	// 사용자 위치와 민들레 위치 사이의 거리 계산
+	private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+		// 지구 반경 (미터)
+		final int R = 6371000;
+
+		// 라디안으로 변환
+		double latDistance = Math.toRadians(lat2 - lat1);
+		double lonDistance = Math.toRadians(lon2 - lon1);
+
+		// 하버사인 공식
+		double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+			+ Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+			* Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+		// 거리 계산 (미터)
+		return R * c;
 	}
 }

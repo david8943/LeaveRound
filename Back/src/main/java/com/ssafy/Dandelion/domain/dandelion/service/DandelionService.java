@@ -8,36 +8,45 @@ import com.ssafy.Dandelion.domain.dandelion.dto.response.DandelionLocationRespon
 import com.ssafy.Dandelion.domain.dandelion.dto.response.GoldDandelionLocationResponseDTO;
 import com.ssafy.Dandelion.domain.dandelion.dto.response.MonthlyGoldRankingResponseDTO;
 import com.ssafy.Dandelion.domain.dandelion.dto.response.WeeklyRankingResponseDTO;
-import com.ssafy.Dandelion.domain.dandelion.entity.Dandelion;
-import com.ssafy.Dandelion.domain.dandelion.entity.GoldDandelion;
 
 public interface DandelionService {
 
-	// 사용자가 일반 민들레를 수집함
-	Dandelion collectDandelion(Integer userId, Integer dandelionId);
-
-	// 사용자가 황금 민들레를 수집함
-	GoldDandelion collectGoldDandelion(Integer userId, Integer goldDandelionId);
-
-	// 사용자의 위치 주변에 있는 일반 민들레 위치 정보 조회
-	List<DandelionLocationResponseDTO> getNearbyDandelions(Integer userId,
-		DandelionLocationRequestDTO locationRequestDTO);
-
-	// 사용자 주변의 황금 민들레 위치 정보를 조회
-	List<GoldDandelionLocationResponseDTO> getNearbyGoldDandelions(DandelionLocationRequestDTO locationRequestDTO);
-
-	// 사용자가 민들레를 기부함(황금 민들레 포함)
+	// 민들레 기부(황금 민들레 + 일반 민들레)
 	void donateDandelions(Integer userId, DandelionDonationRequestDTO donationRequestDTO);
 
-	// 사용자가 갖고 있는 일반 민들레 개수 조회
-	int getUserDandelionCount(Integer userId);
+	// 사용자가 보유한 총 일반 민들레 개수 조회(유저)
+	int getTotalDandelionCount(Integer userId);
 
-	// 사용자가 보유한 황금 민들레 개수 조회
-	int getUserGoldDandelionCount(Integer userId);
+	// 사용자가 보유한 총 황금 민들레 개수 조회(유저)
+	int getTotalGoldDandelionCount(Integer userId);
 
-	// 주간 기부 랭킹 조회(황금 민들레는 일반 민들레 100개)
+	// 사용자가 기부 가능한 일반 민들레 개수 조회
+	int getAvailableDandelionCount(Integer userId);
+
+	// 사용자가 기부 가능한 황금 민들레 개수 조회
+	int getAvailableGoldDandelionCount(Integer userId);
+
+	// 주간 기부 랭킹 조회(일반 민들레 + 황금 민들레)
 	WeeklyRankingResponseDTO getWeeklyRanking(Integer userId);
 
-	// 월간 황금 민들레 수집 랭킹 조회
+	// 월간 황금 민들레 수집 랭킹
 	MonthlyGoldRankingResponseDTO getMonthlyGoldRanking(Integer userId);
+
+	// 일반 민들레 위치 조회 및 재배치
+	List<DandelionLocationResponseDTO> getAndRelocatePersonalDandelions(Integer userId,
+		DandelionLocationRequestDTO locationRequestDTO);
+
+	// 이번 달 미수집 황금 민들레 전체 위치 조회
+	List<GoldDandelionLocationResponseDTO> getMonthlyUncollectedGoldDandelions();
+
+	// 민들레 수집 (거리 체크 포함)
+	void collectDandelionWithDistanceCheck(Integer userId, Integer dandelionId,
+		DandelionLocationRequestDTO locationRequestDTO);
+
+	// 황금 민들레 수집 (거리 체크 포함)
+	void collectGoldDandelionWithDistanceCheck(Integer userId, Integer goldDandelionId,
+		DandelionLocationRequestDTO locationRequestDTO);
+
+	// 월별 황금 민들레 생성 및 관리 메소드
+	void generateMonthlyGoldDandelions();
 }

@@ -56,7 +56,7 @@ public enum ErrorStatus implements BaseErrorCode {
 	DANDELION_EMPTY(HttpStatus.BAD_REQUEST, "DANDELION4005", "가지고 있는 민들레 개수가 없습니다."),
 	GOLD_DANDELION_EMPTY(HttpStatus.BAD_REQUEST, "DANDELION4006", "가지고 있는 황금 민들레 개수가 없습니다."),
 	ORGANIZATION_EMPTY(HttpStatus.BAD_REQUEST, "DANDELION4007", "지정한 기부처가 존재하지 않습니다"),
-	GOLD_DANDLION_ALREADY_COLLECT(HttpStatus.BAD_REQUEST, "DANDELION4008", "이미 수집 완료된 황금 민들레입니다."),
+	GOLD_DANDELION_ALREADY_COLLECT(HttpStatus.BAD_REQUEST, "DANDELION4008", "이미 수집 완료된 황금 민들레입니다."),
 	GOLD_DANDELION_TOO_FAR_TO_COLLECT(HttpStatus.BAD_REQUEST, "DANDELION4009", "수집할 수 있는 거리보다 멉니다."),
 	GOLD_DANDELION_NOT_FOUND(HttpStatus.NOT_FOUND, "DANDELION4010", "존재하지 않는 황금 민들레입니다."),
 	EMPTY_DONATION(HttpStatus.BAD_REQUEST, "DANDELION4011", "기부할 민들레가 없습니다."),
