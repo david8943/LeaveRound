@@ -44,7 +44,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 		logger.info("LoginFilter.attemptAuthentication");
 		String email = obtainUsername(request);
 		String password = obtainPassword(request);
-
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(email, password, List.of());
 		return authenticationManager.authenticate(token);
 	}
