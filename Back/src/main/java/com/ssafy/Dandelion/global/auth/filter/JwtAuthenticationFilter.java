@@ -46,12 +46,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private Map<HttpMethod, List<String>> methodUrlPatterns = new HashMap<HttpMethod, List<String>>() {{
 		put(
 			HttpMethod.GET, Arrays.asList(
-				"/error", "/favicon.ico"
+				"/error",
+				"/favicon.ico"
 			)
 		);
 		put(
 			HttpMethod.POST, Arrays.asList(
-				"/api/users", "/api/users/login"
+				"/api/users",
+				"/api/users/login"
 			)
 		);
 		put(
