@@ -54,6 +54,7 @@ public class AutoDonationConverter {
 			.sliceMoney(autoDonation.getSliceMoney().toString())
 			.donationTime(autoDonation.getDonateTime().toString())
 			.organizationName(organizationName)
+			.amountSum(autoDonation.getAmountSum())
 			.isActive(autoDonation.isActive())
 			.build();
 	}

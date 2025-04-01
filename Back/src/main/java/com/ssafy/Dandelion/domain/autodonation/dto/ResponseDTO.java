@@ -30,6 +30,7 @@ public class ResponseDTO {
 		String sliceMoney;
 		String donationTime;
 		String organizationName;
+		Long amountSum;
 		Boolean isActive;
 	}
 
