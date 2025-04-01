@@ -13,10 +13,13 @@ import com.ssafy.Dandelion.domain.autodonation.repository.AutoDonationInfoReposi
 import com.ssafy.Dandelion.domain.autodonation.repository.AutoDonationRepository;
 import com.ssafy.Dandelion.domain.organization.repository.OrganizationProjectRepository;
 import com.ssafy.Dandelion.domain.organization.repository.OrganizationRepository;
+import com.ssafy.Dandelion.domain.user.dto.UserRequestDTO;
+import com.ssafy.Dandelion.domain.user.entity.User;
 import com.ssafy.Dandelion.domain.user.repository.UserRepository;
 import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
 import com.ssafy.Dandelion.global.apiPayload.exception.handler.BadRequestHandler;
 import com.ssafy.Dandelion.global.apiPayload.exception.handler.NotFoundHandler;
+import com.ssafy.Dandelion.global.config.SsafyApiProperties;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +35,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	private final OrganizationRepository organizationRepository;
 	private final OrganizationProjectRepository organizationProjectRepository;
 	private final UserRepository userRepository;
+	private final SsafyApiProperties safyApiProperties;
 
 	@Transactional
 	@Override
@@ -51,8 +55,8 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 
 	@Override
 	public ResponseDTO.ReadAllAutoDonationDTO readAllAutoDonation(Integer userId) {
-		if (userRepository.existsById(userId))
-			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
 		List<ResponseDTO.AccountDTO> accountDTOList = autoDonationRepository.findAllByUserId(userId).stream()
 			.map(autoDonation -> {
@@ -64,7 +68,16 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 					.orElseThrow(() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION))
 					.getOrganizationName();
 
-				return AutoDonationConverter.toAccountDTO(autoDonation, organizationName);
+				String accountBalance = safyApiProperties.getUserAllAcounts(user.getUserKey())
+					.getBody()
+					.getRec()
+					.stream()
+					.filter(info -> info.getAccountNo().equals(autoDonation.getAccountNo()))
+					.map(UserRequestDTO.AccountInfo::getAccountBalance)
+					.findFirst()
+					.orElse("");
+
+				return AutoDonationConverter.toAccountDTO(autoDonation, organizationName, accountBalance);
 			})
 			.toList();
 
@@ -120,6 +133,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 
 	@Override
 	public ResponseDTO.ReadAutoDonationDTO readAutoDonation(Integer userId, Integer autoDonationId) {
+		System.out.println(userId);
 		if (userRepository.existsById(userId))
 			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 

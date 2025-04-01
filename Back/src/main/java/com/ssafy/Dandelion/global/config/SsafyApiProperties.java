@@ -99,7 +99,7 @@ public class SsafyApiProperties {
 		}
 	}
 
-	private ResponseEntity<UserRequestDTO.AccountInfos> getUserAllAcounts(String userKey) {
+	public ResponseEntity<UserRequestDTO.AccountInfos> getUserAllAcounts(String userKey) {
 		String url = createApiUrl("/ssafy/api/v1/edu/demandDeposit/inquireDemandDepositAccountList");
 
 		Map<String, Object> body = new HashMap<>();
