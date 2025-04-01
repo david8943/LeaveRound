@@ -20,6 +20,6 @@ public enum ProjectCategory {
 				return category;
 			}
 		}
-		throw new IllegalArgumentException("Unknown category name: " + categoryName);
+		return null;
 	}
 }
