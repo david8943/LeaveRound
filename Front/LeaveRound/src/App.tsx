@@ -11,6 +11,8 @@ import Organization from '@/pages/OrganizationPage.tsx';
 import TitleLayout from '@/components/layout/TitleLayout.tsx';
 import { useLocation } from 'react-router-dom';
 import DandelionPage from './pages/Event/DandelionPage.tsx';
+import MainPage from './pages/MainPage.tsx';
+import ManageAccountsPage from './pages/ManageAccountsPage.tsx';
 
 function App() {
   const location = useLocation();
@@ -26,7 +28,9 @@ function App() {
       <div className='flex flex-col min-h-screen'>
         <main>
           <Routes>
-            <Route path='/' element={<Onboarding />} />
+            <Route path='/start' element={<Onboarding />} />
+            <Route path='/' element={<MainPage />} />
+            <Route path='/manage' element={<ManageAccountsPage />} />
             <Route path='/login' element={<Login />} />
             <Route path='/signup' element={<Signup />} />
             <Route path='/organization' element={<Organization />} />
