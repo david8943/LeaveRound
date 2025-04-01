@@ -34,6 +34,8 @@ public class ResponseDTO {
 		String sliceMoney;
 		String donationTime;
 		String organizationName;
+		String accountBalance;
+		Long amountSum;
 		Boolean isActive;
 	}
 
@@ -49,7 +51,7 @@ public class ResponseDTO {
 		String donationTime;
 		String organizationName;
 		Boolean isActive;
-		Long totalBalance;
+		Long amountSum;
 		List<AutoDonationInfoDTO> autoDonationInfos;
 	}
 

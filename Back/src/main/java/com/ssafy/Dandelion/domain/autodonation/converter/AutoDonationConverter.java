@@ -2,7 +2,6 @@ package com.ssafy.Dandelion.domain.autodonation.converter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import com.ssafy.Dandelion.domain.autodonation.dto.RequestDTO;
 import com.ssafy.Dandelion.domain.autodonation.dto.ResponseDTO;
@@ -51,7 +50,8 @@ public class AutoDonationConverter {
 		return result;
 	}
 
-	public static ResponseDTO.AccountDTO toAccountDTO(AutoDonation autoDonation, String organizationName) {
+	public static ResponseDTO.AccountDTO toAccountDTO(AutoDonation autoDonation, String organizationName,
+		String accountBalance) {
 		return ResponseDTO.AccountDTO.builder()
 			.autoDonationId(autoDonation.getAutoDonationId())
 			.acountNo(autoDonation.getAccountNo())
@@ -59,7 +59,9 @@ public class AutoDonationConverter {
 			.sliceMoney(autoDonation.getSliceMoney().toString())
 			.donationTime(autoDonation.getDonateTime().toString())
 			.organizationName(organizationName)
+			.amountSum(autoDonation.getAmountSum())
 			.isActive(autoDonation.isActive())
+			.accountBalance(accountBalance)
 			.build();
 	}
 
@@ -77,11 +79,6 @@ public class AutoDonationConverter {
 		List<ResponseDTO.AutoDonationInfoDTO> autoDonationInfoDTOList,
 		String organizationName) {
 
-		Long totalBalance = autoDonationInfoDTOList.stream()
-			.map(ResponseDTO.AutoDonationInfoDTO::getTransactionBalance)
-			.filter(Objects::nonNull)
-			.reduce(0L, Long::sum);
-
 		return ResponseDTO.ReadAutoDonationDTO.builder()
 			.autoDonationId(autoDonation.getAutoDonationId())
 			.bankName(Bank.fromBankCode(autoDonation.getBankCode()).toString())
@@ -89,7 +86,7 @@ public class AutoDonationConverter {
 			.sliceMoney(autoDonation.getSliceMoney().toString())
 			.donationTime(autoDonation.getDonateTime().toString())
 			.isActive(autoDonation.isActive())
-			.totalBalance(totalBalance)
+			.amountSum(autoDonation.getAmountSum())
 			.organizationName(organizationName)
 			.autoDonationInfos(autoDonationInfoDTOList)
 			.build();

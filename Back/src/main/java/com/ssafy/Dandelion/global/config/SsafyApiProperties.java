@@ -1,15 +1,26 @@
 package com.ssafy.Dandelion.global.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.ssafy.Dandelion.domain.user.dto.UserRequestDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 @Component
 @Getter
@@ -86,5 +97,31 @@ public class SsafyApiProperties {
 			}
 			return sb.toString();
 		}
+	}
+
+	public ResponseEntity<UserRequestDTO.AccountInfos> getUserAllAcounts(String userKey) {
+		String url = createApiUrl("/ssafy/api/v1/edu/demandDeposit/inquireDemandDepositAccountList");
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("Header", SsafyApiProperties.SsafyApiHeader.createSsafyApiHeaderTemplate(
+			"inquireDemandDepositAccountList",
+			getApiKey(),
+			userKey
+		));
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", "application/json");
+		HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+		// API 호출
+		RestTemplate restTemplate = new RestTemplate();
+		ResponseEntity<UserRequestDTO.AccountInfos> accountInfos = restTemplate.exchange(
+			url,
+			HttpMethod.POST,
+			requestEntity,
+			UserRequestDTO.AccountInfos.class
+		);
+		return accountInfos;
+
 	}
 }
