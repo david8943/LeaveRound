@@ -1,8 +1,8 @@
-// hooks/useAxios.ts
 import { useState, useEffect, useCallback } from 'react';
-import axios, { AxiosRequestConfig, AxiosError, Method } from 'axios';
+import { AxiosRequestConfig, AxiosError, Method } from 'axios';
+import api from '@/services/api';
 
-interface UseAxiosProps<T> {
+interface UseAxiosProps {
   url: string;
   method?: Method;
   data?: any;
@@ -23,13 +23,10 @@ const useAxios = <T = any>({
   data = null,
   config = {},
   executeOnMount = true,
-}: UseAxiosProps<T>): UseAxiosReturn<T> => {
+}: UseAxiosProps): UseAxiosReturn<T> => {
   const [response, setResponse] = useState<T | null>(null);
   const [error, setError] = useState<AxiosError | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
-  const baseURL = import.meta.env.VITE_BASE_URL;
-  const fullURL = `${baseURL}${url}`;
 
   const fetchData = useCallback(
     async (overrideData: any = data) => {
@@ -37,11 +34,10 @@ const useAxios = <T = any>({
       setError(null);
 
       try {
-        const res = await axios<T>({
-          url: fullURL,
+        const res = await api<T>({
+          url,
           method,
           data: overrideData,
-          withCredentials: true,
           ...config,
         });
         setResponse(res.data);
@@ -51,7 +47,7 @@ const useAxios = <T = any>({
         setLoading(false);
       }
     },
-    [fullURL, method, data, config],
+    [url, method, data, config],
   );
 
   useEffect(() => {
