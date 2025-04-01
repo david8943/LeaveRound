@@ -173,4 +173,19 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 		return AutoDonationConverter.totalAccountDTO(findAutoDonations);
 	}
 
+	@Override
+	public void executeAutoDonation(AutoDonation autoDonation) {
+		User user = userRepository.findById(autoDonation.getUserId()).orElseThrow(
+			() -> new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND));
+		long accountBalance = safyApiProperties.getAccountInfo(user.getUserKey(), autoDonation.getAccountNo());
+		Integer remain = (int)(accountBalance % autoDonation.getSliceMoney().getSliceMoney());
+
+		String organizationAccount = organizationProjectRepository.findById(autoDonation.getOrganizationProjectId())
+			.orElseThrow(
+				() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT))
+			.getAccountNo();
+		safyApiProperties.sendAutoDonation(user.getUserKey(), autoDonation, remain.toString(), organizationAccount);
+		autoDonationInfoRepository.save(AutoDonationConverter.toAutoDonationInfo(autoDonation, accountBalance));
+	}
+
 }
