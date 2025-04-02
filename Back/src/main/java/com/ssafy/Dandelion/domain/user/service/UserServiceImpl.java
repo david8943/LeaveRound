@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.ssafy.Dandelion.domain.autodonation.entity.AutoDonation;
@@ -66,10 +67,17 @@ public class UserServiceImpl implements UserService {
 	 * @throws SsafyApiHandler SSAFY API 연동 실패 시 예외 발생
 	 */
 	public void signup(UserSignUpRequestDTO userSignUpRequestDTO) {
+
+		if (checkUserEmail(userSignUpRequestDTO.getEmail())) {
+			log.info("SSAFY API에 이미 존재하는 이메일입니다.");
+			throw new MemberHandler(ErrorStatus.MEMBER_DUPLICATE_SSAFY_EMAIL);
+		}
+
 		// 이메일 중복 체크
 		if (userRepository.existsByEmail(userSignUpRequestDTO.getEmail())) {
 			throw new MemberHandler(ErrorStatus.MEMBER_DUPLICATE_EMAIL);
 		}
+
 		//SSAFY API를 통해 userKey 발급
 		String userKey = createUser(userSignUpRequestDTO.getEmail());
 		createUserAccounts(userKey);
@@ -130,6 +138,37 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 		return UserInfoResponseDTO.fromEntity(user);
+	}
+
+	private boolean checkUserEmail(String email) {
+		try {
+			//API 호출을 위한 URL 및 요청 객체 생성
+			String url = ssafyApiProperties.createApiUrl("/ssafy/api/v1/member/search");
+			UserCreateRequestDTO requestDTO = UserCreateRequestDTO.builder()
+				.apiKey(ssafyApiProperties.getApiKey())
+				.userId(email)
+				.build();
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Content-Type", "application/json");
+			HttpEntity<UserCreateRequestDTO> requestEntity = new HttpEntity<>(requestDTO, headers);
+
+			ResponseEntity<SsafyUserResponseDTO> response = restTemplate.exchange(
+				url,
+				HttpMethod.POST,
+				requestEntity,
+				SsafyUserResponseDTO.class
+			);
+
+			if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+				return true;
+			}
+
+			return false;
+		} catch (HttpClientErrorException.BadRequest e) {
+			return false;
+		} catch (Exception e) {
+			throw new SsafyApiHandler(ErrorStatus.SSAFY_API_CONNECTION_ERROR);
+		}
 	}
 
 	/**

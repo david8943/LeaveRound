@@ -22,6 +22,7 @@ public enum ErrorStatus implements BaseErrorCode {
 	MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER4001", "사용자가 없습니다."),
 	MEMBER_DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "MEMBER4002", "이미 사용 중인 이메일입니다."),
 	MEMBER_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "MEMBER4003", "비밀번호가 일치하지 않습니다."),
+	MEMBER_DUPLICATE_SSAFY_EMAIL(HttpStatus.BAD_REQUEST, "MEMBER4004", "이미 사용 중인 이메일입니다."),
 
 	// 검증 관련 에러
 	VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "VALID4001", "입력값이 유효하지 않습니다."),
