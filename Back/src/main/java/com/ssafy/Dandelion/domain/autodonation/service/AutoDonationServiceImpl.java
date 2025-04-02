@@ -40,7 +40,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void createAutoDonation(Integer userId, RequestDTO.AutoDonationDTO request) {
-		if (userRepository.existsById(userId))
+		if (!userRepository.existsById(userId))
 			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		if (!organizationProjectRepository.existsById(request.getOrganizationProjectId()))
@@ -87,7 +87,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void changeActive(Integer userId, Integer autoDonationId) {
-		if (userRepository.existsById(userId))
+		if (!userRepository.existsById(userId))
 			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
@@ -100,7 +100,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void deleteAutoDonation(Integer userId, Integer autoDonationId) {
-		if (userRepository.existsById(userId))
+		if (!userRepository.existsById(userId))
 			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
@@ -115,7 +115,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void updateAutoDonation(Integer userId, Integer autoDonationId, RequestDTO.AutoDonationDTO request) {
-		if (userRepository.existsById(userId))
+		if (!userRepository.existsById(userId))
 			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
@@ -133,8 +133,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 
 	@Override
 	public ResponseDTO.ReadAutoDonationDTO readAutoDonation(Integer userId, Integer autoDonationId) {
-		System.out.println(userId);
-		if (userRepository.existsById(userId))
+		if (!userRepository.existsById(userId))
 			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		List<ResponseDTO.AutoDonationInfoDTO> autoDonationInfoDTOList = autoDonationInfoRepository.findAllByAutoDonationId(
