@@ -24,7 +24,7 @@ public class LogoutFilter implements LogoutHandler, LogoutSuccessHandler {
 	public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
 		ResponseCookie expiredCookie = ResponseCookie.from("access_token", "")
 			.httpOnly(true)
-			.secure(false)
+			.secure(true)
 			.path("/")
 			.maxAge(0)  // 쿠키 즉시 만료
 			.sameSite("None")

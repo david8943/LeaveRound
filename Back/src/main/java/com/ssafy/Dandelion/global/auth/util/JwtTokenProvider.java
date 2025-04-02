@@ -48,7 +48,7 @@ public class JwtTokenProvider {
 
 		return ResponseCookie.from("access_token", accessToken)
 			.httpOnly(true)
-			.secure(false)
+			.secure(true)
 			.path("/")
 			.maxAge(expirationTime)
 			.sameSite("None")
