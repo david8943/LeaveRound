@@ -27,7 +27,6 @@ import com.ssafy.Dandelion.domain.dandelion.dto.response.WeeklyRankingResponseDT
 import com.ssafy.Dandelion.domain.dandelion.entity.Dandelion;
 import com.ssafy.Dandelion.domain.dandelion.entity.DandelionDonationInfo;
 import com.ssafy.Dandelion.domain.dandelion.entity.GoldDandelion;
-import com.ssafy.Dandelion.domain.dandelion.entity.constant.DandelionValue;
 import com.ssafy.Dandelion.domain.dandelion.repository.DandelionDonationInfoRepository;
 import com.ssafy.Dandelion.domain.dandelion.repository.DandelionLocationRepository;
 import com.ssafy.Dandelion.domain.dandelion.repository.DandelionRepository;
@@ -159,19 +158,15 @@ public class DandelionServiceImpl implements DandelionService {
 		for (Object[] data : donationRankingData) {
 			Integer donorId = (Integer)data[0];
 			Long normalDonation = ((Number)data[1]).longValue();
-			Long goldDonation = ((Number)data[2]).longValue();
-
-			// 황금 민들레 1개 = 일반 민들레 100개로 계산 (DandelionValue 적용)
-			Long totalDonation = normalDonation + (goldDonation * DandelionValue.GOLD.getValue());
 
 			// 사용자별 총 기부 개수 합산
-			userTotalDonationMap.merge(donorId, totalDonation.intValue(), Integer::sum);
+			userTotalDonationMap.merge(donorId, normalDonation.intValue(), Integer::sum);
 		}
 
 		// 기부 개수 내림차순으로 정렬
 		List<Map.Entry<Integer, Integer>> sortedDonations = userTotalDonationMap.entrySet().stream()
 			.sorted(Map.Entry.<Integer, Integer>comparingByValue().reversed())
-			.collect(Collectors.toList());
+			.toList();
 
 		// 상위 10명만 랭킹에 포함
 		int limit = Math.min(WEEKLY_RANKING_LIMIT, sortedDonations.size());
@@ -633,7 +628,7 @@ public class DandelionServiceImpl implements DandelionService {
 		// Redis 위치 정보 업데이트
 		dandelionLocationRepository.saveDandelionLocations(userId, dandelionsToRelocate);
 	}
-	
+
 	// 민들레 주가 생성
 	private void createAdditionalDandelions(Integer userId, DandelionLocationRequestDTO locationRequestDTO, int count) {
 		// 부족한 개수만큼 추가 민들레 생성
