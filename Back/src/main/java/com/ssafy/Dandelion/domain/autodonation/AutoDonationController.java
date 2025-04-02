@@ -40,7 +40,7 @@ public class AutoDonationController {
 	public ApiResponse<ResponseDTO.ReadAllAutoDonationDTO> readAllAutoDonation(
 		@AuthenticationPrincipal CustomUserDetails customUserDetails
 	) {
-		return ApiResponse.onSuccess(autoDonationService.readAllAutoDonation(1));
+		return ApiResponse.onSuccess(autoDonationService.readAllAutoDonation(customUserDetails.getUserId()));
 	}
 
 	@PatchMapping("/{autoDonationId}/active")
@@ -48,7 +48,7 @@ public class AutoDonationController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Integer autoDonationId
 	) {
-		autoDonationService.changeActive(1, autoDonationId);
+		autoDonationService.changeActive(customUserDetails.getUserId(), autoDonationId);
 		return ApiResponse.onSuccess(null);
 	}
 
@@ -57,7 +57,7 @@ public class AutoDonationController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Integer autoDonationId
 	) {
-		autoDonationService.deleteAutoDonation(1, autoDonationId);
+		autoDonationService.deleteAutoDonation(customUserDetails.getUserId(), autoDonationId);
 		return ApiResponse.onSuccess(null);
 	}
 
@@ -67,7 +67,7 @@ public class AutoDonationController {
 		@PathVariable Integer autoDonationId,
 		@RequestBody @Valid RequestDTO.AutoDonationDTO request
 	) {
-		autoDonationService.updateAutoDonation(1, autoDonationId, request);
+		autoDonationService.updateAutoDonation(customUserDetails.getUserId(), autoDonationId, request);
 		return ApiResponse.onSuccess(null);
 	}
 
@@ -76,6 +76,15 @@ public class AutoDonationController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@PathVariable Integer autoDonationId
 	) {
-		return ApiResponse.onSuccess(autoDonationService.readAutoDonation(1, autoDonationId));
+		return ApiResponse.onSuccess(
+			autoDonationService.readAutoDonation(customUserDetails.getUserId(), autoDonationId));
+	}
+
+	@GetMapping("/user/{userId}/total")
+	public ApiResponse<ResponseDTO.AutoDonationTotalAccountDTO> readTotalBalance(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@PathVariable Integer userId
+	) {
+		return ApiResponse.onSuccess(autoDonationService.readTotalBalance(userId));
 	}
 }

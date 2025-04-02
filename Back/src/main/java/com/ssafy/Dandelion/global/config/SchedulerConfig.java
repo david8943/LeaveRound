@@ -1,8 +1,11 @@
 package com.ssafy.Dandelion.global.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.ssafy.Dandelion.domain.dandelion.service.DandelionService;
 
@@ -21,7 +24,7 @@ public class SchedulerConfig {
 	 * 매월 1일 오전 1시에 실행되는 스케줄러.
 	 * 이전 달의 미수집 황금 민들레를 삭제하고 새 황금 민들레 5개를 생성합니다.
 	 */
-	@Scheduled(cron = "0 14 14 2 4 ?") // 매월 1일 오전 1시(로 변경 필요!!)
+	@Scheduled(cron = "0 12 3 2 * ?") // 매월 1일 오전 1시(로 변경 필요!!)
 	public void monthlyGoldDandelionReset() {
 		log.info("Starting monthly gold dandelion reset task");
 		try {
@@ -30,5 +33,14 @@ public class SchedulerConfig {
 		} catch (Exception e) {
 			log.error("Error during monthly gold dandelion reset", e);
 		}
+	}
+
+	@Bean
+	public TaskScheduler taskScheduler() {
+		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+		scheduler.setPoolSize(10);
+		scheduler.setThreadNamePrefix("AutoDonationScheduler-");
+		scheduler.initialize();
+		return scheduler;
 	}
 }

@@ -7,9 +7,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-public class ResponseDTO {
+public class UserResponseDTO {
 
-	private ResponseDTO() {
+	private UserResponseDTO() {
 		throw new IllegalStateException("Utility class");
 	}
 
@@ -24,4 +24,25 @@ public class ResponseDTO {
 		private String accountTypeUniqueNo;
 
 	}
+
+	@Getter
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class AccountDTO {
+		private Integer autoDonationId;
+		private String bankName;
+		private String accountNo;
+		private String accountMoney;
+		private String accountStatus;
+
+		public void setAccountStatus(String accountStatus) {
+			this.accountStatus = accountStatus;
+		}
+
+		public void setAutoDonationId(int autoDonationId) {
+			this.autoDonationId = autoDonationId;
+		}
+	}
+
 }

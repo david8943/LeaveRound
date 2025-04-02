@@ -236,3 +236,5 @@ gradle-app.setting
 **/application-API-KEY.properties
 
 
+
+/src/main/generated/
