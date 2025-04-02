@@ -40,7 +40,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void createAutoDonation(Integer userId, RequestDTO.AutoDonationDTO request) {
-		if (userRepository.existsById(userId))
+		if (!userRepository.existsById(userId))
 			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		if (!organizationProjectRepository.existsById(request.getOrganizationProjectId()))
@@ -87,7 +87,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void changeActive(Integer userId, Integer autoDonationId) {
-		if (userRepository.existsById(userId))
+		if (!userRepository.existsById(userId))
 			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
@@ -100,7 +100,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void deleteAutoDonation(Integer userId, Integer autoDonationId) {
-		if (userRepository.existsById(userId))
+		if (!userRepository.existsById(userId))
 			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
@@ -115,7 +115,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 	@Transactional
 	@Override
 	public void updateAutoDonation(Integer userId, Integer autoDonationId, RequestDTO.AutoDonationDTO request) {
-		if (userRepository.existsById(userId))
+		if (!userRepository.existsById(userId))
 			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		AutoDonation target = autoDonationRepository.findById(autoDonationId)
@@ -133,8 +133,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 
 	@Override
 	public ResponseDTO.ReadAutoDonationDTO readAutoDonation(Integer userId, Integer autoDonationId) {
-		System.out.println(userId);
-		if (userRepository.existsById(userId))
+		if (!userRepository.existsById(userId))
 			throw new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND);
 
 		List<ResponseDTO.AutoDonationInfoDTO> autoDonationInfoDTOList = autoDonationInfoRepository.findAllByAutoDonationId(
@@ -171,6 +170,21 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 		List<AutoDonation> findAutoDonations = autoDonationRepository.findAllByUserId(userId);
 
 		return AutoDonationConverter.totalAccountDTO(findAutoDonations);
+	}
+
+	@Override
+	public void executeAutoDonation(AutoDonation autoDonation) {
+		User user = userRepository.findById(autoDonation.getUserId()).orElseThrow(
+			() -> new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND));
+		long accountBalance = safyApiProperties.getAccountInfo(user.getUserKey(), autoDonation.getAccountNo());
+		Integer remain = (int)(accountBalance % autoDonation.getSliceMoney().getSliceMoney());
+
+		String organizationAccount = organizationProjectRepository.findById(autoDonation.getOrganizationProjectId())
+			.orElseThrow(
+				() -> new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT))
+			.getAccountNo();
+		safyApiProperties.sendAutoDonation(user.getUserKey(), autoDonation, remain.toString(), organizationAccount);
+		autoDonationInfoRepository.save(AutoDonationConverter.toAutoDonationInfo(autoDonation, accountBalance));
 	}
 
 }

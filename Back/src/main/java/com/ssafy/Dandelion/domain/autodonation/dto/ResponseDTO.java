@@ -3,10 +3,13 @@ package com.ssafy.Dandelion.domain.autodonation.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 public class ResponseDTO {
 
@@ -72,5 +75,29 @@ public class ResponseDTO {
 	@AllArgsConstructor
 	public static class AutoDonationTotalAccountDTO {
 		Long totalAccount;
+	}
+
+	@Getter
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@ToString
+	public static class TransactionInfos {
+		@JsonProperty("REC")
+		private List<ResponseDTO.TransactionInfo> rec;
+	}
+
+	@Getter
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@ToString
+	public static class TransactionInfo {
+		private String transactionUniqueNo;
+		private String accountNo;
+		private String transactionDate;
+		private String transactionType;
+		private String transactionTypeName;
+		private String transactionAccountNo;
 	}
 }
