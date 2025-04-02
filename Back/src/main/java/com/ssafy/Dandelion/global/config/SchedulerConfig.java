@@ -21,7 +21,7 @@ public class SchedulerConfig {
 	 * 매월 1일 오전 1시에 실행되는 스케줄러.
 	 * 이전 달의 미수집 황금 민들레를 삭제하고 새 황금 민들레 5개를 생성합니다.
 	 */
-	@Scheduled(cron = "0 0 1 1 * ?") // 매월 1일 오전 1시
+	@Scheduled(cron = "0 14 14 2 4 ?") // 매월 1일 오전 1시(로 변경 필요!!)
 	public void monthlyGoldDandelionReset() {
 		log.info("Starting monthly gold dandelion reset task");
 		try {

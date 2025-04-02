@@ -28,7 +28,7 @@ import com.ssafy.Dandelion.domain.dandelion.entity.Dandelion;
 import com.ssafy.Dandelion.domain.dandelion.entity.DandelionDonationInfo;
 import com.ssafy.Dandelion.domain.dandelion.entity.GoldDandelion;
 import com.ssafy.Dandelion.domain.dandelion.repository.DandelionDonationInfoRepository;
-import com.ssafy.Dandelion.domain.dandelion.repository.DandelionLocationRepository;
+import com.ssafy.Dandelion.domain.dandelion.repository.DandelionLocationRedisRepository;
 import com.ssafy.Dandelion.domain.dandelion.repository.DandelionRepository;
 import com.ssafy.Dandelion.domain.dandelion.repository.GoldDandelionRepository;
 import com.ssafy.Dandelion.domain.organization.repository.OrganizationProjectRepository;
@@ -48,7 +48,7 @@ public class DandelionServiceImpl implements DandelionService {
 
 	private final DandelionRepository dandelionRepository;
 	private final GoldDandelionRepository goldDandelionRepository;
-	private final DandelionLocationRepository dandelionLocationRepository;
+	private final DandelionLocationRedisRepository dandelionLocationRedisRepository;
 	private final DandelionDonationInfoRepository donationInfoRepository;
 	private final OrganizationProjectRepository organizationProjectRepository;
 	private final UserRepository userRepository;
@@ -287,6 +287,10 @@ public class DandelionServiceImpl implements DandelionService {
 			Integer userID = entry.getKey();
 			Integer goldCount = entry.getValue();
 
+			if (goldCount <= 0) {
+				continue;
+			}
+
 			// 사용자 정보 조회
 			String userName = userRepository.findById(userID)
 				.map(user -> user.getName())
@@ -412,7 +416,7 @@ public class DandelionServiceImpl implements DandelionService {
 		dandelion.setUserId(userId);
 
 		// Redis에서 해당 민들레 위치 정보 삭제
-		dandelionLocationRepository.removeDandelion(userId, dandelionId);
+		dandelionLocationRedisRepository.removeDandelion(userId, dandelionId);
 
 		// 업데이트된 민들레 정보 저장
 		dandelionRepository.save(dandelion);
@@ -450,7 +454,7 @@ public class DandelionServiceImpl implements DandelionService {
 		goldDandelion.setAcquiredAt(LocalDateTime.now());
 
 		// Redis에서 해당 황금 민들레 위치 정보 삭제
-		dandelionLocationRepository.removeGoldDandelion(goldDandelionId);
+		dandelionLocationRedisRepository.removeGoldDandelion(goldDandelionId);
 
 		// 업데이트된 황금 민들레 정보 저장
 		goldDandelionRepository.save(goldDandelion);
@@ -473,7 +477,7 @@ public class DandelionServiceImpl implements DandelionService {
 
 		// Redis에서 해당 황금 민들레 위치 정보 삭제 후 DB에서도 삭제
 		for (GoldDandelion goldDandelion : previousGoldDandelions) {
-			dandelionLocationRepository.removeGoldDandelion(goldDandelion.getGoldDandelionId());
+			dandelionLocationRedisRepository.removeGoldDandelion(goldDandelion.getGoldDandelionId());
 			goldDandelionRepository.delete(goldDandelion);
 		}
 
@@ -509,25 +513,52 @@ public class DandelionServiceImpl implements DandelionService {
 		}
 
 		// Redis에 저장
-		dandelionLocationRepository.saveGoldDandelionLocations(newGoldDandelions);
+		dandelionLocationRedisRepository.saveGoldDandelionLocations(newGoldDandelions);
 
 		log.info("새로운 월별 황금 민들레 생성 성공");
 	}
 
 	// 내부 유틸리티 메소드들
 
-	// 사용자 주변의 일반 민들레 위치 정보 조회
+	// 사용자 주변 민들레 정보 조회
 	private List<DandelionLocationResponseDTO> getNearbyDandelions(Integer userId,
 		DandelionLocationRequestDTO locationRequestDTO) {
-		// 현재 사용자 위치 주변의 민들레 검색
-		var nearbyDandelions = dandelionLocationRepository.findDandelionsNearby(
+		log.debug("Finding nearby dandelions for user: {}", userId);
+		log.debug("Latitude: {}, Longitude: {}",
+			locationRequestDTO.getMyLatitude(),
+			locationRequestDTO.getMyLongitude());
+
+		var nearbyDandelions = dandelionLocationRedisRepository.findDandelionsNearby(
 			userId,
 			locationRequestDTO.getMyLatitude(),
 			locationRequestDTO.getMyLongitude()
 		);
 
-		// 결과가 없는 경우 빈 리스트 반환
-		if (nearbyDandelions == null) {
+		log.debug("Nearby dandelions result: {}", nearbyDandelions);
+
+		// 결과가 없거나 빈 경우
+		if (nearbyDandelions == null ||
+			nearbyDandelions.getContent() == null ||
+			nearbyDandelions.getContent().isEmpty()) {
+
+			log.debug("No nearby dandelions found. Creating initial dandelions.");
+			createInitialDandelions(userId, locationRequestDTO);
+
+			// 다시 조회
+			nearbyDandelions = dandelionLocationRedisRepository.findDandelionsNearby(
+				userId,
+				locationRequestDTO.getMyLatitude(),
+				locationRequestDTO.getMyLongitude()
+			);
+
+			log.debug("After creating initial dandelions, result: {}", nearbyDandelions);
+		}
+
+		// 결과가 여전히 없다면 빈 리스트 반환
+		if (nearbyDandelions == null ||
+			nearbyDandelions.getContent() == null ||
+			nearbyDandelions.getContent().isEmpty()) {
+			log.warn("Still no dandelions found after creation attempt.");
 			return new ArrayList<>();
 		}
 
@@ -535,12 +566,16 @@ public class DandelionServiceImpl implements DandelionService {
 		return nearbyDandelions.getContent().stream()
 			.map(geoLocation -> {
 				Integer dandelionId = (Integer)geoLocation.getContent().getName();
-				var position = geoLocation.getContent().getPoint();
 
 				return DandelionLocationResponseDTO.builder()
 					.dandelionId(dandelionId)
-					.latitude(BigDecimal.valueOf(position.getY()))
-					.longitude(BigDecimal.valueOf(position.getX()))
+					// point가 null일 경우 사용자 위치 기반으로 랜덤 생성
+					.latitude(geoLocation.getContent().getPoint() != null ?
+						BigDecimal.valueOf(geoLocation.getContent().getPoint().getY()) :
+						locationRequestDTO.getMyLatitude())
+					.longitude(geoLocation.getContent().getPoint() != null ?
+						BigDecimal.valueOf(geoLocation.getContent().getPoint().getX()) :
+						locationRequestDTO.getMyLongitude())
 					.build();
 			})
 			.collect(Collectors.toList());
@@ -581,7 +616,7 @@ public class DandelionServiceImpl implements DandelionService {
 		}
 
 		// Redis에 저장
-		dandelionLocationRepository.saveDandelionLocations(userId, newDandelions);
+		dandelionLocationRedisRepository.saveDandelionLocations(userId, newDandelions);
 	}
 
 	// 100미터 범위 밖에 있는 민들레를 사용자 주변으로 재배치함
@@ -626,7 +661,7 @@ public class DandelionServiceImpl implements DandelionService {
 		}
 
 		// Redis 위치 정보 업데이트
-		dandelionLocationRepository.saveDandelionLocations(userId, dandelionsToRelocate);
+		dandelionLocationRedisRepository.saveDandelionLocations(userId, dandelionsToRelocate);
 	}
 
 	// 민들레 주가 생성
@@ -664,7 +699,7 @@ public class DandelionServiceImpl implements DandelionService {
 		}
 
 		// Redis에 저장
-		dandelionLocationRepository.saveDandelionLocations(userId, newDandelions);
+		dandelionLocationRedisRepository.saveDandelionLocations(userId, newDandelions);
 	}
 
 	// 사용자 위치와 민들레 위치 사이의 거리 계산

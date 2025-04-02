@@ -31,7 +31,7 @@ public class Dandelion extends BaseTimeEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer dandelionId;
 
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private Integer userId;
 
 	@Column(nullable = false, precision = 11, scale = 6)

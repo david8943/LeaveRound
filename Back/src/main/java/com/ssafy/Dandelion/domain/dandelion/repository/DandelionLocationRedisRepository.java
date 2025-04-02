@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class DandelionLocationRepository {
+public class DandelionLocationRedisRepository {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final Distance geoDistance; //100미터 거리 설정 됨
