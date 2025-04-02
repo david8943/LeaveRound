@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -521,6 +522,7 @@ public class DandelionServiceImpl implements DandelionService {
 	// 내부 유틸리티 메소드들
 
 	// 사용자 주변 민들레 정보 조회
+	// 사용자 주변 민들레 정보 조회
 	private List<DandelionLocationResponseDTO> getNearbyDandelions(Integer userId,
 		DandelionLocationRequestDTO locationRequestDTO) {
 		log.debug("Finding nearby dandelions for user: {}", userId);
@@ -567,9 +569,15 @@ public class DandelionServiceImpl implements DandelionService {
 			.map(geoLocation -> {
 				Integer dandelionId = (Integer)geoLocation.getContent().getName();
 
+				// 데이터베이스에서 민들레 확인
+				Optional<Dandelion> dandelionOpt = dandelionRepository.findById(dandelionId);
+				if (dandelionOpt.isEmpty() || dandelionOpt.get().getUserId() != null) {
+					// 존재하지 않거나 이미 수집된 민들레는 건너뛰기
+					return null;
+				}
+
 				return DandelionLocationResponseDTO.builder()
 					.dandelionId(dandelionId)
-					// point가 null일 경우 사용자 위치 기반으로 랜덤 생성
 					.latitude(geoLocation.getContent().getPoint() != null ?
 						BigDecimal.valueOf(geoLocation.getContent().getPoint().getY()) :
 						locationRequestDTO.getMyLatitude())
@@ -578,6 +586,8 @@ public class DandelionServiceImpl implements DandelionService {
 						locationRequestDTO.getMyLongitude())
 					.build();
 			})
+			.filter(dto -> dto != null) // null인 항목 제거
+			.limit(TARGET_DANDELION_COUNT) // 10개로 제한
 			.collect(Collectors.toList());
 	}
 
