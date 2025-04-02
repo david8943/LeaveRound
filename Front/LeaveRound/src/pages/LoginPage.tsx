@@ -18,11 +18,6 @@ const LoginPage: React.FC = () => {
   const { response, refetch } = useAxios<any>({
     url: API.member.login,
     method: 'post',
-    config: {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    },
     executeOnMount: false,
   });
 
@@ -39,14 +34,20 @@ const LoginPage: React.FC = () => {
   const isLoginDisabled = !isValidEmail(email) || email === '' || password === '';
 
   const submitLogin = () => {
-    const form = new URLSearchParams();
-    form.append('email', 'aaaaaaaaaaaaaabb@naver.com');
-    form.append('password', 'aaaaaabb');
+    const form = new FormData();
+    form.append('email', email);
+    form.append('password', password);
 
-    refetch(form);
-
-    console.log('res.', response);
+    refetch(form); // ✅ 요청만 보내고
   };
+
+  // ✅ 응답 처리
+  useEffect(() => {
+    if (response) {
+      console.log('로그인 응답:', response);
+      // 여기서 로그인 성공 로직 수행 (예: 리다이렉트, 토큰 저장 등)
+    }
+  }, [response]);
 
   return (
     <TitleLayout title='로그인'>
