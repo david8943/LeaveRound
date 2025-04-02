@@ -49,15 +49,21 @@ public enum ErrorStatus implements BaseErrorCode {
 	NOT_FOUND_ORGANIZATION(HttpStatus.NOT_FOUND, "ORGANIZATION4001", "존재하지 않는 기부 단체입니다."),
 
 	// 민들레 관련 에러
+	DANDELION_NOT_FOUND(HttpStatus.NOT_FOUND, "DANDELION4000", "존재하지 않는 민들레입니다."),
 	DANDELION_ALREADY_COLLECT(HttpStatus.BAD_REQUEST, "DANDELION4001", "이미 수집 완료된 민들레입니다."),
 	DANDELION_TOO_FAR_TO_COLLECT(HttpStatus.BAD_REQUEST, "DANDELION4002", "수집할 수 있는 거리보다 멉니다."),
 	DANDELION_OVER_COUNT(HttpStatus.BAD_REQUEST, "DANDELION4003", "가지고 있는 민들레 개수보다 기부 개수가 많습니다."),
 	GOLD_DANDELION_OVER_COUNT(HttpStatus.BAD_REQUEST, "DANDELION4004", "가지고 있는 황금 민들레 개수보다 기부 개수가 많습니다."),
 	DANDELION_EMPTY(HttpStatus.BAD_REQUEST, "DANDELION4005", "가지고 있는 민들레 개수가 없습니다."),
-	GOLD_DANDELION_EMPTY(HttpStatus.BAD_REQUEST, "DANDELION4006", "가지고 잇는 황금 민들레 개수가 없습니다."),
-	ORGANIZATION_EMPTY(HttpStatus.BAD_REQUEST, "DANELION4007", "지정한 기부처가 존재하지 않습니다"),
-	GOLD_DANDLION_ALREADY_COLLECT(HttpStatus.BAD_REQUEST, "DANDELION4008", "이미 수집 완료된 황금 민들레입니다."),
-	GOLD_DANDELION_TOO_FAR_TO_COLLECT(HttpStatus.BAD_REQUEST, "DANDELION4009", "수집할 수 있는 거리보다 멉니다");
+
+	GOLD_DANDELION_EMPTY(HttpStatus.BAD_REQUEST, "DANDELION4006", "가지고 있는 황금 민들레 개수가 없습니다."),
+	ORGANIZATION_EMPTY(HttpStatus.BAD_REQUEST, "DANDELION4007", "지정한 기부처가 존재하지 않습니다"),
+	GOLD_DANDELION_ALREADY_COLLECT(HttpStatus.BAD_REQUEST, "DANDELION4008", "이미 수집 완료된 황금 민들레입니다."),
+	GOLD_DANDELION_TOO_FAR_TO_COLLECT(HttpStatus.BAD_REQUEST, "DANDELION4009", "수집할 수 있는 거리보다 멉니다."),
+	GOLD_DANDELION_NOT_FOUND(HttpStatus.NOT_FOUND, "DANDELION4010", "존재하지 않는 황금 민들레입니다."),
+	EMPTY_DONATION(HttpStatus.BAD_REQUEST, "DANDELION4011", "기부할 민들레가 없습니다."),
+	INSUFFICIENT_DANDELIONS(HttpStatus.BAD_REQUEST, "DANDELION4012", "보유한 민들레가 부족합니다."),
+	INVALID_LOCATION(HttpStatus.BAD_REQUEST, "DANDELION4013", "유효하지 않은 위치 정보입니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;
