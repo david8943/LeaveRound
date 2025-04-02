@@ -28,8 +28,8 @@ function App() {
       <div className='flex flex-col min-h-screen'>
         <main>
           <Routes>
-            <Route path='/start' element={<Onboarding />} />
-            <Route path='/' element={<MainPage />} />
+            <Route path='/' element={<Onboarding />} />
+            <Route path='/main' element={<MainPage />} />
             <Route path='/manage' element={<ManageAccountsPage />} />
             <Route path='/login' element={<Login />} />
             <Route path='/signup' element={<Signup />} />
