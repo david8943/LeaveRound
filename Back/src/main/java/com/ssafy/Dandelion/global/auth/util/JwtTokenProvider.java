@@ -117,6 +117,7 @@ public class JwtTokenProvider {
 
 	private String findToken(Cookie[] cookies) {
 		for (Cookie cookie : cookies) {
+			System.out.println(cookie.toString());
 			if ("access_token".equals(cookie.getName())) {
 				return cookie.getValue();
 			}
