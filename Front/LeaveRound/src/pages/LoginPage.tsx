@@ -4,11 +4,14 @@ import SeedLeaveRound from '@/assets/icons/SeedLeaveRoundSmall.svg';
 import TitleLayout from '@/components/layout/TitleLayout';
 import useAxios from '@/hooks/useAxios';
 import { API } from '@/constants/url';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<'invalid-email' | 'login-fail' | ''>('');
+
+  const navigator = useNavigate();
 
   const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -18,11 +21,6 @@ const LoginPage: React.FC = () => {
   const { response, refetch } = useAxios<any>({
     url: API.member.login,
     method: 'post',
-    config: {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    },
     executeOnMount: false,
   });
 
@@ -39,24 +37,25 @@ const LoginPage: React.FC = () => {
   const isLoginDisabled = !isValidEmail(email) || email === '' || password === '';
 
   const submitLogin = () => {
-    const form = new URLSearchParams();
-    form.append('email', 'aaaaaaaaaaaaaabb@naver.com');
-    form.append('password', 'aaaaaabb');
+    const form = new FormData();
+    form.append('email', email);
+    form.append('password', password);
 
     refetch(form);
-
-    console.log('res.', response);
   };
+
+  useEffect(() => {
+    if (response && response.isSuccess) {
+      navigator('/main');
+    }
+  }, [response]);
 
   return (
     <TitleLayout title='로그인'>
       <div className='flex flex-col items-center w-full'>
-        {/* 아이콘 */}
         <img src={SeedLeaveRound} alt='로고' className='mt-[94px] w-[76px] h-[76px]' />
         <p className='mt-[26px] text-body text-center'>민들레와 함께 선한 영향력을 후-</p>
-
         <div className='relative flex flex-col items-center w-full px-[50px]'>
-          {/* 이메일 입력 */}
           <div className='mt-[110px] w-full'>
             <input
               type='email'
@@ -69,8 +68,6 @@ const LoginPage: React.FC = () => {
               {error === 'invalid-email' && <p className='text-detail text-primary'>이메일 형식을 지켜주세요.</p>}
             </div>
           </div>
-
-          {/* 비밀번호 입력 */}
           <div className='mt-[47px] w-full'>
             <input
               type='password'
@@ -89,8 +86,6 @@ const LoginPage: React.FC = () => {
               )}
             </div>
           </div>
-
-          {/* 로그인 버튼 */}
           <div className='mt-[190px] w-full flex justify-center'>
             <button
               onClick={submitLogin}
@@ -102,8 +97,6 @@ const LoginPage: React.FC = () => {
               로그인
             </button>
           </div>
-
-          {/* 회원가입 링크 */}
           <p className='mt-[26px] text-detail'>
             아직 회원이 아니신가요?{' '}
             <Link to='/signup' className='text-primary'>
