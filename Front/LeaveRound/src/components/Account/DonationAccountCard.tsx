@@ -153,7 +153,7 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
               </button>
               {/* 메뉴 드롭다운 */}
               {isMenuOpen && (
-                <div ref={menuRef} className='absolute top-full right-0 mt-1 z-20'>
+                <div ref={menuRef} className='absolute top-full right-0 -mt-2 z-20'>
                   <AccountMenu
                     onClose={closeMenu}
                     accountNumber={accountNumber}
@@ -167,6 +167,7 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
                       paymentAmount,
                     }}
                     onModify={handleModify}
+                    isPaused={autoDonation === 'inactive'}
                   />
                 </div>
               )}

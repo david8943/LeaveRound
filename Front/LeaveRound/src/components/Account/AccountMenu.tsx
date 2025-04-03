@@ -16,9 +16,17 @@ interface AccountMenuProps {
     paymentAmount?: number;
   };
   onModify: () => void;
+  isPaused?: boolean;
 }
 
-export const AccountMenu = ({ onClose, accountNumber, userId, accountInfo, onModify }: AccountMenuProps) => {
+export const AccountMenu = ({
+  onClose,
+  accountNumber,
+  userId,
+  accountInfo,
+  onModify,
+  isPaused = false,
+}: AccountMenuProps) => {
   const navigate = useNavigate();
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
 
@@ -32,7 +40,11 @@ export const AccountMenu = ({ onClose, accountNumber, userId, accountInfo, onMod
   };
 
   const handleStop = () => {
-    console.log('기부 중지 모달 열기');
+    if (isPaused) {
+      console.log('기부 시작 모달 열기');
+    } else {
+      console.log('기부 중지 모달 열기');
+    }
     onClose();
   };
 
@@ -61,7 +73,7 @@ export const AccountMenu = ({ onClose, accountNumber, userId, accountInfo, onMod
           </li>
           <li className='w-full'>
             <button className={menuItemClass} onClick={handleStop}>
-              기부 중지
+              {isPaused ? '기부 시작' : '기부 중지'}
             </button>
           </li>
           <li className='w-full'>
