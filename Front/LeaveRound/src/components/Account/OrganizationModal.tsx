@@ -1,6 +1,9 @@
 import AccountModal from './AccountModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BasicButton } from '../common/BasicButton';
+import { TOrganization } from '@/models/organizations';
+import { API } from '@/constants/url';
+import useAxios from '@/hooks/useAxios';
 
 interface OrganizationModalProps {
   onClose: () => void;
@@ -16,25 +19,32 @@ const CATEGORIES = [
   { id: 'etc', label: '기타', emoji: '🎸' },
 ];
 
-const ORGANIZATIONS = [
-  { id: 'random', name: '리브라운드가 정해주세요!', category: 'all' },
-  { id: 'eco1', name: '초록우산', category: 'environment' },
-  { id: 'eco2', name: '싸피복지관', category: 'environment' },
-  { id: 'edu1', name: 'IT교육기관', category: 'education' },
-  { id: 'etc1', name: '국립문화센터', category: 'etc' },
-  { id: 'etc2', name: '문화체육관광부', category: 'etc' },
-];
+type OrganizationListResponse = {
+  result: {
+    organizationInfos: TOrganization[];
+  };
+};
 
 export const OrganizationModal = ({ onClose, onSave, currentPurpose }: OrganizationModalProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all'); // 영어 id로 관리
   const [selectedOrganization, setSelectedOrganization] = useState(currentPurpose || '리브라운드가 정해주세요!');
 
-  const filteredOrganizations = ORGANIZATIONS.filter((org) => {
-    const matchesSearch =
-      org.name.toLowerCase().startsWith(searchTerm.toLowerCase()) ||
-      org.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || org.category === selectedCategory;
+  const { response, refetch } = useAxios<OrganizationListResponse>({
+    url: API.organization.list,
+    executeOnMount: false,
+  });
+
+  useEffect(() => {
+    refetch();
+  }, []);
+
+  const organizations = response?.result?.organizationInfos ?? [];
+  const selectedLabel = CATEGORIES.find((cat) => cat.id === selectedCategory)?.label;
+
+  const filteredOrganizations = organizations.filter((org) => {
+    const matchesSearch = org.organizationName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedLabel === '전체' || org.projectCategory === selectedLabel;
     return matchesSearch && matchesCategory;
   });
 
@@ -73,16 +83,18 @@ export const OrganizationModal = ({ onClose, onSave, currentPurpose }: Organizat
         </div>
 
         <div className='w-full mb-4 space-y-2 max-h-[300px] overflow-y-auto'>
-          {filteredOrganizations.map((org) => (
+          {filteredOrganizations?.map((org: TOrganization) => (
             <button
-              key={org.id}
-              onClick={() => setSelectedOrganization(org.name)}
+              key={org.organizationId}
+              onClick={() => setSelectedOrganization(org.organizationName)}
               className={`w-full px-4 py-[1rem] rounded-[0.5rem] border border-primary text-left ${
-                selectedOrganization === org.name ? 'bg-[rgba(255,217,95,0.8)]' : 'bg-[rgba(255,217,95,0.2)]'
+                selectedOrganization === org.organizationName
+                  ? 'bg-[rgba(255,217,95,0.8)]'
+                  : 'bg-[rgba(255,217,95,0.2)]'
               }`}
             >
-              {CATEGORIES.find((cat) => cat.id === org.category)?.emoji}
-              {org.name}
+              {CATEGORIES.find((cat) => cat.id === org.projectCategory)?.emoji}
+              {org.organizationName}
             </button>
           ))}
         </div>
