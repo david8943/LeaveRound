@@ -9,3 +9,13 @@ export interface TMyRankInfo {
   myName: string;
   myDonateCount: number;
 }
+
+export interface TGoldRankInfo {
+  name: string;
+  goldCount: number;
+}
+
+export interface TMyGoldRankInfo {
+  myName: string;
+  myGoldCount: number;
+}
