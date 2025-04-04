@@ -18,9 +18,8 @@ public class UserInfoResponseDTO {
     private String email;
     private String userKey;
     private int dandelionCount;
-    private int dandelionUseCount;
     private int goldDandelionCount;
-    private int goldDandelionUseCount;
+    private int totalDonationCount;
     private String createdAt;
     private String updatedAt;
 
@@ -34,9 +33,8 @@ public class UserInfoResponseDTO {
                 .email(user.getEmail())
                 .userKey(user.getUserKey())
                 .dandelionCount(user.getDandelionCount())
-                .dandelionUseCount(user.getDandelionUseCount())
                 .goldDandelionCount(user.getGoldDandelionCount())
-                .goldDandelionUseCount(user.getGoldDandelionUseCount())
+                .totaldonationCount(user.getDandelionUseCount() + (user.getGoldDandelionUseCount() * 100))
                 .createdAt(user.getCreatedAt().format(formatter))
                 .updatedAt(user.getUpdatedAt().format(formatter))
                 .build();
