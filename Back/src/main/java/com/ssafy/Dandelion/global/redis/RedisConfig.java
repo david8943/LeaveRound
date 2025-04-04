@@ -62,7 +62,7 @@ public class RedisConfig {
 	 */
 	@Bean
 	public Distance geoDistance() {
-		return new Distance(0.1, Metrics.KILOMETERS);
+		return new Distance(0.25, Metrics.KILOMETERS);
 	}
 
 }

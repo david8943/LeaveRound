@@ -55,7 +55,7 @@ public class DandelionServiceImpl implements DandelionService {
 	private final UserRepository userRepository;
 
 	// 민들레 거리 제한 상수 (미터 단위)
-	private static final double MAX_COLLECTION_DISTANCE = 100.0;
+	private static final double MAX_COLLECTION_DISTANCE = 50.0;
 	// 사용자당 제공할 민들레 개수
 	private static final int TARGET_DANDELION_COUNT = 10;
 	// 월별 생성할 황금 민들레 개수
