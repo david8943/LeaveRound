@@ -33,6 +33,7 @@ import com.ssafy.Dandelion.domain.dandelion.repository.DandelionLocationRedisRep
 import com.ssafy.Dandelion.domain.dandelion.repository.DandelionRepository;
 import com.ssafy.Dandelion.domain.dandelion.repository.GoldDandelionRepository;
 import com.ssafy.Dandelion.domain.organization.repository.OrganizationProjectRepository;
+import com.ssafy.Dandelion.domain.user.entity.User;
 import com.ssafy.Dandelion.domain.user.repository.UserRepository;
 import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
 import com.ssafy.Dandelion.global.apiPayload.exception.handler.DandelionHandler;
@@ -107,36 +108,28 @@ public class DandelionServiceImpl implements DandelionService {
 
 		donationInfoRepository.save(donationInfo);
 
-		log.info("{} 사용자가 {} 일반 민들레랑 {} 황금 민들레를 {} 프로젝트에 기부함",
-			userId, normalCount, goldCount, projectId);
-	}
-
-	// 보유한 일반 민들레 개수 조회
-	@Override
-	public int getTotalDandelionCount(Integer userId) {
-		return dandelionRepository.countByUserId(userId);
-	}
-
-	// 보유한 황금 민들레 총 개수 조회
-	@Override
-	public int getTotalGoldDandelionCount(Integer userId) {
-		return goldDandelionRepository.countByUserId(userId);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND));
+		user.setDandelionUseCount(user.getDandelionUseCount() + normalCount);
+		user.setGoldDandelionUseCount(user.getGoldDandelionUseCount() + goldCount);
+		userRepository.save(user);
 	}
 
 	// 기부 가능한 일반 민들레 개수
 	@Override
 	public int getAvailableDandelionCount(Integer userId) {
-		int totalCollected = getTotalDandelionCount(userId);
-		Integer totalDonated = donationInfoRepository.sumUseDandelionCountByUserId(userId);
-		return totalCollected - (totalDonated != null ? totalDonated : 0);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND));
+		return user.getDandelionCount() - user.getDandelionUseCount();
 	}
 
 	// 기부 가능한 황금 민들레 개수
 	@Override
 	public int getAvailableGoldDandelionCount(Integer userId) {
-		int totalCollected = getTotalGoldDandelionCount(userId);
-		Integer totalDonated = donationInfoRepository.sumUseGoldDandelionCountByUserId(userId);
-		return totalCollected - (totalDonated != null ? totalDonated : 0);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND));
+		return user.getGoldDandelionCount() - user.getGoldDandelionUseCount();
+
 	}
 
 	// 주간 기부 랭킹 조회
@@ -404,6 +397,12 @@ public class DandelionServiceImpl implements DandelionService {
 		// 민들레 수집 처리 (사용자 ID 설정)
 		dandelion.setUserId(userId);
 
+		// user 엔티티 업데이트
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND));
+		user.setDandelionCount(user.getDandelionCount() + 1);
+		userRepository.save(user);
+
 		// Redis에서 해당 민들레 위치 정보 삭제
 		dandelionLocationRedisRepository.removeDandelion(userId, dandelionId);
 
@@ -441,6 +440,11 @@ public class DandelionServiceImpl implements DandelionService {
 		// 황금 민들레 수집 처리 (사용자 ID 설정 및 수집 시간 기록)
 		goldDandelion.setUserId(userId);
 		goldDandelion.setAcquiredAt(LocalDateTime.now());
+
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND));
+		user.setGoldDandelionCount(user.getGoldDandelionCount() + 1);
+		userRepository.save(user);
 
 		// Redis에서 해당 황금 민들레 위치 정보 삭제
 		dandelionLocationRedisRepository.removeGoldDandelion(goldDandelionId);

@@ -150,36 +150,23 @@ public class UserServiceImpl implements UserService {
 			.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
 		// 민들레 서비스를 통해 민들레 정보 조회
-		try {
-			// 일반 민들레 총 개수와 기부 가능한 개수 조회
-			int totalDandelionCount = dandelionService.getTotalDandelionCount(userId);
-			int availableDandelionCount = dandelionService.getAvailableDandelionCount(userId);
-			int dandelionUseCount = totalDandelionCount - availableDandelionCount;
+		int availableDandelionCount = dandelionService.getAvailableDandelionCount(userId);
+		int availableGoldDandelionCount = dandelionService.getAvailableGoldDandelionCount(userId);
+		int totalDonationCount = user.getDandelionUseCount() + (user.getGoldDandelionUseCount() * 100);
 
-			// 황금 민들레 총 개수와 기부 가능한 개수 조회
-			int totalGoldDandelionCount = dandelionService.getTotalGoldDandelionCount(userId);
-			int availableGoldDandelionCount = dandelionService.getAvailableGoldDandelionCount(userId);
-			int goldDandelionUseCount = totalGoldDandelionCount - availableGoldDandelionCount;
+		DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
-			// DTO를 직접 생성
-			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-
-			return UserInfoResponseDTO.builder()
-				.userId(user.getUserId())
-				.name(user.getName())
-				.email(user.getEmail())
-				.userKey(user.getUserKey())
-				.dandelionCount(availableDandelionCount)
-				.goldDandelionCount(availableGoldDandelionCount)
-				.totalDonationCount(dandelionUseCount + (goldDandelionUseCount * 100))
-				.createdAt(user.getCreatedAt() != null ? user.getCreatedAt().format(formatter) : "")
-				.updatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt().format(formatter) : "")
-				.build();
-
-		} catch (Exception e) {
-
-		}
-		return UserInfoResponseDTO.fromEntity(user);
+		return UserInfoResponseDTO.builder()
+			.userId(user.getUserId())
+			.name(user.getName())
+			.email(user.getEmail())
+			.userKey(user.getUserKey())
+			.dandelionCount(availableDandelionCount)
+			.goldDandelionCount(availableGoldDandelionCount)
+			.totalDonationCount(totalDonationCount)
+			.createdAt(user.getCreatedAt() != null ? user.getCreatedAt().format(formatter) : "")
+			.updatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt().format(formatter) : "")
+			.build();
 	}
 
 	private boolean checkUserEmail(String email) {

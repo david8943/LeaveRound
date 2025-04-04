@@ -14,12 +14,6 @@ public interface DandelionService {
 	// 민들레 기부(황금 민들레 + 일반 민들레)
 	void donateDandelions(Integer userId, DandelionDonationRequestDTO donationRequestDTO);
 
-	// 사용자가 보유한 총 일반 민들레 개수 조회(유저)
-	int getTotalDandelionCount(Integer userId);
-
-	// 사용자가 보유한 총 황금 민들레 개수 조회(유저)
-	int getTotalGoldDandelionCount(Integer userId);
-
 	// 사용자가 기부 가능한 일반 민들레 개수 조회
 	int getAvailableDandelionCount(Integer userId);
 
