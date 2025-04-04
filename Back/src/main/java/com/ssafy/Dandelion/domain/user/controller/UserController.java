@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,15 +52,11 @@ public class UserController {
 		return ApiResponse.of(SuccessStatus.LOGIN_SUCCESS, null);
 	}
 
-	/**
-	 * 회원 정보 조회 API
-	 *
-	 * @param userId 조회할 회원의 ID
-	 * @return 회원 상세 정보
-	 */
-	@GetMapping("/{userId}")
-	public ApiResponse<UserInfoResponseDTO> getUserInfo(@PathVariable Integer userId) {
-		UserInfoResponseDTO userInfo = userService.getUserInfo(userId);
+	// 회원 정보 조회
+	@GetMapping("")
+	public ApiResponse<UserInfoResponseDTO> getUserInfo(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		UserInfoResponseDTO userInfo = userService.getUserInfo(customUserDetails.getUserId());
 		return ApiResponse.of(SuccessStatus.USERINFO_SUCCESS, userInfo);
 	}
 
