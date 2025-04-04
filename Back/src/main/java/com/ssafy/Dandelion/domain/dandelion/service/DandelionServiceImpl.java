@@ -115,22 +115,6 @@ public class DandelionServiceImpl implements DandelionService {
 		userRepository.save(user);
 	}
 
-	// 보유한 일반 민들레 개수 조회
-	@Override
-	public int getTotalDandelionCount(Integer userId) {
-		return userRepository.findById(userId)
-			.map(User::getDandelionCount)
-			.orElse(0);
-	}
-
-	// 보유한 황금 민들레 총 개수 조회
-	@Override
-	public int getTotalGoldDandelionCount(Integer userId) {
-		return userRepository.findById(userId)
-			.map(User::getGoldDandelionCount)
-			.orElse(0);
-	}
-
 	// 기부 가능한 일반 민들레 개수
 	@Override
 	public int getAvailableDandelionCount(Integer userId) {
