@@ -13,13 +13,6 @@ import com.ssafy.Dandelion.domain.dandelion.entity.GoldDandelion;
 @Repository
 public interface GoldDandelionRepository extends JpaRepository<GoldDandelion, Integer> {
 
-	// 사용자가 갖고 있는 모든 황금 민들레 조회
-	List<GoldDandelion> findByUserId(Integer userId);
-
-	// 사용자가 갖고 있는 황금 민들레 총 개수
-	@Query("SELECT COUNT(g) FROM GoldDandelion g WHERE g.userId = :userId")
-	int countByUserId(@Param("userId") Integer userId);
-
 	// 특정 기간 내에 아직 수집되지 않은 황금 민들레 조회
 	@Query("SELECT g FROM GoldDandelion g WHERE g.userId IS NULL AND g.createdAt BETWEEN :startDate AND :endDate")
 	List<GoldDandelion> findUncollectedGoldDandelionsBetween(
