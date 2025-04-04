@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AddAccountIcon from '@/assets/icons/AddAccount.svg';
 import ArrowRightIcon from '@/assets/icons/ArrowRight.svg';
-import tossIcon from '@/assets/icons/toss.svg'; // 아이콘 임시 고정
 import AccountPreview from '@/components/Account/AccountPreview';
 import useAxios from '@/hooks/useAxios';
 import { API } from '@/constants/url';
