@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { AccountSettingModal } from './AccountSettingModal';
 import { createPortal } from 'react-dom';
+import Modal from '@/components/Modal';
 
 interface AccountMenuProps {
   onClose: () => void;
@@ -29,6 +30,15 @@ export const AccountMenu = ({
 }: AccountMenuProps) => {
   const navigate = useNavigate();
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    mainMessage: string;
+    detailMessage: string;
+  }>({
+    isOpen: false,
+    mainMessage: '',
+    detailMessage: '',
+  });
 
   const handleDetail = () => {
     navigate(`/${userId}/donate/${accountNumber}`);
@@ -41,15 +51,30 @@ export const AccountMenu = ({
 
   const handleStop = () => {
     if (isPaused) {
-      console.log('기부 시작 모달 열기');
+      setModalState({
+        isOpen: true,
+        mainMessage: '자동기부를 다시 시작 합니다',
+        detailMessage: '계좌 메뉴탭에서 기부를 다시 중지할 수 있어요',
+      });
     } else {
-      console.log('기부 중지 모달 열기');
+      setModalState({
+        isOpen: true,
+        mainMessage: '자동기부를 일시중지 합니다',
+        detailMessage: '계좌 메뉴탭에서 기부를 다시 시작할 수 있어요',
+      });
     }
-    onClose();
   };
 
   const handleDelete = () => {
-    console.log('기부 삭제 모달 열기');
+    setModalState({
+      isOpen: true,
+      mainMessage: '자동기부설정을 삭제합니다',
+      detailMessage: '메인화면에서 자동기부 계좌로 다시 등록 할 수 있어요',
+    });
+  };
+
+  const handleModalClose = () => {
+    setModalState({ ...modalState, isOpen: false });
     onClose();
   };
 
@@ -88,6 +113,13 @@ export const AccountMenu = ({
           <AccountSettingModal onClose={() => setIsSettingModalOpen(false)} accountInfo={accountInfo} />,
           document.body,
         )}
+      {modalState.isOpen && (
+        <Modal
+          mainMessage={modalState.mainMessage}
+          detailMessage={modalState.detailMessage}
+          onClose={handleModalClose}
+        />
+      )}
     </>
   );
 };
