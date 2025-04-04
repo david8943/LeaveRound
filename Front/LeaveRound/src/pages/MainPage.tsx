@@ -1,13 +1,45 @@
-import { Link } from "react-router-dom";
-import AddAccountIcon from "@/assets/icons/AddAccount.svg";
-import ArrowRightIcon from "@/assets/icons/ArrowRight.svg";
-import tossIcon from "@/assets/icons/toss.svg";
-import AccountPreview from "@/components/Account/AccountPreview";
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import AddAccountIcon from '@/assets/icons/AddAccount.svg';
+import ArrowRightIcon from '@/assets/icons/ArrowRight.svg';
+import tossIcon from '@/assets/icons/toss.svg'; // 아이콘 임시 고정
+import AccountPreview from '@/components/Account/AccountPreview';
+import useAxios from '@/hooks/useAxios';
+import { API } from '@/constants/url';
+import { getBankIcon } from '@/constants/bankIconMap';
+
+type Account = {
+  autoDonationId: number | null;
+  bankName: string;
+  accountNo: string;
+  accountMoney: string;
+  accountStatus: 'AUTO_ENABLED' | 'AUTO_PAUSED' | 'AUTO_DISABLED';
+};
 
 const MainPage: React.FC = () => {
+  const [accounts, setAccounts] = useState<Account[]>([]);
+
+  const { response, refetch } = useAxios<{ result: Account[] }>({
+    url: API.member.account,
+    method: 'get',
+    executeOnMount: false, // mount 시 자동 실행 방지
+  });
+
+  // 요청은 딱 한 번만 보내도록 설정
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (response?.result) {
+      setAccounts(response.result);
+    }
+  }, [response]);
+
   return (
     <div className="px-[32px] pt-[98px] pb-[95px]">
-      {/* 총 기부금액 */}
+      {/* 총 기부금액 (하드코딩된 값) */}
       <p className="text-detail text-right">총 기부금액</p>
       <p className="text-[36px] text-right mt-[12px] font-heading">17,450,405 원</p>
 
@@ -25,60 +57,35 @@ const MainPage: React.FC = () => {
       </div>
 
       <div className="mt-[16px] space-y-[16px]">
-        <AccountPreview
-          bankIcon={tossIcon}
-          bankName="토스뱅크"
-          accountNumber="112398849502"
-          balance={1798493}
-          accountStatus="AUTO_ENABLED"
-        />
-        <AccountPreview
-          bankIcon={tossIcon}
-          bankName="토스뱅크"
-          accountNumber="112398849502"
-          balance={1798493}
-          accountStatus="AUTO_PAUSED"
-        />
-        <AccountPreview
-          bankIcon={tossIcon}
-          bankName="토스뱅크"
-          accountNumber="112398849502"
-          balance={1798493}
-          accountStatus="AUTO_PAUSED"
-        />
+        {accounts
+          .filter((acc) => acc.accountStatus !== 'AUTO_DISABLED')
+          .map((acc, idx) => (
+            <AccountPreview
+              key={idx}
+              bankIcon={getBankIcon(acc.bankName)}
+              bankName={acc.bankName}
+              accountNumber={acc.accountNo}
+              balance={Number(acc.accountMoney)}
+              accountStatus={acc.accountStatus}
+            />
+          ))}
       </div>
 
       {/* 등록되지 않은 계좌 */}
       <p className="mt-[32px] text-body">등록되지 않은 계좌</p>
       <div className="mt-[16px] space-y-[16px]">
-        <AccountPreview
-          bankIcon={tossIcon}
-          bankName="신한은행"
-          accountNumber="123456789012"
-          balance={352000}
-          accountStatus="AUTO_DISABLED"
-        />
-        <AccountPreview
-          bankIcon={tossIcon}
-          bankName="신한은행"
-          accountNumber="123456789012"
-          balance={352000}
-          accountStatus="AUTO_DISABLED"
-        />
-        <AccountPreview
-          bankIcon={tossIcon}
-          bankName="신한은행"
-          accountNumber="123456789012"
-          balance={352000}
-          accountStatus="AUTO_DISABLED"
-        />
-        <AccountPreview
-          bankIcon={tossIcon}
-          bankName="신한은행"
-          accountNumber="123456789012"
-          balance={352000}
-          accountStatus="AUTO_DISABLED"
-        />
+        {accounts
+          .filter((acc) => acc.accountStatus === 'AUTO_DISABLED')
+          .map((acc, idx) => (
+            <AccountPreview
+              key={idx}
+              bankIcon={getBankIcon(acc.bankName)}
+              bankName={acc.bankName}
+              accountNumber={acc.accountNo}
+              balance={Number(acc.accountMoney)}
+              accountStatus={acc.accountStatus}
+            />
+          ))}
       </div>
     </div>
   );

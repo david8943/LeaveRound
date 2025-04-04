@@ -5,7 +5,7 @@ export const API = {
     signup: `${API_VERSION}/users`,
     login: `${API_VERSION}/users/login`,
     info: (userId: string) => `${API_VERSION}/users/${userId}`,
-    account: (userId: string) => `${API_VERSION}/users/${userId}/acounts`,
+    account: `${API_VERSION}/users/accounts`,
   },
   event: {
     getYellowDandelion: (dandelionId: string) => `${API_VERSION}/dandelions/collections/gold/${dandelionId}`,
