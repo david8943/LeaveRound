@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ssafy.Dandelion.domain.user.dto.UserRequestDTO;
 import com.ssafy.Dandelion.domain.user.dto.UserResponseDTO;
 import com.ssafy.Dandelion.domain.user.dto.request.UserLoginRequestDTO;
 import com.ssafy.Dandelion.domain.user.dto.request.UserSignUpRequestDTO;
@@ -69,6 +70,14 @@ public class UserController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		List<UserResponseDTO.AccountDTO> accountList = userService.readUserAllAccounts(customUserDetails.getUserId());
 		return ApiResponse.of(SuccessStatus.USERINFO_SUCCESS, accountList);
+	}
+
+	@PostMapping("/accounts")
+	public ApiResponse<Void> createUserAccount(
+		@AuthenticationPrincipal CustomUserDetails customUserDetails,
+		@RequestBody UserRequestDTO.DepositAccount depositAccount) {
+		userService.depositUserAccount(customUserDetails.getUserId(), depositAccount);
+		return ApiResponse.onSuccess(null);
 	}
 
 }
