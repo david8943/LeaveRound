@@ -6,6 +6,20 @@ import { AccountMenu } from '@/components/Account/AccountMenu';
 import { AccountSettingModal } from './AccountSettingModal';
 import { createPortal } from 'react-dom';
 
+// 타입 정의
+type DonationAmount =
+  | 'FIVE_HUNDRED'
+  | 'ONE_THOUSAND'
+  | 'ONE_THOUSAND_FIVE_HUNDRED'
+  | 'TWO_THOUSAND'
+  | 'TWO_THOUSAND_FIVE_HUNDRED'
+  | 'THREE_THOUSAND'
+  | 'THREE_THOUSAND_FIVE_HUNDRED'
+  | 'FOUR_THOUSAND'
+  | 'FIVE_THOUSAND';
+
+type DonationTime = 'ONE_DAY' | 'TWO_DAY' | 'THREE_DAY' | 'FOUR_DAY' | 'FIVE_DAY' | 'SIX_DAY' | 'SEVEN_DAY';
+
 // 전역 상태를 관리하기 위한 변수
 let activeMenuId: string | null = null;
 const menuCloseListeners: Map<string, () => void> = new Map();
@@ -18,15 +32,18 @@ interface DonationAccountCardProps {
     accountNumber: string;
     balance: number;
     autoDonation?: 'active' | 'inactive' | 'unregistered';
-    paymentUnit?: string;
-    paymentFrequency?: string;
+    paymentUnit?: DonationAmount;
+    paymentFrequency?: DonationTime;
     paymentPurpose?: string;
     paymentAmount?: number;
+    autoDonationId?: number;
   };
-  id: string; // 카드 식별을 위한 고유 ID
+  id: string;
+  onStatusChange?: () => void;
+  onDelete?: () => void;
 }
 
-export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProps) {
+export function DonationAccountCard({ accountInfo, id, onStatusChange, onDelete }: DonationAccountCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
@@ -40,15 +57,16 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
     balance,
     bankIcon = tossIcon,
     autoDonation = 'unregistered',
-    paymentUnit = '10원',
-    paymentFrequency = '매일',
-    paymentPurpose = '싸피복지관',
-    paymentAmount = 1330,
+    paymentUnit,
+    paymentFrequency,
+    paymentPurpose,
+    paymentAmount,
+    autoDonationId,
   } = accountInfo;
 
   // 금액 포맷팅 (1,000단위 콤마)
   const formattedBalance = balance.toLocaleString('ko-KR');
-  const formattedPaymentAmount = paymentAmount.toLocaleString('ko-KR');
+  const formattedPaymentAmount = paymentAmount ? paymentAmount.toLocaleString('ko-KR') : '0';
 
   // 메뉴 닫기 함수
   const closeMenu = () => {
@@ -109,6 +127,20 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
     setIsSettingModalOpen(true);
   };
 
+  const handleStatusChange = () => {
+    closeMenu();
+    if (onStatusChange) {
+      onStatusChange();
+    }
+  };
+
+  const handleDelete = () => {
+    closeMenu();
+    if (onDelete) {
+      onDelete();
+    }
+  };
+
   // 자동기부 상태에 따른 스타일 결정
   const cardStyle = () => {
     switch (autoDonation) {
@@ -126,9 +158,37 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
     setIsExpanded(!isExpanded);
   };
 
+  const getDonationAmountLabel = (value: DonationAmount) => {
+    const amounts: { [key in DonationAmount]: string } = {
+      FIVE_HUNDRED: '500원',
+      ONE_THOUSAND: '1,000원',
+      ONE_THOUSAND_FIVE_HUNDRED: '1,500원',
+      TWO_THOUSAND: '2,000원',
+      TWO_THOUSAND_FIVE_HUNDRED: '2,500원',
+      THREE_THOUSAND: '3,000원',
+      THREE_THOUSAND_FIVE_HUNDRED: '3,500원',
+      FOUR_THOUSAND: '4,000원',
+      FIVE_THOUSAND: '5,000원',
+    };
+    return amounts[value] || value;
+  };
+
+  const getDonationTimeLabel = (value: DonationTime) => {
+    const times: { [key in DonationTime]: string } = {
+      ONE_DAY: '1일',
+      TWO_DAY: '2일',
+      THREE_DAY: '3일',
+      FOUR_DAY: '4일',
+      FIVE_DAY: '5일',
+      SIX_DAY: '6일',
+      SEVEN_DAY: '7일',
+    };
+    return times[value] || value;
+  };
+
   return (
     <>
-      <div className={`flex flex-col mx-8 p-4 mb-[12px] rounded-[8px] border ${cardStyle()}`}>
+      <div className={`flex flex-col mx-4 p-4 mb-[12px] rounded-[8px] border ${cardStyle()}`}>
         <div className='relative ml-[1rem]'>
           {/* 계좌 정보 */}
           <div className='flex items-center gap-[21px] flex-shrink-0'>
@@ -153,7 +213,7 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
               </button>
               {/* 메뉴 드롭다운 */}
               {isMenuOpen && (
-                <div ref={menuRef} className='absolute top-full right-0 -mt-2 z-20'>
+                <div ref={menuRef} className='absolute top-full right-0 mt-1 z-20'>
                   <AccountMenu
                     onClose={closeMenu}
                     accountNumber={accountNumber}
@@ -165,9 +225,11 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
                       paymentFrequency,
                       paymentPurpose,
                       paymentAmount,
+                      autoDonationId,
                     }}
                     onModify={handleModify}
                     isPaused={autoDonation === 'inactive'}
+                    onStatusChange={handleStatusChange}
                   />
                 </div>
               )}
@@ -180,10 +242,10 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
           <div className='mt-4 pt-4 border-t border-gray-500'>
             <div className='grid grid-cols-2 gap-y-2 ml-3 mr-3'>
               <div className='text-gray-700'>기부 금액 단위</div>
-              <div className='text-right'>{paymentUnit}</div>
+              <div className='text-right'>{paymentUnit && getDonationAmountLabel(paymentUnit)}</div>
 
               <div className='text-gray-700'>기부 주기</div>
-              <div className='text-right'>{paymentFrequency}</div>
+              <div className='text-right'>{paymentFrequency && getDonationTimeLabel(paymentFrequency)}</div>
 
               <div className='text-gray-700'>기부하는 곳</div>
               <div className='text-right'>{paymentPurpose}</div>
@@ -216,6 +278,7 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
               paymentFrequency,
               paymentPurpose,
               paymentAmount,
+              autoDonationId,
             }}
           />,
           document.body,

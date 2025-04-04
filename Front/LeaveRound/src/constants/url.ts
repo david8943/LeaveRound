@@ -18,6 +18,10 @@ export const API = {
   },
   autoDonation: {
     detail: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}`,
+    list: (userId: string) => `${API_VERSION}/auto-donations?userId=${userId}`,
+    update: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}`,
+    toggleActive: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}/active`,
+    delete: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}`,
   },
   organization: {
     list: `${API_VERSION}/organizations`,

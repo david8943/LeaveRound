@@ -3,6 +3,29 @@ import { useState } from 'react';
 import { AccountSettingModal } from './AccountSettingModal';
 import { createPortal } from 'react-dom';
 import Modal from '@/components/Modal';
+import useAxios from '@/hooks/useAxios';
+import { API } from '@/constants/url';
+
+type DonationAmount =
+  | 'FIVE_HUNDRED'
+  | 'ONE_THOUSAND'
+  | 'ONE_THOUSAND_FIVE_HUNDRED'
+  | 'TWO_THOUSAND'
+  | 'TWO_THOUSAND_FIVE_HUNDRED'
+  | 'THREE_THOUSAND'
+  | 'THREE_THOUSAND_FIVE_HUNDRED'
+  | 'FOUR_THOUSAND'
+  | 'FOUR_THOUSAND_FIVE_HUNDRED'
+  | 'FIVE_THOUSAND';
+
+type DonationTime = 'ONE_DAY' | 'TWO_DAY' | 'THREE_DAY' | 'FOUR_DAY' | 'FIVE_DAY' | 'SIX_DAY' | 'SEVEN_DAY';
+
+interface ApiResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: null;
+}
 
 interface AccountMenuProps {
   onClose: () => void;
@@ -11,13 +34,16 @@ interface AccountMenuProps {
   accountInfo: {
     bankName: string;
     balance: number;
-    paymentUnit?: string;
-    paymentFrequency?: string;
+    paymentUnit?: DonationAmount;
+    paymentFrequency?: DonationTime;
     paymentPurpose?: string;
     paymentAmount?: number;
+    autoDonationId?: number;
+    accountNo?: string;
   };
   onModify: () => void;
   isPaused?: boolean;
+  onStatusChange?: () => void;
 }
 
 export const AccountMenu = ({
@@ -27,6 +53,7 @@ export const AccountMenu = ({
   accountInfo,
   onModify,
   isPaused = false,
+  onStatusChange,
 }: AccountMenuProps) => {
   const navigate = useNavigate();
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
@@ -34,10 +61,34 @@ export const AccountMenu = ({
     isOpen: boolean;
     mainMessage: string;
     detailMessage: string;
+    isConfirmAction: boolean;
   }>({
     isOpen: false,
     mainMessage: '',
     detailMessage: '',
+    isConfirmAction: false,
+  });
+
+  const {
+    refetch: toggleActive,
+    response: toggleResponse,
+    loading: toggleLoading,
+    error: toggleError,
+  } = useAxios<ApiResponse>({
+    url: accountInfo.autoDonationId ? API.autoDonation.toggleActive(accountInfo.autoDonationId.toString()) : '',
+    method: 'patch',
+    executeOnMount: false,
+  });
+
+  const {
+    refetch: deleteDonation,
+    response: deleteResponse,
+    loading: deleteLoading,
+    error: deleteError,
+  } = useAxios<ApiResponse>({
+    url: accountInfo.autoDonationId ? API.autoDonation.delete(accountInfo.autoDonationId.toString()) : '',
+    method: 'delete',
+    executeOnMount: false,
   });
 
   const handleDetail = () => {
@@ -55,12 +106,14 @@ export const AccountMenu = ({
         isOpen: true,
         mainMessage: '자동기부를 다시 시작 합니다',
         detailMessage: '계좌 메뉴탭에서 기부를 다시 중지할 수 있어요',
+        isConfirmAction: true,
       });
     } else {
       setModalState({
         isOpen: true,
         mainMessage: '자동기부를 일시중지 합니다',
         detailMessage: '계좌 메뉴탭에서 기부를 다시 시작할 수 있어요',
+        isConfirmAction: true,
       });
     }
   };
@@ -70,17 +123,54 @@ export const AccountMenu = ({
       isOpen: true,
       mainMessage: '자동기부설정을 삭제합니다',
       detailMessage: '메인화면에서 자동기부 계좌로 다시 등록 할 수 있어요',
+      isConfirmAction: false,
     });
+  };
+
+  const handleModalConfirm = async () => {
+    if (!accountInfo.autoDonationId) {
+      console.error('자동기부 ID가 없습니다.');
+      return;
+    }
+
+    try {
+      if (modalState.isConfirmAction) {
+        await toggleActive();
+        if (toggleResponse?.isSuccess) {
+          setModalState({ ...modalState, isOpen: false });
+          onClose();
+          if (onStatusChange) {
+            onStatusChange();
+          }
+        } else {
+          console.error('자동기부 상태 변경 실패:', toggleResponse?.message);
+        }
+      } else {
+        await deleteDonation();
+        if (deleteResponse?.isSuccess) {
+          setModalState({ ...modalState, isOpen: false });
+          onClose();
+          if (onStatusChange) {
+            onStatusChange();
+          }
+        } else {
+          console.error('자동기부 삭제 실패:', deleteResponse?.message);
+        }
+      }
+    } catch (error) {
+      console.error('자동기부 작업 중 오류 발생:', error);
+    }
   };
 
   const handleModalClose = () => {
     setModalState({ ...modalState, isOpen: false });
-    onClose();
   };
 
-  // 버튼 호버 공통 스타일 변수
   const menuItemClass =
     'w-full py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white transition-colors duration-200 rounded-lg';
+
+  if (toggleLoading || deleteLoading) return <div>처리 중...</div>;
+  if (toggleError || deleteError) return <div>오류가 발생했습니다.</div>;
 
   return (
     <>
@@ -118,8 +208,19 @@ export const AccountMenu = ({
           mainMessage={modalState.mainMessage}
           detailMessage={modalState.detailMessage}
           onClose={handleModalClose}
+          onConfirmClick={modalState.isConfirmAction ? handleModalConfirm : undefined}
+          confirmText={modalState.isConfirmAction ? '확인' : undefined}
         />
       )}
     </>
   );
+};
+
+const testAccountInfo = {
+  bankName: '테스트은행',
+  balance: 100000,
+  autoDonationId: 1,
+  accountNo: '1234567890',
+  paymentUnit: 'ONE_THOUSAND' as DonationAmount,
+  paymentFrequency: 'ONE_DAY' as DonationTime,
 };
