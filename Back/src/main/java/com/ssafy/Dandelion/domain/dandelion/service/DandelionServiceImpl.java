@@ -252,10 +252,7 @@ public class DandelionServiceImpl implements DandelionService {
 		List<Object[]> goldCollectionData = goldDandelionRepository.findGoldDandelionCollectionRankingBetween(startDate,
 			endDate);
 
-		// 2. 이번 달에 사용자가 기부한 황금 민들레 데이터 조회
-		List<Object[]> goldDonationData = donationInfoRepository.findMonthlyGoldDonationRanking(startDate, endDate);
-
-		// 사용자별 황금 민들레 합산 맵 생성 (수집 + 기부)
+		// 사용자별 황금 민들레 합산 맵 생성 (수집)
 		Map<Integer, Integer> userGoldCountMap = new HashMap<>();
 
 		// 수집 데이터 합산
@@ -263,15 +260,6 @@ public class DandelionServiceImpl implements DandelionService {
 			Integer userID = (Integer)data[0];
 			Long collectionCount = ((Number)data[1]).longValue();
 			userGoldCountMap.put(userID, collectionCount.intValue());
-		}
-
-		// 기부 데이터 합산 (이미 기부한 것도 수집한 것으로 간주)
-		for (Object[] data : goldDonationData) {
-			Integer userID = (Integer)data[0];
-			Long donationCount = ((Number)data[1]).longValue();
-
-			// 이미 해당 사용자의 데이터가 있으면 합산, 없으면 새로 추가
-			userGoldCountMap.merge(userID, donationCount.intValue(), Integer::sum);
 		}
 
 		// 합산 데이터를 내림차순으로 정렬
