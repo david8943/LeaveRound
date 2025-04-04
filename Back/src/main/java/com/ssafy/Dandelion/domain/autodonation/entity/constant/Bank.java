@@ -3,11 +3,14 @@ package com.ssafy.Dandelion.domain.autodonation.entity.constant;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.stream.IntStream;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @AllArgsConstructor
+@ToString
 public enum Bank {
 	HANKOOK("001", "한국은행", "001-1-3f424fd78ee94d"),
 	SANEOB("002", "산업은행", "002-1-8168e2f2b57343"),
@@ -56,7 +59,6 @@ public enum Bank {
 
 		return IntStream.range(0, count)
 			.map(i -> RANDOM.nextInt(bankList.size()))
-			.distinct()
 			.limit(count)
 			.mapToObj(bankList::get)
 			.toList();
