@@ -156,7 +156,7 @@ public class SsafyApiProperties {
 
 	public void sendAutoDonation(String userKey, AutoDonation autoDonation, String accountBalance,
 		String organizationAccount) {
-		String url = createApiUrl("/ssafy/api/v1/edu/demandDeposit/updateDemand");
+		String url = createApiUrl("/ssafy/api/v1/edu/demandDeposit/updateDemandDepositAccountTransfer");
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("Header", SsafyApiProperties.SsafyApiHeader.createSsafyApiHeaderTemplate(
