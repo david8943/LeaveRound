@@ -2,6 +2,7 @@ package com.ssafy.Dandelion.domain.user.service;
 
 import static com.ssafy.Dandelion.domain.autodonation.entity.constant.Bank.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -160,17 +161,19 @@ public class UserServiceImpl implements UserService {
 			int availableGoldDandelionCount = dandelionService.getAvailableGoldDandelionCount(userId);
 			int goldDandelionUseCount = totalGoldDandelionCount - availableGoldDandelionCount;
 
-			// User 객체를 새로 생성하여 민들레 정보 업데이트
-			user = User.builder()
+			// DTO를 직접 생성
+			DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+
+			return UserInfoResponseDTO.builder()
 				.userId(user.getUserId())
 				.name(user.getName())
 				.email(user.getEmail())
-				.password(user.getPassword())
 				.userKey(user.getUserKey())
 				.dandelionCount(availableDandelionCount)
-				.dandelionUseCount(dandelionUseCount)
 				.goldDandelionCount(availableGoldDandelionCount)
-				.goldDandelionUseCount(goldDandelionUseCount)
+				.totalDonationCount(dandelionUseCount + (goldDandelionUseCount * 100))
+				.createdAt(user.getCreatedAt() != null ? user.getCreatedAt().format(formatter) : "")
+				.updatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt().format(formatter) : "")
 				.build();
 
 		} catch (Exception e) {
