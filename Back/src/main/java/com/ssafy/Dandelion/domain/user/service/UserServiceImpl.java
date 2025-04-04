@@ -1,6 +1,6 @@
 package com.ssafy.Dandelion.domain.user.service;
 
-import static com.ssafy.Dandelion.domain.autodonation.entity.constant.Bank.getRandomBanks;
+import static com.ssafy.Dandelion.domain.autodonation.entity.constant.Bank.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import com.ssafy.Dandelion.domain.autodonation.entity.AutoDonation;
 import com.ssafy.Dandelion.domain.autodonation.entity.constant.Bank;
 import com.ssafy.Dandelion.domain.autodonation.repository.AutoDonationRepository;
+import com.ssafy.Dandelion.domain.dandelion.service.DandelionService;
 import com.ssafy.Dandelion.domain.user.dto.UserRequestDTO;
 import com.ssafy.Dandelion.domain.user.dto.UserResponseDTO;
 import com.ssafy.Dandelion.domain.user.dto.constant.AccountStatus;
@@ -47,6 +48,7 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final AutoDonationRepository autoDonationRepository;
+	private final DandelionService dandelionService;
 	private final PasswordEncoder passwordEncoder;
 	private final RestTemplate restTemplate;
 	private final SsafyApiProperties ssafyApiProperties;
@@ -142,8 +144,38 @@ public class UserServiceImpl implements UserService {
 	 */
 	@Override
 	public UserInfoResponseDTO getUserInfo(Integer userId) {
+		// 기본 사용자 정보 조회
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
+		// 민들레 서비스를 통해 민들레 정보 조회
+		try {
+			// 일반 민들레 총 개수와 기부 가능한 개수 조회
+			int totalDandelionCount = dandelionService.getTotalDandelionCount(userId);
+			int availableDandelionCount = dandelionService.getAvailableDandelionCount(userId);
+			int dandelionUseCount = totalDandelionCount - availableDandelionCount;
+
+			// 황금 민들레 총 개수와 기부 가능한 개수 조회
+			int totalGoldDandelionCount = dandelionService.getTotalGoldDandelionCount(userId);
+			int availableGoldDandelionCount = dandelionService.getAvailableGoldDandelionCount(userId);
+			int goldDandelionUseCount = totalGoldDandelionCount - availableGoldDandelionCount;
+
+			// User 객체를 새로 생성하여 민들레 정보 업데이트
+			user = User.builder()
+				.userId(user.getUserId())
+				.name(user.getName())
+				.email(user.getEmail())
+				.password(user.getPassword())
+				.userKey(user.getUserKey())
+				.dandelionCount(availableDandelionCount)
+				.dandelionUseCount(dandelionUseCount)
+				.goldDandelionCount(availableGoldDandelionCount)
+				.goldDandelionUseCount(goldDandelionUseCount)
+				.build();
+
+		} catch (Exception e) {
+
+		}
 		return UserInfoResponseDTO.fromEntity(user);
 	}
 
