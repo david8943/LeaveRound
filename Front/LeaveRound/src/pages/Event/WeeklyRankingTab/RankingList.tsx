@@ -3,20 +3,15 @@ import Rank1Img from '@/assets/rank1.png';
 import Rank2Img from '@/assets/rank2.png';
 import Rank3Img from '@/assets/rank3.png';
 import WhiteDandelion from '@/assets/white-dandelion.png';
+import { TRankInfo } from '@/models/ranking';
 
-interface User {
-  rank: number;
-  name: string;
-  score: number;
-}
-
-interface RankingListProps {
-  users: User[];
+interface PRankingList {
+  users: TRankInfo[];
 }
 
 const rankImages = [Rank1Img, Rank2Img, Rank3Img];
 
-const RankingList: React.FC<RankingListProps> = ({ users }) => (
+const RankingList: React.FC<PRankingList> = ({ users }) => (
   <ul className='h-full flex flex-col justify-between'>
     {users.map((user) => (
       <li key={user.rank} className='flex justify-between items-center'>
@@ -32,7 +27,7 @@ const RankingList: React.FC<RankingListProps> = ({ users }) => (
           <div>
             <img className='w-[20px] h-[20px]' src={WhiteDandelion} />
           </div>
-          <div>{user.score}</div>
+          <div>{user.donateCount}</div>
         </div>
       </li>
     ))}
