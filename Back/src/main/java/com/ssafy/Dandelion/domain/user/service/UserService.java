@@ -2,6 +2,7 @@ package com.ssafy.Dandelion.domain.user.service;
 
 import java.util.List;
 
+import com.ssafy.Dandelion.domain.user.dto.UserRequestDTO;
 import com.ssafy.Dandelion.domain.user.dto.UserResponseDTO;
 import com.ssafy.Dandelion.domain.user.dto.request.UserLoginRequestDTO;
 import com.ssafy.Dandelion.domain.user.dto.request.UserSignUpRequestDTO;
@@ -19,4 +20,6 @@ public interface UserService {
 	UserInfoResponseDTO getUserInfo(Integer userId);
 
 	List<UserResponseDTO.AccountDTO> readUserAllAccounts(Integer userId);
+
+	void depositUserAccount(Integer userId, UserRequestDTO.DepositAccount depositAccount);
 }

@@ -47,4 +47,14 @@ public class UserRequestDTO {
 		private String lastTransactionDate;
 		private String currency;
 	}
+
+	@Getter
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@ToString
+	public static class DepositAccount {
+		private String accountNo;
+		private String accountBalance;
+	}
 }
