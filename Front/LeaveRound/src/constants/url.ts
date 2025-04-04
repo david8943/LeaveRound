@@ -8,13 +8,13 @@ export const API = {
     account: `${API_VERSION}/users/accounts`,
   },
   event: {
-    getYellowDandelion: (dandelionId: string) => `${API_VERSION}/dandelions/collections/gold/${dandelionId}`,
+    getGoldDandelion: (dandelionId: string) => `${API_VERSION}/dandelions/collections/gold/${dandelionId}`,
     getWhiteDandelion: (dandelionId: string) => `${API_VERSION}/dandelions/collections/personal/${dandelionId}`,
     whiteLocation: `${API_VERSION}/daldelions/locations/personal`,
-    yellowLocation: `${API_VERSION}/dandelions/locations/gold `,
+    goldLocation: `${API_VERSION}/dandelions/locations/gold `,
     donateDandelion: `${API_VERSION}/dandelions/donations/organizations`,
     whiteDandelionRanking: `${API_VERSION}/dandelions/donations/rankings/weekly`,
-    yellowDandelionRanking: `${API_VERSION}//dandelions/donations/rankings/gold/monthly`,
+    goldDandelionRanking: `${API_VERSION}/dandelions/donations/rankings/gold/monthly`,
   },
   autoDonation: {
     detail: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}`,
