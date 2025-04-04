@@ -1,15 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import Slider from 'react-slick';
-// import { BasicButton } from "@/components/common/BasicButton";
 import LeaveRound from '@/assets/icons/SeedLeaveRoundLarge.svg';
 import Card1 from '@/assets/images/OnboardingCard1.svg';
 import Card2 from '@/assets/images/OnboardingCard2.svg';
 import Card3 from '@/assets/images/OnboardingCard3.svg';
-import { API } from '@/constants/url';
-import useAxios from '@/hooks/useAxios';
 
 const Onboarding: React.FC = () => {
   const navigate = useNavigate();
@@ -25,21 +22,6 @@ const Onboarding: React.FC = () => {
     centerMode: true,
     centerPadding: '0%',
   };
-
-  const { response, refetch } = useAxios<any>({
-    url: API.event.whiteDandelionRanking,
-    method: 'get',
-    executeOnMount: false,
-  });
-
-  useEffect(() => {
-    const getList = () => {
-      refetch();
-    };
-
-    getList();
-    console.log('res: ', response);
-  }, []);
 
   return (
     <div className='bg-background flex flex-col items-center w-[var(--width-base)] mx-auto'>
