@@ -215,7 +215,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private void createUserAccounts(String userKey) {
-		List<Bank> selectedBanks = getRandomBanks(3);
+		List<Bank> selectedBanks = getRandomBanks(8);
 
 		for (Bank bank : selectedBanks) {
 			createUserAccount(userKey, bank);
