@@ -18,6 +18,7 @@ export const API = {
   },
   autoDonation: {
     detail: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}`,
+    totalAmount: `${API_VERSION}/auto-donations/user/total`,
   },
   organization: {
     list: `${API_VERSION}/organizations`,

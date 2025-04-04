@@ -17,30 +17,50 @@ type Account = {
 
 const MainPage: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [totalAmount, setTotalAmount] = useState<number>(0);
 
-  const { response, refetch } = useAxios<{ result: Account[] }>({
+  const {
+    response: accountsResponse,
+    refetch: refetchAccounts,
+  } = useAxios<{ result: Account[] }>({
     url: API.member.account,
-    method: 'get',
-    executeOnMount: false, // mount 시 자동 실행 방지
+    method: "get",
+    executeOnMount: false,
   });
 
-  // 요청은 딱 한 번만 보내도록 설정
+  const {
+    response: donationResponse,
+    refetch: refetchTotalDonation,
+  } = useAxios<{ result: { totalAccount: number } }>({
+    url: API.autoDonation.totalAmount,
+    method: "get",
+    executeOnMount: false,
+  });
+
   useEffect(() => {
-    refetch();
+    refetchAccounts();
+    refetchTotalDonation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (response?.result) {
-      setAccounts(response.result);
+    if (accountsResponse?.result) {
+      setAccounts(accountsResponse.result);
     }
-  }, [response]);
+  }, [accountsResponse]);
+
+  useEffect(() => {
+    if (donationResponse?.result?.totalAccount != null) {
+      setTotalAmount(donationResponse.result.totalAccount);
+    }
+  }, [donationResponse]);
 
   return (
     <div className="px-[32px] pt-[98px] pb-[95px]">
-      {/* 총 기부금액 (하드코딩된 값) */}
       <p className="text-detail text-right">총 기부금액</p>
-      <p className="text-[36px] text-right mt-[12px] font-heading">17,450,405 원</p>
+      <p className="text-[36px] text-right mt-[12px] font-heading">
+        {totalAmount.toLocaleString()} 원
+      </p>
 
       {/* 자동 기부 등록된 계좌 */}
       <div className="flex justify-between items-center mt-[45px]">
