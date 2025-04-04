@@ -1,23 +1,40 @@
 import { dandelionIcon } from '@/assets/aseets';
 import { AccountDetailCard } from '@/components/Account/AccountDetailCard';
 import TitleLayout from '@/components/layout/TitleLayout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import bracketsIcon from '@/assets/icons/brackets.svg';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import useAxios from '@/hooks/useAxios';
-import { API } from '@/constants/url';
 import { AutoDonationDetailResponse } from '@/types/donation';
 
+// 쿠키에서 값을 가져오는 함수
+const getCookie = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+  return null;
+};
+
 export const AccountDetail = () => {
-  const { userId, autoDonationId } = useParams<{ userId: string; autoDonationId: string }>();
+  const { autoDonationId } = useParams<{ autoDonationId: string }>();
   const [isExpanded, setIsExpanded] = useState(false);
+  const navigate = useNavigate();
+  const userId = getCookie('userId');
+
+  // 로그인한 사용자 정보 확인
+  useEffect(() => {
+    if (!userId) {
+      navigate('/login');
+      return;
+    }
+  }, [navigate, userId]);
 
   const { response, loading, error } = useAxios<AutoDonationDetailResponse>({
-    url: `/${userId}${API.autoDonation.detail(autoDonationId || '')}`,
+    url: `/api/auto-donations/${autoDonationId}?userId=${userId}`,
     method: 'get',
     config: {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        Authorization: `Bearer ${getCookie('accessToken')}`,
       },
     },
   });

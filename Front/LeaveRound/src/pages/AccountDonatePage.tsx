@@ -36,6 +36,7 @@ interface AutoDonationResponse {
 
 export const AccountDonate = () => {
   const { userId } = useParams();
+
   const [autoDonationAccounts, setAutoDonationAccounts] = useState<AutoDonationResponse>({
     activeAccounts: [
       {

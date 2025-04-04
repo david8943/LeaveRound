@@ -92,7 +92,7 @@ export const AccountMenu = ({
   });
 
   const handleDetail = () => {
-    navigate(`/${userId}/donate/${accountNumber}`);
+    navigate(`/${userId}/donate/${accountInfo.autoDonationId}`);
     onClose();
   };
 
