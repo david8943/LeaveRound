@@ -126,6 +126,13 @@ public class UserServiceImpl implements UserService {
 		return accountDTOS;
 	}
 
+	@Override
+	public void depositUserAccount(Integer userId, UserRequestDTO.DepositAccount depositAccount) {
+		String userKey = getUserKeyById(userId);
+
+		ssafyApiProperties.depositUserAccount(userKey, depositAccount);
+	}
+
 	/**
 	 * 사용자 정보 조회
 	 *
@@ -208,7 +215,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private void createUserAccounts(String userKey) {
-		List<Bank> selectedBanks = getRandomBanks(3);
+		List<Bank> selectedBanks = getRandomBanks(8);
 
 		for (Bank bank : selectedBanks) {
 			createUserAccount(userKey, bank);
@@ -235,8 +242,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	private String getUserKeyById(Integer userId) {
-		String userKey = userRepository.findById(userId)
-			.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND)).getUserKey();
+		String userKey = userRepository.findUserKeyByUserId(userId)
+			.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+
 		return userKey;
 	}
 
