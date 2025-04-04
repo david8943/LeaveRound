@@ -400,7 +400,7 @@ public class DandelionServiceImpl implements DandelionService {
 		// user 엔티티 업데이트
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new NotFoundHandler(ErrorStatus.MEMBER_NOT_FOUND));
-		user.setDandelionCount(user.getDandelionCount());
+		user.setDandelionCount(user.getDandelionCount() + 1);
 		userRepository.save(user);
 
 		// Redis에서 해당 민들레 위치 정보 삭제
