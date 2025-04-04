@@ -7,7 +7,15 @@ import { BasicButton } from '../common/BasicButton';
 import { ConfirmModal } from './ConfirmModal';
 import { OrganizationModal } from './OrganizationModal';
 import { createPortal } from 'react-dom';
-import { tossIcon } from '@/assets/aseets';
+import useAxios from '@/hooks/useAxios';
+import { API } from '@/constants/url';
+
+interface ApiResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: null;
+}
 
 // API enum 값과 일치하는 기부 금액 단위
 const DONATION_AMOUNTS = [
@@ -19,6 +27,7 @@ const DONATION_AMOUNTS = [
   { value: 'THREE_THOUSAND', label: '3,000원' },
   { value: 'THREE_THOUSAND_FIVE_HUNDRED', label: '3,500원' },
   { value: 'FOUR_THOUSAND', label: '4,000원' },
+  { value: 'FOUR_THOUSAND_FIVE_HUNDRED', label: '4,500원' },
   { value: 'FIVE_THOUSAND', label: '5,000원' },
 ] as const;
 
@@ -50,6 +59,8 @@ interface AccountSettingModalProps {
     paymentFrequency?: DonationTime;
     paymentPurpose?: string;
     paymentAmount?: number;
+    autoDonationId?: number;
+    accountNo?: string;
   };
 }
 
@@ -61,6 +72,18 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isOrganizationModalOpen, setIsOrganizationModalOpen] = useState(false);
   const [selectedPurpose, setSelectedPurpose] = useState(accountInfo.paymentPurpose || '');
+  const [organizationProjectId, setOrganizationProjectId] = useState<number>(1); // API 연동 시 실제 프로젝트 ID로 변경 필요
+
+  const {
+    response: updateResponse,
+    loading: updateLoading,
+    error: updateError,
+    refetch: updateDonation,
+  } = useAxios<ApiResponse>({
+    url: accountInfo.autoDonationId ? API.autoDonation.update(accountInfo.autoDonationId.toString()) : '',
+    method: 'put',
+    executeOnMount: false,
+  });
 
   const handleClose = () => {
     onClose();
@@ -70,14 +93,47 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
     setIsConfirmModalOpen(true);
   };
 
+  const handleConfirm = async () => {
+    if (!accountInfo.autoDonationId) {
+      console.error('자동기부 ID가 없습니다.');
+      return;
+    }
+
+    const updateData = {
+      accountNo: accountInfo.accountNo,
+      sliceMoney: settings.amount,
+      donationTime: settings.frequency,
+      bankName: accountInfo.bankName,
+      organizationProjectId: organizationProjectId,
+    };
+
+    try {
+      await updateDonation(updateData);
+
+      if (updateResponse?.isSuccess) {
+        onClose();
+      } else {
+        console.error('자동기부 설정 업데이트 실패:', updateResponse?.message);
+      }
+    } catch (error) {
+      console.error('자동기부 설정 업데이트 중 오류 발생:', error);
+    }
+  };
+
   const handleSelectOrganization = () => {
     setIsOrganizationModalOpen(true);
   };
 
-  const handleOrganizationSave = (purpose: string) => {
+  const handleOrganizationSave = (purpose: string, projectId?: number) => {
     setSelectedPurpose(purpose === '리브라운드가 정해주세요!' ? '기부처 랜덤 선택' : purpose);
+    if (projectId) {
+      setOrganizationProjectId(projectId);
+    }
     setIsOrganizationModalOpen(false);
   };
+
+  if (updateLoading) return <div>처리 중...</div>;
+  if (updateError) return <div>오류가 발생했습니다.</div>;
 
   return (
     <>
@@ -89,7 +145,7 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
         <div className='w-[120%] mb-[1rem] relative z-50'>
           <AccountCard
             accountInfo={{
-              accountNumber: '1234567890123456',
+              accountNumber: accountInfo.accountNo || '',
               bankName: accountInfo.bankName,
               balance: accountInfo.balance,
               autoDonation: 'active',
@@ -146,17 +202,15 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
           </div>
         </div>
         <div className='flex gap-2 relative z-50'>
-          <BasicButton text='설정하기' onClick={handleSave} className='w-[313px] h-[48px]' />
+          <BasicButton text='설정하기' onClick={handleSave} className='w-[313px] h-[48px]' disabled={updateLoading} />
         </div>
       </AccountModal>
       {isConfirmModalOpen &&
         createPortal(
           <div className='relative z-[9999]'>
             <ConfirmModal
-              onClose={() => {
-                setIsConfirmModalOpen(false);
-                handleClose();
-              }}
+              onClose={() => setIsConfirmModalOpen(false)}
+              onConfirm={handleConfirm}
               amount={parseInt(
                 DONATION_AMOUNTS.find((opt) => opt.value === settings.amount)?.label.replace(/[^0-9]/g, '') || '0',
               )}
