@@ -606,7 +606,7 @@ public class DandelionServiceImpl implements DandelionService {
 
 			// 새 민들레 엔티티 생성 및 저장
 			Dandelion dandelion = Dandelion.builder()
-				.userId(null) // 아직 수집되지 않음
+				.userId(userId) // 아직 수집되지 않음
 				.latitude(BigDecimal.valueOf(newLat))
 				.longitude(BigDecimal.valueOf(newLng))
 				.build();

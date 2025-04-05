@@ -39,7 +39,7 @@ public class DandelionController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Integer dandelionId,
 		@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
-		Integer userId = userDetails.getUserId().intValue();
+		Integer userId = userDetails.getUserId();
 		dandelionService.collectDandelionWithDistanceCheck(userId, dandelionId, locationRequestDTO);
 		return ApiResponse.of(SuccessStatus.DANDELION_COLLECT_SUCCESS, null);
 	}
@@ -50,7 +50,7 @@ public class DandelionController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable Integer dandelionId,
 		@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
-		Integer userId = userDetails.getUserId().intValue();
+		Integer userId = userDetails.getUserId();
 		dandelionService.collectGoldDandelionWithDistanceCheck(userId, dandelionId, locationRequestDTO);
 		return ApiResponse.of(SuccessStatus.GOLD_DANDELION_COLLECT_SUCCESS, null);
 	}
@@ -60,7 +60,7 @@ public class DandelionController {
 	public ApiResponse<List<DandelionLocationResponseDTO>> getPersonalDandelions(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
-		Integer userId = userDetails.getUserId().intValue();
+		Integer userId = userDetails.getUserId();
 		List<DandelionLocationResponseDTO> personalDandelions = dandelionService.getAndRelocatePersonalDandelions(
 			userId,
 			locationRequestDTO);
