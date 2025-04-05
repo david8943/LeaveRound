@@ -52,7 +52,7 @@ const GoldenDandelionTab: React.FC = () => {
               <img className='w-[20px] h-[20px]' src={YellowDandelion} />
             </div>
             <div className='text-detail'>
-              {myGoldRankInfo?.myGoldCount === 0 ? '행운의 황금 민들레를 찾아보세요!' : 0}
+              {myGoldRankInfo?.myGoldCount === 0 ? '행운의 황금 민들레를 찾아보세요!' : myGoldRankInfo?.myGoldCount}
             </div>
           </div>
         </div>

@@ -7,11 +7,14 @@ interface PDandelionWinners {
 }
 
 const DandelionWinners: React.FC<PDandelionWinners> = ({ winners }) => (
-  <ul className='text-center space-y-2'>
+  <ul className='text-center space-y-3'>
     {winners.map((winner, index) => (
       <li key={index} className='flex justify-between w-48 mx-auto'>
         <span>{winner.name}</span>
-        <img src={GoldenIcon} alt='icon' className='w-4 h-4' />
+        <div className='flex items-center space-x-1'>
+          <span>{winner.goldCount}</span>
+          <img src={GoldenIcon} alt='icon' className='w-4 h-4' />
+        </div>
       </li>
     ))}
   </ul>
