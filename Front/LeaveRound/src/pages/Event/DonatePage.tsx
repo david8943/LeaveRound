@@ -24,7 +24,7 @@ const DonatePage = () => {
     executeOnMount: false,
   });
 
-  const { response: isDonate, refetch: donate } = useAxios({
+  const { refetch: donate } = useAxios({
     url: API.event.donateDandelion,
     method: 'post',
     executeOnMount: false,
