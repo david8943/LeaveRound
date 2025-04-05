@@ -56,7 +56,7 @@ public class DandelionController {
 	}
 
 	// 일반 민들레 위치 조회(10개)
-	@GetMapping("/locations/personal")
+	@PostMapping("/locations/personal")
 	public ApiResponse<List<DandelionLocationResponseDTO>> getPersonalDandelions(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
