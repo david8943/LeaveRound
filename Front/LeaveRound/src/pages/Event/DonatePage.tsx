@@ -12,8 +12,8 @@ import { createPortal } from 'react-dom';
 
 const DonatePage = () => {
   const [userInfo, setUserInfo] = useState<User>();
-  const [whiteCnt, setWhiteCnt] = useState<number>();
-  const [yellowCnt, setYellowCnt] = useState<number>();
+  const [whiteCnt, setWhiteCnt] = useState<string>('');
+  const [goldCnt, setGoldCnt] = useState<string>('');
   const [selectedOrganizationId, setSelectedOrganizationId] = useState<number>();
   const [selectedPurpose, setSelectedPurpose] = useState<string>('기부처 랜덤');
   const [isOrganizationModalOpen, setIsOrganizationModalOpen] = useState<boolean>(false);
@@ -24,7 +24,7 @@ const DonatePage = () => {
     executeOnMount: false,
   });
 
-  const { refetch: donate } = useAxios({
+  const { response: isDonate, refetch: donate } = useAxios({
     url: API.event.donateDandelion,
     method: 'post',
     executeOnMount: false,
@@ -49,16 +49,29 @@ const DonatePage = () => {
   };
 
   const handleDonate = async () => {
-    if (!selectedOrganizationId) return alert('기부처를 지정해주세요');
-    if (whiteCnt <= 0 && yellowCnt <= 0) return alert('기부할 민들레를 입력해주세요');
+    if (!selectedOrganizationId) {
+      alert('기부처를 지정해주세요');
+      return;
+    }
 
-    await donate({
-      dandelionCount: whiteCnt,
-      goldDandelionCount: yellowCnt,
-      projectId: selectedOrganizationId,
-    });
+    try {
+      await donate({
+        dandelionCount: Number(whiteCnt),
+        goldDandelionCount: Number(goldCnt),
+        projectId: selectedOrganizationId,
+      });
 
-    alert('기부가 완료되었습니다!');
+      await refetch();
+
+      setWhiteCnt('');
+      setGoldCnt('');
+      setSelectedPurpose('기부처 랜덤');
+
+      alert('기부가 완료되었습니다!');
+    } catch (err) {
+      alert('기부 중 오류가 발생했습니다.');
+      console.error(err);
+    }
   };
 
   return (
@@ -96,8 +109,19 @@ const DonatePage = () => {
             <input
               type='number'
               value={whiteCnt}
-              onChange={(e) => setWhiteCnt(Number(e.target.value))}
-              placeholder={`${userInfo?.dandelionCount ?? ''}`}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === '') {
+                  setWhiteCnt('');
+                  return;
+                }
+                const num = Number(val);
+                const max = userInfo?.dandelionCount ?? 0;
+                if (num >= 0 && num <= max) {
+                  setWhiteCnt(val);
+                }
+              }}
+              placeholder={userInfo?.dandelionCount?.toString() ?? ''}
               className='placeholder-gray-400 px-1 text-center bg-transparent w-[46px] border-b-2 border-gray-600 mr-1'
             />
             <span>개</span>
@@ -111,9 +135,20 @@ const DonatePage = () => {
               <div>
                 <input
                   type='number'
-                  value={yellowCnt}
-                  onChange={(e) => setYellowCnt(Number(e.target.value))}
-                  placeholder={`${userInfo?.goldDandelionCount ?? ''}`}
+                  value={goldCnt}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') {
+                      setGoldCnt('');
+                      return;
+                    }
+                    const num = Number(val);
+                    const max = userInfo?.goldDandelionCount ?? 0;
+                    if (num >= 0 && num <= max) {
+                      setGoldCnt(val);
+                    }
+                  }}
+                  placeholder={userInfo?.goldDandelionCount?.toString() ?? ''}
                   className='bg-transparent w-[46px] border-b-2 border-gray-500 mr-1'
                 />
                 <span>개</span>
