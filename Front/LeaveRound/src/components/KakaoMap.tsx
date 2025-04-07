@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { dandelionLocation } from '@/models/dandelion';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import WhiteDandelionImg from '@/assets/whiteDan.png';
 import axios from '@/services/api';
 import { API } from '@/constants/url';
+import Modal from '@/components/Modal';
 
 declare global {
   interface Window {
@@ -20,8 +21,19 @@ interface KakaoMapProps {
 }
 
 const KakaoMap = ({ lat, lng, level = 2, onMapLoad, dandelions }: KakaoMapProps) => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState({
+    mainMessage: '',
+    detailMessage: '',
+  });
+
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const markerMapRef = useRef<Map<number, any>>(new Map()); // 🔑 마커 저장소
+  const markerMapRef = useRef<Map<number, any>>(new Map());
+
+  const showModal = (mainMessage: string, detailMessage: string) => {
+    setModalMessage({ mainMessage, detailMessage });
+    setModalOpen(true);
+  };
 
   useEffect(() => {
     const scriptId = 'kakao-map-script';
@@ -89,19 +101,20 @@ const KakaoMap = ({ lat, lng, level = 2, onMapLoad, dandelions }: KakaoMapProps)
               );
 
               if (res.data?.isSuccess) {
-                alert(`민들레 #${d.dandelionId} 획득!`);
+                showModal('홀씨를 획득했습니다', '고맙습니다');
 
-                // 지도에서 마커 제거
+                // 마커 제거
                 const markerToRemove = markerMapRef.current.get(d.dandelionId);
                 if (markerToRemove) {
-                  markerToRemove.setMap(null); // 👈 지도에서 제거
-                  markerMapRef.current.delete(d.dandelionId); // 메모리에서도 제거
+                  markerToRemove.setMap(null);
+                  markerMapRef.current.delete(d.dandelionId);
                 }
               } else {
-                alert('획득 실패: ' + res.data.message);
+                showModal('획득 실패', res.data?.message || '알 수 없는 오류');
               }
             } catch (err) {
               console.error('민들레 획득 실패:', err);
+              showModal('홀씨에 가까이 다가가 주세요', '지금 너무 멀리 있어요!');
             }
           });
         });
@@ -117,6 +130,17 @@ const KakaoMap = ({ lat, lng, level = 2, onMapLoad, dandelions }: KakaoMapProps)
     }
   }, [lat, lng, level, onMapLoad, dandelions]);
 
-  return <div ref={mapRef} className='h-[calc(100%-116px-58px)]' id='map' />;
+  return (
+    <>
+      <div ref={mapRef} className='h-[calc(100%-116px-58px)]' id='map' />
+      {modalOpen && (
+        <Modal
+          mainMessage={modalMessage.mainMessage}
+          detailMessage={modalMessage.detailMessage}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
+    </>
+  );
 };
 export default KakaoMap;
