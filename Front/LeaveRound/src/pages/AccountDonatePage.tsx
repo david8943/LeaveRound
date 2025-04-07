@@ -34,99 +34,38 @@ interface AutoDonationResponse {
   inactiveAccounts: AutoDonationAccount[];
 }
 
+// 쿠키에서 값을 가져오는 함수
+const getCookie = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+  return null;
+};
+
 export const AccountDonate = () => {
   const { userId } = useParams();
-
   const [autoDonationAccounts, setAutoDonationAccounts] = useState<AutoDonationResponse>({
-    activeAccounts: [
-      {
-        autoDonationId: 1,
-        bankName: '신한은행',
-        acountNo: '110-123-456789',
-        sliceMoney: 'ONE_THOUSAND',
-        donationTime: 'ONE_DAY',
-        organizationName: '초록우산 어린이재단',
-        isActive: true,
-      },
-      {
-        autoDonationId: 2,
-        bankName: '국민은행',
-        acountNo: '123-45-6789012',
-        sliceMoney: 'TWO_THOUSAND_FIVE_HUNDRED',
-        donationTime: 'THREE_DAY',
-        organizationName: '세이브더칠드런',
-        isActive: true,
-      },
-    ],
-    inactiveAccounts: [
-      {
-        autoDonationId: 3,
-        bankName: '우리은행',
-        acountNo: '1002-123-456789',
-        sliceMoney: 'FIVE_THOUSAND',
-        donationTime: 'SEVEN_DAY',
-        organizationName: '유니세프',
-        isActive: false,
-      },
-    ],
+    activeAccounts: [],
+    inactiveAccounts: [],
   });
 
-  const { response, refetch } = useAxios<{ result: AutoDonationResponse }>({
-    url: API.autoDonation.list(userId || ''),
+  // 자동기부 계좌 목록 조회
+  const { response: autoDonationResponse, refetch: refetchAutoDonation } = useAxios<{ result: AutoDonationResponse }>({
+    url: '/api/auto-donations',
     method: 'get',
     executeOnMount: false,
+    withCredentials: true,
   });
 
-  // 실제 API 호출 대신 목데이터 사용
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      // 개발 환경에서는 API 호출하지 않음
-      return;
-    }
-    if (userId) {
-      refetch();
-    }
-  }, [userId, refetch]);
+    refetchAutoDonation();
+  }, []);
 
-  // 실제 API 응답 처리
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      // 개발 환경에서는 목데이터 유지
-      return;
+    if (autoDonationResponse?.result) {
+      setAutoDonationAccounts(autoDonationResponse.result);
     }
-    if (response?.result) {
-      setAutoDonationAccounts(response.result);
-    }
-  }, [response]);
-
-  // 자동기부 상태 변경 핸들러 (목데이터용)
-  const handleStatusChange = (autoDonationId: number) => {
-    setAutoDonationAccounts((prev) => {
-      const activeAccount = prev.activeAccounts.find((acc) => acc.autoDonationId === autoDonationId);
-      const inactiveAccount = prev.inactiveAccounts.find((acc) => acc.autoDonationId === autoDonationId);
-
-      if (activeAccount) {
-        return {
-          activeAccounts: prev.activeAccounts.filter((acc) => acc.autoDonationId !== autoDonationId),
-          inactiveAccounts: [...prev.inactiveAccounts, { ...activeAccount, isActive: false }],
-        };
-      } else if (inactiveAccount) {
-        return {
-          activeAccounts: [...prev.activeAccounts, { ...inactiveAccount, isActive: true }],
-          inactiveAccounts: prev.inactiveAccounts.filter((acc) => acc.autoDonationId !== autoDonationId),
-        };
-      }
-      return prev;
-    });
-  };
-
-  // 자동기부 삭제 핸들러 (목데이터용)
-  const handleDelete = (autoDonationId: number) => {
-    setAutoDonationAccounts((prev) => ({
-      activeAccounts: prev.activeAccounts.filter((acc) => acc.autoDonationId !== autoDonationId),
-      inactiveAccounts: prev.inactiveAccounts.filter((acc) => acc.autoDonationId !== autoDonationId),
-    }));
-  };
+  }, [autoDonationResponse]);
 
   return (
     <TitleLayout title='자동기부 계좌목록'>
@@ -137,9 +76,9 @@ export const AccountDonate = () => {
         </div>
 
         {/* 활성화된 계좌 섹션 */}
-        {autoDonationAccounts.activeAccounts.length > 0 && (
-          <div className='mb-6'>
-            <h2 className='text-lg font-semibold mb-3 ml-[1rem]'>자동 기부중인 계좌</h2>
+        <div className='mb-6'>
+          <h2 className='text-lg font-semibold mb-3 ml-[1rem]'>자동 기부중인 계좌</h2>
+          {autoDonationAccounts.activeAccounts.length > 0 && (
             <div>
               {autoDonationAccounts.activeAccounts.map((account) => (
                 <DonationAccountCard
@@ -149,25 +88,24 @@ export const AccountDonate = () => {
                     userId: userId || '',
                     bankName: account.bankName,
                     accountNumber: account.acountNo || '',
-                    balance: 100000,
+                    balance: 0,
                     autoDonation: 'active',
                     paymentUnit: account.sliceMoney,
                     paymentFrequency: account.donationTime,
                     paymentPurpose: account.organizationName,
                     autoDonationId: account.autoDonationId,
                   }}
-                  onStatusChange={() => handleStatusChange(account.autoDonationId)}
-                  onDelete={() => handleDelete(account.autoDonationId)}
+                  onStatusChange={refetchAutoDonation}
                 />
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* 비활성화된 계좌 섹션 */}
-        {autoDonationAccounts.inactiveAccounts.length > 0 && (
-          <div>
-            <h2 className='text-lg font-semibold mb-3 ml-[1rem]'>기부 일시중지된 계좌</h2>
+        <div>
+          <h2 className='text-lg font-semibold mb-3 ml-[1rem]'>기부 일시중지된 계좌</h2>
+          {autoDonationAccounts.inactiveAccounts.length > 0 && (
             <div>
               {autoDonationAccounts.inactiveAccounts.map((account) => (
                 <DonationAccountCard
@@ -177,20 +115,19 @@ export const AccountDonate = () => {
                     userId: userId || '',
                     bankName: account.bankName,
                     accountNumber: account.acountNo || '',
-                    balance: 100000,
+                    balance: 0,
                     autoDonation: 'inactive',
                     paymentUnit: account.sliceMoney,
                     paymentFrequency: account.donationTime,
                     paymentPurpose: account.organizationName,
                     autoDonationId: account.autoDonationId,
                   }}
-                  onStatusChange={() => handleStatusChange(account.autoDonationId)}
-                  onDelete={() => handleDelete(account.autoDonationId)}
+                  onStatusChange={refetchAutoDonation}
                 />
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </TitleLayout>
   );

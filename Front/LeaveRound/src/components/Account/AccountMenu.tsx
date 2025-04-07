@@ -6,6 +6,21 @@ import Modal from '@/components/Modal';
 import useAxios from '@/hooks/useAxios';
 import { API } from '@/constants/url';
 
+// 쿠키에서 값을 가져오는 함수
+const getCookie = (name: string): string | null => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+};
+
+interface ApiResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: any;
+}
+
 type DonationAmount =
   | 'FIVE_HUNDRED'
   | 'ONE_THOUSAND'
@@ -19,13 +34,6 @@ type DonationAmount =
   | 'FIVE_THOUSAND';
 
 type DonationTime = 'ONE_DAY' | 'TWO_DAY' | 'THREE_DAY' | 'FOUR_DAY' | 'FIVE_DAY' | 'SIX_DAY' | 'SEVEN_DAY';
-
-interface ApiResponse {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: null;
-}
 
 interface AccountMenuProps {
   onClose: () => void;
@@ -69,26 +77,27 @@ export const AccountMenu = ({
     isConfirmAction: false,
   });
 
-  const {
-    refetch: toggleActive,
-    response: toggleResponse,
-    loading: toggleLoading,
-    error: toggleError,
-  } = useAxios<ApiResponse>({
+  const { refetch: toggleActive } = useAxios<ApiResponse>({
     url: accountInfo.autoDonationId ? API.autoDonation.toggleActive(accountInfo.autoDonationId.toString()) : '',
     method: 'patch',
     executeOnMount: false,
+    config: {
+      headers: {
+        Authorization: `Bearer ${getCookie('accessToken')}`,
+      },
+    },
+    data: { isActive: !isPaused },
   });
 
-  const {
-    refetch: deleteDonation,
-    response: deleteResponse,
-    loading: deleteLoading,
-    error: deleteError,
-  } = useAxios<ApiResponse>({
+  const { refetch: deleteDonation } = useAxios<ApiResponse>({
     url: accountInfo.autoDonationId ? API.autoDonation.delete(accountInfo.autoDonationId.toString()) : '',
     method: 'delete',
     executeOnMount: false,
+    config: {
+      headers: {
+        Authorization: `Bearer ${getCookie('accessToken')}`,
+      },
+    },
   });
 
   const handleDetail = () => {
@@ -135,30 +144,33 @@ export const AccountMenu = ({
 
     try {
       if (modalState.isConfirmAction) {
-        await toggleActive();
-        if (toggleResponse?.isSuccess) {
+        const response = await toggleActive();
+        if (response.isSuccess) {
           setModalState({ ...modalState, isOpen: false });
           onClose();
           if (onStatusChange) {
             onStatusChange();
           }
         } else {
-          console.error('자동기부 상태 변경 실패:', toggleResponse?.message);
+          console.error('자동기부 상태 변경 실패:', response.message || '알 수 없는 오류가 발생했습니다.');
+          alert('자동기부 상태 변경에 실패했습니다.');
         }
       } else {
-        await deleteDonation();
-        if (deleteResponse?.isSuccess) {
+        const response = await deleteDonation();
+        if (response.isSuccess) {
           setModalState({ ...modalState, isOpen: false });
           onClose();
           if (onStatusChange) {
             onStatusChange();
           }
         } else {
-          console.error('자동기부 삭제 실패:', deleteResponse?.message);
+          console.error('자동기부 삭제 실패:', response.message || '알 수 없는 오류가 발생했습니다.');
+          alert('자동기부 삭제에 실패했습니다.');
         }
       }
-    } catch (error) {
-      console.error('자동기부 작업 중 오류 발생:', error);
+    } catch (error: any) {
+      console.error('자동기부 작업 중 오류 발생:', error?.response?.data?.message || error);
+      alert('작업 처리 중 오류가 발생했습니다.');
     }
   };
 
@@ -168,9 +180,6 @@ export const AccountMenu = ({
 
   const menuItemClass =
     'w-full py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white transition-colors duration-200 rounded-lg';
-
-  if (toggleLoading || deleteLoading) return <div>처리 중...</div>;
-  if (toggleError || deleteError) return <div>오류가 발생했습니다.</div>;
 
   return (
     <>

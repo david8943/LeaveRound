@@ -8,13 +8,14 @@ interface UseAxiosProps {
   data?: any;
   config?: AxiosRequestConfig;
   executeOnMount?: boolean;
+  withCredentials?: boolean;
 }
 
 interface UseAxiosReturn<T> {
   response: T | null;
   error: AxiosError | null;
   loading: boolean;
-  refetch: (overrideData?: any) => Promise<void>;
+  refetch: (overrideData?: any) => Promise<T>;
 }
 
 const useAxios = <T = any>({
@@ -23,6 +24,7 @@ const useAxios = <T = any>({
   data = null,
   config = {},
   executeOnMount = true,
+  withCredentials = false,
 }: UseAxiosProps): UseAxiosReturn<T> => {
   const [response, setResponse] = useState<T | null>(null);
   const [error, setError] = useState<AxiosError | null>(null);
@@ -39,15 +41,18 @@ const useAxios = <T = any>({
           method,
           data: overrideData,
           ...config,
+          withCredentials,
         });
         setResponse(res.data);
+        return res.data;
       } catch (err) {
         setError(err as AxiosError);
+        throw err;
       } finally {
         setLoading(false);
       }
     },
-    [url, method, data, config],
+    [url, method, data, config, withCredentials],
   );
 
   useEffect(() => {
