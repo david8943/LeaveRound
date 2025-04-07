@@ -15,13 +15,13 @@ const Modal: React.FC<ModalProps> = ({ mainMessage, detailMessage, onClose, onCo
         <button className='absolute top-[16px] right-[18px]' onClick={onClose}>
           <img src={closeIcon} alt='닫기' width={20} height={20} />
         </button>
-        <p className="text-[20px] text-[#364663]">{mainMessage}</p>
-        <p className="text-detail mt-2 text-[#96A6C2]">{detailMessage}</p>
+        <p className='text-[20px] text-[#364663]'>{mainMessage}</p>
+        <p className='text-detail mt-2 text-[#96A6C2]'>{detailMessage}</p>
         <button
           className='mt-[18px] w-[327px] h-[50px] bg-primary text-white rounded-[8px]'
           onClick={onConfirmClick || onClose}
         >
-          확인
+          {confirmText}
         </button>
       </div>
     </div>
