@@ -172,6 +172,7 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 		return AutoDonationConverter.totalAccountDTO(findAutoDonations);
 	}
 
+	@Transactional
 	@Override
 	public void executeAutoDonation(AutoDonation autoDonation) {
 		User user = userRepository.findById(autoDonation.getUserId()).orElseThrow(
