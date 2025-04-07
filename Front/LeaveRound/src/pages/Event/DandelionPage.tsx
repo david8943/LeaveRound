@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import KakaoMap from '@/components/KakaoMap';
 import useAxios from '@/hooks/useAxios';
 import { API } from '@/constants/url';
-import { dandelionLocation } from '@/models/dandelion';
+import { WhiteDandelionLocation, GoldDandelionLocation } from '@/models/dandelion';
+import { User } from '@/models/member';
 
 const pageTitle: PTitle = {
   title: '이벤트',
@@ -26,47 +27,74 @@ const INIT_LOCATION = {
 
 const DandelionPage = () => {
   const navigate = useNavigate();
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number }>(INIT_LOCATION);
-  const prevLocationRef = useRef<{ lat: number; lng: number }>(INIT_LOCATION);
-  const [dandelions, setDandelions] = useState<dandelionLocation[]>([]);
+  const [whiteCount, setWhiteCount] = useState(0);
+  const [goldCount, setGoldCount] = useState(0);
+  const [userLocation, setUserLocation] = useState(INIT_LOCATION);
+  const [dandelions, setDandelions] = useState<WhiteDandelionLocation[]>([]);
+  const [goldDandelions, setGoldDandelions] = useState<GoldDandelionLocation[]>([]);
+  const prevLocationRef = useRef(INIT_LOCATION);
 
-  const { response, refetch: fetchDandelions } = useAxios<{
+  const { response: userInfoRes, refetch: fetchUserInfo } = useAxios<{ result: User }>({
+    url: API.member.signup,
+    method: 'get',
+    executeOnMount: false,
+  });
+
+  const { response: whiteRes, refetch: fetchWhiteDandelions } = useAxios<{
     isSuccess: boolean;
-    result: dandelionLocation[];
+    result: WhiteDandelionLocation[];
   }>({
     url: API.event.whiteLocation,
     method: 'post',
     executeOnMount: false,
   });
 
-  useEffect(() => {
-    if (response?.isSuccess) {
-      setDandelions(response.result);
-    }
-  }, [response]);
+  const { response: goldRes, refetch: fetchGoldDandelions } = useAxios<{
+    isSuccess: boolean;
+    result: GoldDandelionLocation[];
+  }>({
+    url: API.event.goldLocation,
+    method: 'get',
+    executeOnMount: false,
+  });
 
+  // 사용자 정보 요청 및 상태 반영
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
+    if (userInfoRes?.result) {
+      setWhiteCount(userInfoRes.result.dandelionCount);
+      setGoldCount(userInfoRes.result.goldDandelionCount);
+    }
+  }, [userInfoRes]);
+
+  // 위치 기반 민들레 요청
+  useEffect(() => {
+    if (whiteRes?.isSuccess) setDandelions(whiteRes.result);
+  }, [whiteRes]);
+
+  useEffect(() => {
+    if (goldRes?.isSuccess) setGoldDandelions(goldRes.result);
+  }, [goldRes]);
+
+  // 위치 추적 및 민들레 요청
   useEffect(() => {
     const updateLocation = () => {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          const newLocation = { lat: latitude, lng: longitude };
-
+        ({ coords }) => {
+          const newLoc = { lat: coords.latitude, lng: coords.longitude };
           const prev = prevLocationRef.current;
-          const isSameLocation =
-            prev && Math.abs(prev.lat - newLocation.lat) < 0.0001 && Math.abs(prev.lng - newLocation.lng) < 0.0001;
+          const isSame = Math.abs(prev.lat - newLoc.lat) < 0.0001 && Math.abs(prev.lng - newLoc.lng) < 0.0001;
 
-          if (!isSameLocation) {
-            prevLocationRef.current = newLocation;
-            setUserLocation(newLocation);
+          if (!isSame) {
+            prevLocationRef.current = newLoc;
+            setUserLocation(newLoc);
           }
         },
-        (err) => {
-          console.error('위치 정보를 가져오는 데 실패했습니다:', err);
-        },
-        {
-          enableHighAccuracy: true,
-        },
+        (err) => console.error('위치 정보를 가져오는 데 실패:', err),
+        { enableHighAccuracy: true },
       );
     };
 
@@ -76,20 +104,25 @@ const DandelionPage = () => {
   }, []);
 
   useEffect(() => {
-    fetchDandelions({
-      myLatitude: userLocation.lat,
-      myLongitude: userLocation.lng,
-    });
+    fetchWhiteDandelions({ myLatitude: userLocation.lat, myLongitude: userLocation.lng });
+    fetchGoldDandelions();
   }, [userLocation]);
 
   return (
     <div className='h-[calc(100vh-5rem)]'>
       <Title {...pageTitle} />
+
       <KakaoMap
-        lat={userLocation.lat || INIT_LOCATION.lat}
-        lng={userLocation.lng || INIT_LOCATION.lng}
+        lat={userLocation.lat}
+        lng={userLocation.lng}
         dandelions={dandelions}
+        goldDandelions={goldDandelions}
+        whiteCount={whiteCount}
+        setWhiteCount={setWhiteCount}
+        goldCount={goldCount}
+        setGoldCount={setGoldCount}
       />
+
       <div className='gap-20 h-[58px] flex justify-center items-center'>
         <div className='flex gap-1 items-center' onClick={() => navigate('/event/donationking')}>
           <img src={ListIcon} className='w-4 h-4' />
