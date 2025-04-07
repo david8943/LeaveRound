@@ -275,6 +275,7 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
               paymentPurpose,
               paymentAmount,
               autoDonationId,
+              accountNo: accountNumber,
             }}
           />,
           document.body,
