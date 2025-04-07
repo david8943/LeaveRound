@@ -16,7 +16,9 @@ import com.ssafy.Dandelion.domain.dandelion.dto.response.DandelionLocationRespon
 import com.ssafy.Dandelion.domain.dandelion.dto.response.GoldDandelionLocationResponseDTO;
 import com.ssafy.Dandelion.domain.dandelion.dto.response.MonthlyGoldRankingResponseDTO;
 import com.ssafy.Dandelion.domain.dandelion.dto.response.WeeklyRankingResponseDTO;
-import com.ssafy.Dandelion.domain.dandelion.service.DandelionService;
+import com.ssafy.Dandelion.domain.dandelion.service.DandelionCollectionService;
+import com.ssafy.Dandelion.domain.dandelion.service.DandelionDonationService;
+import com.ssafy.Dandelion.domain.dandelion.service.DandelionRankingService;
 import com.ssafy.Dandelion.global.apiPayload.ApiResponse;
 import com.ssafy.Dandelion.global.apiPayload.code.status.SuccessStatus;
 import com.ssafy.Dandelion.global.auth.user.CustomUserDetails;
@@ -31,74 +33,77 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DandelionController {
 
-	private final DandelionService dandelionService;
+	private final DandelionCollectionService collectionService;
+	private final DandelionDonationService donationService;
+	private final DandelionRankingService rankingService;
 
 	// 일반 민들레 수집
 	@PostMapping("/collections/personal/{dandelionId}")
 	public ApiResponse<Void> collectPersonalDandelion(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable Integer dandelionId,
-		@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
-		Integer userId = userDetails.getUserId();
-		dandelionService.collectDandelionWithDistanceCheck(userId, dandelionId, locationRequestDTO);
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@PathVariable Integer dandelionId,
+			@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
+		Integer userId = userDetails.getUserId().intValue();
+		collectionService.collectDandelion(userId, dandelionId, locationRequestDTO);
 		return ApiResponse.of(SuccessStatus.DANDELION_COLLECT_SUCCESS, null);
 	}
 
 	// 황금 민들레 수집
 	@PostMapping("/collections/gold/{dandelionId}")
 	public ApiResponse<Void> collectGoldDandelion(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable Integer dandelionId,
-		@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
-		Integer userId = userDetails.getUserId();
-		dandelionService.collectGoldDandelionWithDistanceCheck(userId, dandelionId, locationRequestDTO);
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@PathVariable Integer dandelionId,
+			@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
+		Integer userId = userDetails.getUserId().intValue();
+		collectionService.collectGoldDandelion(userId, dandelionId, locationRequestDTO);
 		return ApiResponse.of(SuccessStatus.GOLD_DANDELION_COLLECT_SUCCESS, null);
 	}
 
 	// 일반 민들레 위치 조회(10개)
 	@PostMapping("/locations/personal")
 	public ApiResponse<List<DandelionLocationResponseDTO>> getPersonalDandelions(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
-		Integer userId = userDetails.getUserId();
-		List<DandelionLocationResponseDTO> personalDandelions = dandelionService.getAndRelocatePersonalDandelions(
-			userId,
-			locationRequestDTO);
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@Valid @RequestBody DandelionLocationRequestDTO locationRequestDTO) {
+		Integer userId = userDetails.getUserId().intValue();
+		List<DandelionLocationResponseDTO> personalDandelions = collectionService.getPersonalDandelions(
+				userId, locationRequestDTO);
 		return ApiResponse.of(SuccessStatus.DANDELION_LOCATION_SUCCESS, personalDandelions);
 	}
 
-	// 황금 민들레 조회(한 달에 5개 새로 생성)
+
+	// 황금 민들레 조회
 	@GetMapping("/locations/gold")
 	public ApiResponse<List<GoldDandelionLocationResponseDTO>> getUncollectedGoldDandelions() {
-		List<GoldDandelionLocationResponseDTO> goldDandelions = dandelionService.getMonthlyUncollectedGoldDandelions();
+		List<GoldDandelionLocationResponseDTO> goldDandelions =
+				collectionService.getUncollectedGoldDandelions();
 		return ApiResponse.of(SuccessStatus.GOLD_DANDELION_LOCATION_SUCCESS, goldDandelions);
 	}
 
 	// 민들레 기부(일반 민들레, 황금 민들레)
 	@PostMapping("/donations/organizations")
 	public ApiResponse<Void> donateToOrganizations(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@Valid @RequestBody DandelionDonationRequestDTO donationRequestDTO) {
+			@AuthenticationPrincipal CustomUserDetails userDetails,
+			@Valid @RequestBody DandelionDonationRequestDTO donationRequestDTO) {
 		Integer userId = userDetails.getUserId().intValue();
-		dandelionService.donateDandelions(userId, donationRequestDTO);
+		donationService.donateDandelions(userId, donationRequestDTO);
 		return ApiResponse.of(SuccessStatus.DANDELION_DONATION_SUCCESS, null);
 	}
 
 	// 주간 기부 랭킹 조회
 	@GetMapping("/donations/rankings/weekly")
 	public ApiResponse<WeeklyRankingResponseDTO> getWeeklyRanking(
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
 		Integer userId = userDetails.getUserId().intValue();
-		WeeklyRankingResponseDTO weeklyRanking = dandelionService.getWeeklyRanking(userId);
+		WeeklyRankingResponseDTO weeklyRanking = rankingService.getWeeklyRanking(userId);
 		return ApiResponse.onSuccess(weeklyRanking);
 	}
 
 	// 월간 황금 민들레 랭킹 조회
 	@GetMapping("/donations/rankings/gold/monthly")
 	public ApiResponse<MonthlyGoldRankingResponseDTO> getMonthlyGoldRanking(
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
+			@AuthenticationPrincipal CustomUserDetails userDetails) {
 		Integer userId = userDetails.getUserId().intValue();
-		MonthlyGoldRankingResponseDTO monthlyGoldRanking = dandelionService.getMonthlyGoldRanking(userId);
+		MonthlyGoldRankingResponseDTO monthlyGoldRanking = rankingService.getMonthlyGoldRanking(userId);
 		return ApiResponse.onSuccess(monthlyGoldRanking);
 	}
 }

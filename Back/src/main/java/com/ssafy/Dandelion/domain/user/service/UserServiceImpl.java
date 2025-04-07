@@ -22,7 +22,6 @@ import org.springframework.web.client.RestTemplate;
 import com.ssafy.Dandelion.domain.autodonation.entity.AutoDonation;
 import com.ssafy.Dandelion.domain.autodonation.entity.constant.Bank;
 import com.ssafy.Dandelion.domain.autodonation.repository.AutoDonationRepository;
-import com.ssafy.Dandelion.domain.dandelion.service.DandelionService;
 import com.ssafy.Dandelion.domain.user.dto.UserRequestDTO;
 import com.ssafy.Dandelion.domain.user.dto.UserResponseDTO;
 import com.ssafy.Dandelion.domain.user.dto.constant.AccountStatus;
@@ -49,7 +48,6 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final AutoDonationRepository autoDonationRepository;
-	private final DandelionService dandelionService;
 	private final PasswordEncoder passwordEncoder;
 	private final RestTemplate restTemplate;
 	private final SsafyApiProperties ssafyApiProperties;
@@ -147,26 +145,24 @@ public class UserServiceImpl implements UserService {
 	public UserInfoResponseDTO getUserInfo(Integer userId) {
 		// 기본 사용자 정보 조회
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+				.orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
 
-		// 민들레 서비스를 통해 민들레 정보 조회
-		int availableDandelionCount = dandelionService.getAvailableDandelionCount(userId);
-		int availableGoldDandelionCount = dandelionService.getAvailableGoldDandelionCount(userId);
+		// 사용자의 총 기부량 계산
 		int totalDonationCount = user.getDandelionUseCount() + (user.getGoldDandelionUseCount() * 100);
 
 		DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
 		return UserInfoResponseDTO.builder()
-			.userId(user.getUserId())
-			.name(user.getName())
-			.email(user.getEmail())
-			.userKey(user.getUserKey())
-			.dandelionCount(availableDandelionCount)
-			.goldDandelionCount(availableGoldDandelionCount)
-			.totalDonationCount(totalDonationCount)
-			.createdAt(user.getCreatedAt() != null ? user.getCreatedAt().format(formatter) : "")
-			.updatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt().format(formatter) : "")
-			.build();
+				.userId(user.getUserId())
+				.name(user.getName())
+				.email(user.getEmail())
+				.userKey(user.getUserKey())
+				.dandelionCount(user.getDandelionCount()) // 직접 보유량 사용
+				.goldDandelionCount(user.getGoldDandelionCount()) // 직접 보유량 사용
+				.totalDonationCount(totalDonationCount)
+				.createdAt(user.getCreatedAt() != null ? user.getCreatedAt().format(formatter) : "")
+				.updatedAt(user.getUpdatedAt() != null ? user.getUpdatedAt().format(formatter) : "")
+				.build();
 	}
 
 	private boolean checkUserEmail(String email) {

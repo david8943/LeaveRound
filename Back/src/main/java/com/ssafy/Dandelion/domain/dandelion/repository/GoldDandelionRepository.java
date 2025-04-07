@@ -1,29 +1,18 @@
 package com.ssafy.Dandelion.domain.dandelion.repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
+import com.ssafy.Dandelion.domain.dandelion.entity.GoldDandelion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
-import com.ssafy.Dandelion.domain.dandelion.entity.GoldDandelion;
+import java.util.List;
 
-@Repository
 public interface GoldDandelionRepository extends JpaRepository<GoldDandelion, Integer> {
 
-	// 특정 기간 내에 아직 수집되지 않은 황금 민들레 조회
-	@Query("SELECT g FROM GoldDandelion g WHERE g.userId IS NULL AND g.createdAt BETWEEN :startDate AND :endDate")
-	List<GoldDandelion> findUncollectedGoldDandelionsBetween(
-		@Param("startDate") LocalDateTime startDate,
-		@Param("endDate") LocalDateTime endDate
-	);
-
-	// 특정 기간에 사용자가 수집한 황금 민들레 개수를 조회 (acquiredAt 기준)
-	@Query("SELECT g.userId, COUNT(g) FROM GoldDandelion g WHERE g.userId IS NOT NULL AND g.acquiredAt BETWEEN :startDate AND :endDate GROUP BY g.userId ORDER BY COUNT(g) DESC")
-	List<Object[]> findGoldDandelionCollectionRankingBetween(
-		@Param("startDate") LocalDateTime startDate,
-		@Param("endDate") LocalDateTime endDate
-	);
+    // 월간 황금 민들레 보유 및 기부한 수 합산 랭킹 조회
+    @Query(value =
+            "SELECT u.user_id, COALESCE(u.gold_dandelion_count, 0) + COALESCE(u.gold_dandelion_use_count, 0) as total_gold " +
+                    "FROM users u " +
+                    "WHERE (u.gold_dandelion_count > 0 OR u.gold_dandelion_use_count > 0) " +
+                    "ORDER BY total_gold DESC", nativeQuery = true)
+    List<Object[]> getMonthlyGoldDonationRanking();
 }
