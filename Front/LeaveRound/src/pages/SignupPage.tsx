@@ -26,7 +26,11 @@ const SignupPage: React.FC = () => {
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value;
     setEmail(newEmail);
-    setIsEmailValid(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail));
+    if (newEmail === '') {
+      setIsEmailValid(true);
+    } else {
+      setIsEmailValid(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail));
+    }
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +81,7 @@ const SignupPage: React.FC = () => {
               className="w-[312px] h-[34px] border-b outline-none bg-transparent border-[var(--text-deepgray)] placeholder-[var(--text-deepgray)]"
             />
             <div className="h-[16px] mt-[6px]">
-              {!isEmailValid && (
+              {!isEmailValid && email !== '' && (
                 <p className="text-detail text-primary">이메일 형식을 지켜주세요</p>
               )}
             </div>
