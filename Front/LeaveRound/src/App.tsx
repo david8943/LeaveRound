@@ -9,50 +9,56 @@ import Login from '@/pages/LoginPage.tsx';
 import Signup from '@/pages/SignupPage.tsx';
 import Organization from '@/pages/OrganizationPage.tsx';
 import TitleLayout from '@/components/layout/TitleLayout.tsx';
-import { useLocation } from 'react-router-dom';
 import DandelionPage from './pages/Event/DandelionPage.tsx';
 import MainPage from './pages/MainPage.tsx';
 import ManageAccountsPage from './pages/ManageAccountsPage.tsx';
+import PublicRouter from './router/PublicRouter.tsx';
+import ProtectedRoute from './router/ProtectedRoute.tsx';
+import { useAuthStore } from './stores/useAuthStore.ts';
+import { useEffect } from 'react';
 
 function App() {
-  const location = useLocation();
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const setIsLoggedIn = useAuthStore((state) => state.setIsLoggedIn);
 
-  // MenuBar를 숨길 경로들
-  const hideMenuBarPaths = ['/', '/login', '/signup'];
-
-  // 현재 경로가 해당 배열에 포함되는지 확인
-  const shouldShowMenuBar = !hideMenuBarPaths.includes(location.pathname);
+  useEffect(() => {
+    const isInSession = sessionStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(isInSession);
+  }, [setIsLoggedIn]);
 
   return (
     <div className='min-h-screen bg-background'>
       <div className='flex flex-col min-h-screen'>
         <main>
           <Routes>
-            <Route path='/' element={<Onboarding />} />
-            <Route path='/main' element={<MainPage />} />
-            <Route path='/manage' element={<ManageAccountsPage />} />
-            <Route path='/login' element={<Login />} />
-            <Route path='/signup' element={<Signup />} />
-            <Route path='/organization' element={<Organization />} />
-            <Route path='/:userId/donate' element={<AccountDonate />} />
-            <Route path='/:userId/donate/:id' element={<AccountDetail />} />
-            <Route path='/event'>
-              <Route index element={<DandelionPage />} />
-              <Route
-                element={
-                  <TitleLayout title='hihi'>
-                    <Outlet />
-                  </TitleLayout>
-                }
-              >
-                <Route path='donationking' element={<DonationKingPage />} />
-                <Route path='donate' element={<DonatePage />} />
+            <Route element={<PublicRouter />}>
+              <Route path='/' element={<Onboarding />} />
+              <Route path='/login' element={<Login />} />
+              <Route path='/signup' element={<Signup />} />
+            </Route>
+            <Route element={<ProtectedRoute />}>
+              <Route path='/main' element={<MainPage />} />
+              <Route path='/manage' element={<ManageAccountsPage />} />
+              <Route path='/organization' element={<Organization />} />
+              <Route path='/:userId/donate' element={<AccountDonate />} />
+              <Route path='/:userId/donate/:id' element={<AccountDetail />} />
+              <Route path='/event'>
+                <Route index element={<DandelionPage />} />
+                <Route
+                  element={
+                    <TitleLayout title='hihi'>
+                      <Outlet />
+                    </TitleLayout>
+                  }
+                >
+                  <Route path='donationking' element={<DonationKingPage />} />
+                  <Route path='donate' element={<DonatePage />} />
+                </Route>
               </Route>
             </Route>
           </Routes>
         </main>
-        {/* 조건부 렌더링 */}
-        {shouldShowMenuBar && <MenuBar />}
+        {isLoggedIn && <MenuBar />}
       </div>
     </div>
   );

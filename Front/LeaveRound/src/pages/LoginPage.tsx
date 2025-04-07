@@ -5,11 +5,14 @@ import TitleLayout from '@/components/layout/TitleLayout';
 import useAxios from '@/hooks/useAxios';
 import { API } from '@/constants/url';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<'invalid-email' | 'login-fail' | ''>('');
+
+  const { setIsLoggedIn } = useAuthStore.getState();
 
   const navigator = useNavigate();
 
@@ -47,6 +50,8 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     if (response && response.isSuccess) {
       navigator('/main');
+      sessionStorage.setItem('isLoggedIn', 'true');
+      setIsLoggedIn(true);
     }
   }, [response]);
 
