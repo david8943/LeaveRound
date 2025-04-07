@@ -8,6 +8,7 @@ import useAxios from '@/hooks/useAxios';
 interface OrganizationModalProps {
   onClose: () => void;
   onSave: (purpose: string) => void;
+  selectedId: (id: number) => void;
   currentPurpose?: string;
 }
 
@@ -25,9 +26,9 @@ type OrganizationListResponse = {
   };
 };
 
-export const OrganizationModal = ({ onClose, onSave, currentPurpose }: OrganizationModalProps) => {
+export const OrganizationModal = ({ onClose, onSave, selectedId, currentPurpose }: OrganizationModalProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all'); // 영어 id로 관리
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedOrganization, setSelectedOrganization] = useState(currentPurpose || '리브라운드가 정해주세요!');
 
   const { response, refetch } = useAxios<OrganizationListResponse>({
@@ -86,7 +87,10 @@ export const OrganizationModal = ({ onClose, onSave, currentPurpose }: Organizat
           {filteredOrganizations?.map((org: TOrganization) => (
             <button
               key={org.organizationId}
-              onClick={() => setSelectedOrganization(org.organizationName)}
+              onClick={() => {
+                selectedId(org.organizationProjectId);
+                setSelectedOrganization(org.organizationName);
+              }}
               className={`w-full px-4 py-[1rem] rounded-[0.5rem] border border-primary text-left ${
                 selectedOrganization === org.organizationName
                   ? 'bg-[rgba(255,217,95,0.8)]'

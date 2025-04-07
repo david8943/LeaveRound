@@ -33,6 +33,7 @@ interface AccountSettingModalProps {
 }
 
 export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClose, accountInfo }) => {
+  const [_selectedOrganizationId, setSelectedOrganizationId] = useState<number>();
   const [settings, setSettings] = useState<DonationSettings>({
     amount: 10,
     frequency: 'daily',
@@ -157,6 +158,7 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
           <OrganizationModal
             onClose={() => setIsOrganizationModalOpen(false)}
             onSave={handleOrganizationSave}
+            selectedId={setSelectedOrganizationId}
             currentPurpose={selectedPurpose === '기부처 랜덤 선택' ? '리브라운드가 정해주세요!' : selectedPurpose}
           />,
           document.body,
