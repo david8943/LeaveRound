@@ -15,7 +15,7 @@ const DonatePage = () => {
   const [whiteCnt, setWhiteCnt] = useState<string>('');
   const [goldCnt, setGoldCnt] = useState<string>('');
   const [selectedOrganizationId, setSelectedOrganizationId] = useState<number>();
-  const [selectedPurpose, setSelectedPurpose] = useState<string>('기부처 랜덤');
+  const [selectedPurpose, setSelectedPurpose] = useState<string>('');
   const [isOrganizationModalOpen, setIsOrganizationModalOpen] = useState<boolean>(false);
 
   const { response, refetch } = useAxios<{ result: User }>({
@@ -44,16 +44,11 @@ const DonatePage = () => {
   };
 
   const handleOrganizationSave = (purpose: string) => {
-    setSelectedPurpose(purpose === '리브라운드가 정해주세요!' ? '기부처 랜덤' : purpose);
+    setSelectedPurpose(purpose);
     setIsOrganizationModalOpen(false);
   };
 
   const handleDonate = async () => {
-    if (!selectedOrganizationId) {
-      alert('기부처를 지정해주세요');
-      return;
-    }
-
     try {
       await donate({
         dandelionCount: Number(whiteCnt),
@@ -65,7 +60,7 @@ const DonatePage = () => {
 
       setWhiteCnt('');
       setGoldCnt('');
-      setSelectedPurpose('기부처 랜덤');
+      setSelectedPurpose('');
 
       alert('기부가 완료되었습니다!');
     } catch (err) {
@@ -161,7 +156,7 @@ const DonatePage = () => {
       </div>
 
       <div className='px-10'>
-        <BasicButton text='기부하기' onClick={handleDonate} />
+        <BasicButton disabled={!selectedOrganizationId} text='기부하기' onClick={handleDonate} />
       </div>
 
       {isOrganizationModalOpen &&
@@ -170,7 +165,7 @@ const DonatePage = () => {
             onClose={() => setIsOrganizationModalOpen(false)}
             onSave={handleOrganizationSave}
             selectedId={setSelectedOrganizationId}
-            currentPurpose={selectedPurpose === '기부처 랜덤' ? '리브라운드가 정해주세요!' : selectedPurpose}
+            currentPurpose={selectedPurpose}
           />,
           document.body,
         )}
