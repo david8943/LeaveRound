@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.ssafy.Dandelion.domain.autodonation.dto.ResponseDTO;
 import com.ssafy.Dandelion.domain.autodonation.entity.AutoDonation;
 import com.ssafy.Dandelion.domain.user.dto.UserRequestDTO;
 
@@ -129,11 +130,11 @@ public class SsafyApiProperties {
 	}
 
 	public long getAccountInfo(String userKey, String accountNo) {
-		String url = createApiUrl("/ssafy/api/v1/edu/demandDeposit/inquireDemand");
+		String url = createApiUrl("/ssafy/api/v1/edu/demandDeposit/inquireDemandDepositAccount ");
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("Header", SsafyApiProperties.SsafyApiHeader.createSsafyApiHeaderTemplate(
-			"inquireDemandDepositAccountBalance",
+			"inquireDemandDepositAccount",
 			getApiKey(),
 			userKey
 		));
@@ -146,13 +147,13 @@ public class SsafyApiProperties {
 
 		// API 호출
 		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<UserRequestDTO.AccountInfos> accountInfos = restTemplate.exchange(
+		ResponseEntity<ResponseDTO.AccountInfo> accountInfo = restTemplate.exchange(
 			url,
 			HttpMethod.POST,
 			requestEntity,
-			UserRequestDTO.AccountInfos.class
+			ResponseDTO.AccountInfo.class
 		);
-		return Long.parseLong(accountInfos.getBody().getRec().get(0).getAccountBalance());
+		return Long.parseLong(accountInfo.getBody().getRec().getAccountBalance());
 	}
 
 	public void sendAutoDonation(String userKey, AutoDonation autoDonation, String accountBalance,

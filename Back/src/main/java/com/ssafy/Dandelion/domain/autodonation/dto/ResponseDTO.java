@@ -100,4 +100,37 @@ public class ResponseDTO {
 		private String transactionTypeName;
 		private String transactionAccountNo;
 	}
+
+	@Getter
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@ToString
+	public static class AccountInfo {
+		@JsonProperty("REC")
+		private Account rec;
+	}
+
+	@Getter
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@ToString
+	public static class Account {
+		private String bankCode;
+		private String bankName;
+		private String userName;
+		private String accountNo;
+		private String accountName;
+		private String accountTypeCode;
+		private String accountTypeName;
+		private String accountCreatedDate;
+		private String accountExpiryDate;
+		private String dailyTransferLimit;
+		private String oneTimeTransferLimit;
+		private String accountBalance;
+		private String lastTransactionDate;
+		private String currency;
+	}
 }
+

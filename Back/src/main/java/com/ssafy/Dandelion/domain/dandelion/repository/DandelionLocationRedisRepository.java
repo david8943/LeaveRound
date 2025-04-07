@@ -1,9 +1,7 @@
 package com.ssafy.Dandelion.domain.dandelion.repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,9 +15,8 @@ import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.ssafy.Dandelion.domain.dandelion.DandelionLocationUtil;
 import com.ssafy.Dandelion.domain.dandelion.dto.response.DandelionLocationResponseDTO;
-import com.ssafy.Dandelion.domain.dandelion.dto.response.GoldDandelionLocationResponseDTO;
-import com.ssafy.Dandelion.domain.dandelion.util.DandelionLocationUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,9 +40,9 @@ public class DandelionLocationRedisRepository {
 
 	// 사용자 주변 민들레 조회 및 필요시 재배치
 	public List<DandelionLocationResponseDTO> refreshAndGetDandelions(Integer userId,
-																	  BigDecimal latitude,
-																	  BigDecimal longitude,
-																	  int targetCount) {
+		BigDecimal latitude,
+		BigDecimal longitude,
+		int targetCount) {
 		String userKey = String.format(USER_DANDELIONS_PREFIX, userId);
 
 		// 현재 시간 기반 타임스탬프 (ID 생성용)
@@ -57,23 +54,23 @@ public class DandelionLocationRedisRepository {
 		try {
 			// 100m 반경 내의 민들레 검색
 			GeoResults<RedisGeoCommands.GeoLocation<Object>> nearbyDandelions =
-					redisTemplate.opsForGeo().radius(userKey,
-							new Circle(
-									new Point(longitude.doubleValue(), latitude.doubleValue()),
-									new Distance(100, RedisGeoCommands.DistanceUnit.METERS)
-							),
-							RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().includeCoordinates()
-					);
+				redisTemplate.opsForGeo().radius(userKey,
+					new Circle(
+						new Point(longitude.doubleValue(), latitude.doubleValue()),
+						new Distance(100, RedisGeoCommands.DistanceUnit.METERS)
+					),
+					RedisGeoCommands.GeoRadiusCommandArgs.newGeoRadiusArgs().includeCoordinates()
+				);
 
 			// 검색된 민들레를 DTO로 변환
 			if (nearbyDandelions != null && nearbyDandelions.getContent() != null) {
 				nearbyDandelions.getContent().forEach(geoLocation -> {
 					if (locationDTOs.size() < targetCount) {
 						locationDTOs.add(DandelionLocationResponseDTO.builder()
-								.dandelionId((Integer) geoLocation.getContent().getName())
-								.latitude(BigDecimal.valueOf(geoLocation.getContent().getPoint().getY()))
-								.longitude(BigDecimal.valueOf(geoLocation.getContent().getPoint().getX()))
-								.build());
+							.dandelionId((Integer)geoLocation.getContent().getName())
+							.latitude(BigDecimal.valueOf(geoLocation.getContent().getPoint().getY()))
+							.longitude(BigDecimal.valueOf(geoLocation.getContent().getPoint().getX()))
+							.build());
 					}
 				});
 			}
@@ -84,10 +81,10 @@ public class DandelionLocationRedisRepository {
 
 				// 새로운 민들레 생성
 				Map<Integer, Point> newDandelions = locationUtil.generateRandomDandelions(
-						latitude.doubleValue(),
-						longitude.doubleValue(),
-						needToCreate,
-						(int)(timestamp % 1000000)
+					latitude.doubleValue(),
+					longitude.doubleValue(),
+					needToCreate,
+					(int)(timestamp % 1000000)
 				);
 
 				// Redis에 저장
@@ -97,10 +94,10 @@ public class DandelionLocationRedisRepository {
 				for (Map.Entry<Integer, Point> entry : newDandelions.entrySet()) {
 					Point point = entry.getValue();
 					locationDTOs.add(DandelionLocationResponseDTO.builder()
-							.dandelionId(entry.getKey())
-							.latitude(BigDecimal.valueOf(point.getY()))
-							.longitude(BigDecimal.valueOf(point.getX()))
-							.build());
+						.dandelionId(entry.getKey())
+						.latitude(BigDecimal.valueOf(point.getY()))
+						.longitude(BigDecimal.valueOf(point.getX()))
+						.build());
 				}
 			}
 
@@ -113,21 +110,21 @@ public class DandelionLocationRedisRepository {
 			redisTemplate.delete(userKey);
 
 			Map<Integer, Point> newDandelions = locationUtil.generateRandomDandelions(
-					latitude.doubleValue(),
-					longitude.doubleValue(),
-					targetCount,
-					(int)(timestamp % 1000000)
+				latitude.doubleValue(),
+				longitude.doubleValue(),
+				targetCount,
+				(int)(timestamp % 1000000)
 			);
 
 			saveDandelionLocations(userId, newDandelions);
 
 			return newDandelions.entrySet().stream()
-					.map(entry -> DandelionLocationResponseDTO.builder()
-							.dandelionId(entry.getKey())
-							.latitude(BigDecimal.valueOf(entry.getValue().getY()))
-							.longitude(BigDecimal.valueOf(entry.getValue().getX()))
-							.build())
-					.toList();
+				.map(entry -> DandelionLocationResponseDTO.builder()
+					.dandelionId(entry.getKey())
+					.latitude(BigDecimal.valueOf(entry.getValue().getY()))
+					.longitude(BigDecimal.valueOf(entry.getValue().getX()))
+					.build())
+				.toList();
 		}
 	}
 
@@ -138,12 +135,12 @@ public class DandelionLocationRedisRepository {
 
 		if (allGoldDandelionIds != null && !allGoldDandelionIds.isEmpty()) {
 			List<Point> positions = redisTemplate.opsForGeo().position(GOLD_DANDELIONS_KEY,
-					allGoldDandelionIds.toArray());
+				allGoldDandelionIds.toArray());
 
 			int i = 0;
 			for (Object id : allGoldDandelionIds) {
 				if (i < positions.size() && positions.get(i) != null) {
-					result.add(new Object[]{id, positions.get(i)});
+					result.add(new Object[] {id, positions.get(i)});
 				}
 				i++;
 			}
@@ -154,8 +151,8 @@ public class DandelionLocationRedisRepository {
 
 	// 민들레 수집 (거리 확인 포함)
 	public boolean collectDandelionIfNearby(Integer userId, Integer dandelionId,
-											BigDecimal latitude, BigDecimal longitude,
-											double maxDistance) {
+		BigDecimal latitude, BigDecimal longitude,
+		double maxDistance) {
 		String userKey = String.format(USER_DANDELIONS_PREFIX, userId);
 		String collectedKey = String.format(USER_COLLECTED_DANDELIONS_PREFIX, userId);
 
@@ -171,10 +168,10 @@ public class DandelionLocationRedisRepository {
 
 			// 거리 계산
 			double distance = locationUtil.calculateDistance(
-					latitude.doubleValue(),
-					longitude.doubleValue(),
-					dandelionPoint.getY(),
-					dandelionPoint.getX()
+				latitude.doubleValue(),
+				longitude.doubleValue(),
+				dandelionPoint.getY(),
+				dandelionPoint.getX()
 			);
 
 			if (distance > maxDistance) {
@@ -194,8 +191,8 @@ public class DandelionLocationRedisRepository {
 
 	// 황금 민들레 수집 (거리 확인 포함)
 	public boolean collectGoldDandelionIfNearby(Integer userId, Integer goldDandelionId,
-												BigDecimal latitude, BigDecimal longitude,
-												double maxDistance) {
+		BigDecimal latitude, BigDecimal longitude,
+		double maxDistance) {
 		String collectedKey = String.format(USER_COLLECTED_GOLD_PREFIX, userId);
 
 		// 위치 정보 가져오기
@@ -209,10 +206,10 @@ public class DandelionLocationRedisRepository {
 
 		// 거리 계산
 		double distance = locationUtil.calculateDistance(
-				latitude.doubleValue(),
-				longitude.doubleValue(),
-				goldPoint.getY(),
-				goldPoint.getX()
+			latitude.doubleValue(),
+			longitude.doubleValue(),
+			goldPoint.getY(),
+			goldPoint.getX()
 		);
 
 		if (distance > maxDistance) {
@@ -231,14 +228,14 @@ public class DandelionLocationRedisRepository {
 		String key = String.format(USER_DANDELIONS_PREFIX, userId);
 
 		dandelionLocations.forEach((dandelionId, location) ->
-				redisTemplate.opsForGeo().add(key, location, dandelionId)
+			redisTemplate.opsForGeo().add(key, location, dandelionId)
 		);
 	}
 
 	// 황금 민들레 위치 저장
 	public void saveGoldDandelionLocations(Map<Integer, Point> goldDandelionLocations) {
 		goldDandelionLocations.forEach((dandelionId, location) ->
-				redisTemplate.opsForGeo().add(GOLD_DANDELIONS_KEY, location, dandelionId)
+			redisTemplate.opsForGeo().add(GOLD_DANDELIONS_KEY, location, dandelionId)
 		);
 
 		// 1달 후 만료 설정
