@@ -149,7 +149,7 @@ const DonatePage = () => {
                     }
                   }}
                   placeholder={userInfo?.goldDandelionCount?.toString() ?? ''}
-                  className='bg-transparent w-[46px] border-b-2 border-gray-500 mr-1'
+                  className='bg-transparent  text-center w-[46px] border-b-2 border-gray-500 mr-1'
                 />
                 <span>개</span>
               </div>
