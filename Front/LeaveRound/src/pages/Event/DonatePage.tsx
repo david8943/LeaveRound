@@ -9,14 +9,20 @@ import { API } from '@/constants/url';
 import { User } from '@/models/member';
 import { OrganizationModal } from '@/components/Account/OrganizationModal';
 import { createPortal } from 'react-dom';
+import Modal from '@/components/Modal';
 
 const DonatePage = () => {
   const [userInfo, setUserInfo] = useState<User>();
   const [whiteCnt, setWhiteCnt] = useState<string>('');
   const [goldCnt, setGoldCnt] = useState<string>('');
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState<number>();
-  const [selectedPurpose, setSelectedPurpose] = useState<string>('기부처 랜덤');
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<number | null>();
+  const [selectedPurpose, setSelectedPurpose] = useState<string>('');
   const [isOrganizationModalOpen, setIsOrganizationModalOpen] = useState<boolean>(false);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [resultModalContent, setResultModalContent] = useState({
+    mainMessage: '',
+    detailMessage: '',
+  });
 
   const { response, refetch } = useAxios<{ result: User }>({
     url: API.member.signup,
@@ -44,16 +50,11 @@ const DonatePage = () => {
   };
 
   const handleOrganizationSave = (purpose: string) => {
-    setSelectedPurpose(purpose === '리브라운드가 정해주세요!' ? '기부처 랜덤' : purpose);
+    setSelectedPurpose(purpose);
     setIsOrganizationModalOpen(false);
   };
 
   const handleDonate = async () => {
-    if (!selectedOrganizationId) {
-      alert('기부처를 지정해주세요');
-      return;
-    }
-
     try {
       await donate({
         dandelionCount: Number(whiteCnt),
@@ -65,12 +66,21 @@ const DonatePage = () => {
 
       setWhiteCnt('');
       setGoldCnt('');
-      setSelectedPurpose('기부처 랜덤');
+      setSelectedPurpose('');
+      setSelectedOrganizationId(null);
 
-      alert('기부가 완료되었습니다!');
+      setResultModalContent({
+        mainMessage: '홀씨 기부를 완료했습니다',
+        detailMessage: '따뜻한 온기를 준 후원자님, 감사합니다',
+      });
+      setIsResultModalOpen(true);
     } catch (err) {
-      alert('기부 중 오류가 발생했습니다.');
       console.error(err);
+      setResultModalContent({
+        mainMessage: '기부 중 오류 발생',
+        detailMessage: '잠시 후 다시 시도해주세요.',
+      });
+      setIsResultModalOpen(true);
     }
   };
 
@@ -149,7 +159,7 @@ const DonatePage = () => {
                     }
                   }}
                   placeholder={userInfo?.goldDandelionCount?.toString() ?? ''}
-                  className='bg-transparent w-[46px] border-b-2 border-gray-500 mr-1'
+                  className='bg-transparent  text-center w-[46px] border-b-2 border-gray-500 mr-1'
                 />
                 <span>개</span>
               </div>
@@ -161,7 +171,7 @@ const DonatePage = () => {
       </div>
 
       <div className='px-10'>
-        <BasicButton text='기부하기' onClick={handleDonate} />
+        <BasicButton disabled={!selectedOrganizationId} text='기부하기' onClick={handleDonate} />
       </div>
 
       {isOrganizationModalOpen &&
@@ -170,7 +180,16 @@ const DonatePage = () => {
             onClose={() => setIsOrganizationModalOpen(false)}
             onSave={handleOrganizationSave}
             selectedId={setSelectedOrganizationId}
-            currentPurpose={selectedPurpose === '기부처 랜덤' ? '리브라운드가 정해주세요!' : selectedPurpose}
+            currentPurpose={selectedPurpose}
+          />,
+          document.body,
+        )}
+      {isResultModalOpen &&
+        createPortal(
+          <Modal
+            mainMessage={resultModalContent.mainMessage}
+            detailMessage={resultModalContent.detailMessage}
+            onClose={() => setIsResultModalOpen(false)}
           />,
           document.body,
         )}

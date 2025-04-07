@@ -13,8 +13,8 @@ const rankImages = [Rank1Img, Rank2Img, Rank3Img];
 
 const RankingList: React.FC<PRankingList> = ({ users }) => (
   <ul className='h-full flex flex-col justify-between'>
-    {users.map((user) => (
-      <li key={user.rank} className='flex justify-between items-center'>
+    {users.map((user, index) => (
+      <li key={index} className='flex justify-between items-center'>
         <div className='w-12 h-12 flex justify-center items-center'>
           {user.rank <= 3 ? (
             <img src={rankImages[user.rank - 1]} alt={`rank${user.rank}`} className='w-5 h-5' />
