@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { dandelionLocation } from '@/models/dandelion';
 import { useEffect, useRef } from 'react';
+import WhiteDandelionImg from '@/assets/whiteDan.png';
 
 declare global {
   interface Window {
@@ -12,9 +14,10 @@ interface KakaoMapProps {
   lng: number;
   level?: number;
   onMapLoad?: (map: any) => void;
+  dandelions: dandelionLocation[];
 }
 
-const KakaoMap = ({ lat, lng, level = 4, onMapLoad }: KakaoMapProps) => {
+const Map = ({ lat, lng, level = 2, onMapLoad, dandelions }: KakaoMapProps) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -40,6 +43,8 @@ const KakaoMap = ({ lat, lng, level = 4, onMapLoad }: KakaoMapProps) => {
         const options = {
           center: new window.kakao.maps.LatLng(lat, lng),
           level,
+          disableZoom: true,
+          draggable: false,
         };
 
         const map = new window.kakao.maps.Map(container, options);
@@ -47,6 +52,18 @@ const KakaoMap = ({ lat, lng, level = 4, onMapLoad }: KakaoMapProps) => {
         new window.kakao.maps.Marker({
           position: new window.kakao.maps.LatLng(lat, lng),
           map,
+          title: '내 위치',
+        });
+
+        dandelions.forEach((d) => {
+          new window.kakao.maps.Marker({
+            position: new window.kakao.maps.LatLng(d.latitude, d.longitude),
+            map,
+            title: `민들레 #${d.dandelionId}`,
+            image: new window.kakao.maps.MarkerImage(WhiteDandelionImg, new window.kakao.maps.Size(30, 30), {
+              offset: new window.kakao.maps.Point(15, 30),
+            }),
+          });
         });
 
         if (onMapLoad) onMapLoad(map);
@@ -58,9 +75,9 @@ const KakaoMap = ({ lat, lng, level = 4, onMapLoad }: KakaoMapProps) => {
     } else {
       initMap();
     }
-  }, [lat, lng, level, onMapLoad]);
+  }, [lat, lng, level, onMapLoad, dandelions]);
 
   return <div ref={mapRef} className='h-[calc(100%-116px-58px)]' id='map' />;
 };
 
-export default KakaoMap;
+export default Map;
