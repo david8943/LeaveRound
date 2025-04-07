@@ -24,7 +24,7 @@ const Onboarding: React.FC = () => {
   };
 
   return (
-    <div className='bg-background flex flex-col items-center w-[var(--width-base)] mx-auto'>
+    <div className='bg-background flex flex-col items-center w-[var(--width-base)] mx-auto overflow-hidden relative'>
       <img src={LeaveRound} alt='Leave Round' className='w-auto h-auto relative -top-[90px] left-[15px]' />
 
       {/* 텍스트 */}
@@ -40,7 +40,7 @@ const Onboarding: React.FC = () => {
       </Slider>
 
       {/* 로그인 버튼 */}
-      <div className='absolute bottom-[95px]'>
+      <div className='mt-[50px]'>
         <button
           onClick={() => navigate('/login')}
           className='w-[313px] h-[48px] bg-[var(--primary)] text-white rounded-[24px]'
@@ -50,7 +50,7 @@ const Onboarding: React.FC = () => {
       </div>
 
       {/* 회원가입 링크 */}
-      <p className='absolute bottom-[53px] text-detail text-deepgray'>
+      <p className='mt-[26px] text-detail text-deepgray'>
         아직 회원이 아니신가요?{' '}
         <span className='text-primary cursor-pointer' onClick={() => navigate('/signup')}>
           회원가입
