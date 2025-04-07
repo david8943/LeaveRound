@@ -26,7 +26,6 @@ const menuCloseListeners: Map<string, () => void> = new Map();
 
 interface DonationAccountCardProps {
   accountInfo: {
-    userId: string;
     bankIcon?: string;
     bankName: string;
     accountNumber: string;
@@ -39,11 +38,12 @@ interface DonationAccountCardProps {
     autoDonationId?: number;
   };
   id: string;
+  userId: string;
   onStatusChange?: () => void;
   onDelete?: () => void;
 }
 
-export function DonationAccountCard({ accountInfo, id, onStatusChange, onDelete }: DonationAccountCardProps) {
+export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, onDelete }: DonationAccountCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
@@ -51,7 +51,6 @@ export function DonationAccountCard({ accountInfo, id, onStatusChange, onDelete 
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const {
-    userId,
     bankName,
     accountNumber,
     balance,
@@ -129,9 +128,6 @@ export function DonationAccountCard({ accountInfo, id, onStatusChange, onDelete 
 
   const handleStatusChange = () => {
     closeMenu();
-    if (onStatusChange) {
-      onStatusChange();
-    }
   };
 
   const handleDelete = () => {
@@ -229,7 +225,7 @@ export function DonationAccountCard({ accountInfo, id, onStatusChange, onDelete 
                     }}
                     onModify={handleModify}
                     isPaused={autoDonation === 'inactive'}
-                    onStatusChange={handleStatusChange}
+                    onStatusChange={onStatusChange}
                   />
                 </div>
               )}

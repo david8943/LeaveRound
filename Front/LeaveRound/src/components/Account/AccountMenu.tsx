@@ -136,26 +136,18 @@ export const AccountMenu = ({
     try {
       if (modalState.isConfirmAction) {
         await toggleActive();
-        if (toggleResponse?.isSuccess) {
-          setModalState({ ...modalState, isOpen: false });
-          onClose();
-          if (onStatusChange) {
-            onStatusChange();
-          }
-        } else {
-          console.error('자동기부 상태 변경 실패:', toggleResponse?.message);
+        if (onStatusChange) {
+          await onStatusChange();
         }
+        setModalState({ ...modalState, isOpen: false });
+        onClose();
       } else {
         await deleteDonation();
-        if (deleteResponse?.isSuccess) {
-          setModalState({ ...modalState, isOpen: false });
-          onClose();
-          if (onStatusChange) {
-            onStatusChange();
-          }
-        } else {
-          console.error('자동기부 삭제 실패:', deleteResponse?.message);
+        if (onStatusChange) {
+          await onStatusChange();
         }
+        setModalState({ ...modalState, isOpen: false });
+        onClose();
       }
     } catch (error) {
       console.error('자동기부 작업 중 오류 발생:', error);
@@ -208,8 +200,8 @@ export const AccountMenu = ({
           mainMessage={modalState.mainMessage}
           detailMessage={modalState.detailMessage}
           onClose={handleModalClose}
-          onConfirmClick={modalState.isConfirmAction ? handleModalConfirm : undefined}
-          confirmText={modalState.isConfirmAction ? '확인' : undefined}
+          onConfirmClick={handleModalConfirm}
+          confirmText='확인'
         />
       )}
     </>
