@@ -39,7 +39,7 @@ export const MenuBar = () => {
   // 현재 경로에 따른 활성화 메뉴 아이템 확인
   const isItemActive = (itemPath: string) => {
     // AccountDetailPage와 AccountDonatePage에서는 홈 버튼 활성화
-    if (itemPath === '/' && location.pathname.includes('/donate')) {
+    if (itemPath === '/' && (location.pathname.includes('/donate') || location.pathname.includes('/main'))) {
       return true;
     }
     return location.pathname === itemPath;
