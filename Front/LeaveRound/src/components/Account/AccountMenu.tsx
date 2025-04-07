@@ -204,7 +204,7 @@ export const AccountMenu = ({ onClose, accountInfo, onModify, isPaused = false, 
           mainMessage={modalState.mainMessage}
           detailMessage={modalState.detailMessage}
           onClose={handleModalClose}
-          onConfirmClick={handleModalConfirm}
+          onConfirm={handleModalConfirm}
           confirmText='확인'
         />
       )}
