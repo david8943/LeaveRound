@@ -134,7 +134,7 @@ public class SsafyApiProperties {
 
 		Map<String, Object> body = new HashMap<>();
 		body.put("Header", SsafyApiProperties.SsafyApiHeader.createSsafyApiHeaderTemplate(
-			"inquireDemandDepositAccountBalance",
+			"inquireDemandDepositAccount",
 			getApiKey(),
 			userKey
 		));
