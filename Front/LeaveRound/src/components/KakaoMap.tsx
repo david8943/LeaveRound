@@ -22,9 +22,9 @@ interface KakaoMapProps {
   dandelions: WhiteDandelionLocation[];
   goldDandelions: GoldDandelionLocation[];
   whiteCount: number;
-  setWhiteCount: (cnt: number) => void;
+  setWhiteCount: React.Dispatch<React.SetStateAction<number>>;
   goldCount: number;
-  setGoldCount: (cnt: number) => void;
+  setGoldCount: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const KakaoMap = ({
@@ -64,7 +64,7 @@ const KakaoMap = ({
   const handleDandelionClick = async (
     id: number,
     apiFn: (id: number) => string,
-    countSetter: (cnt: number) => void,
+    countSetter: React.Dispatch<React.SetStateAction<number>>,
     count: number,
   ) => {
     try {
@@ -75,8 +75,9 @@ const KakaoMap = ({
       );
 
       if (res.data?.isSuccess) {
-        showModal('홀씨를 획득했습니다', '고맙습니다');
-        countSetter(count + 1);
+        countSetter((prev) => prev + 1);
+
+        showModal('홀씨를 획득했습니다', `지금까지 ${count + 1}개를 모았어요!`);
 
         const markerToRemove = markerMapRef.current.get(id);
         if (markerToRemove) {
