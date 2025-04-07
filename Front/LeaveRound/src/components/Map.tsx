@@ -14,7 +14,7 @@ interface KakaoMapProps {
   onMapLoad?: (map: any) => void;
 }
 
-const KakaoMap = ({ lat, lng, level = 3, onMapLoad }: KakaoMapProps) => {
+const KakaoMap = ({ lat, lng, level = 4, onMapLoad }: KakaoMapProps) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {

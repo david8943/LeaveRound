@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Title from '@/components/Title/Title';
 import { PTitle } from '@/models/title';
 import MagicWand from '@/assets/icons/magic-wand.svg';
@@ -18,15 +18,48 @@ const pageTitle: PTitle = {
 
 const DandelionPage = () => {
   const navigate = useNavigate();
-
   const [_map, _setMap] = useState<any>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const prevLocationRef = useRef<{ lat: number; lng: number } | null>(null);
+
+  useEffect(() => {
+    const updateLocation = () => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          const newLocation = { lat: latitude, lng: longitude };
+
+          const prev = prevLocationRef.current;
+
+          const isSameLocation =
+            prev && Math.abs(prev.lat - newLocation.lat) < 0.0001 && Math.abs(prev.lng - newLocation.lng) < 0.0001;
+
+          if (!isSameLocation) {
+            prevLocationRef.current = newLocation;
+            setUserLocation(newLocation);
+          }
+        },
+        (err) => {
+          console.error('위치 정보를 가져오는 데 실패했습니다:', err);
+        },
+        {
+          enableHighAccuracy: true,
+        },
+      );
+    };
+
+    updateLocation();
+    const interval = setInterval(updateLocation, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className='h-[calc(100vh-5rem)]'>
       <Title {...pageTitle} />
-      <Map lat={37.5665} lng={126.978} />
+      <Map lat={userLocation?.lat || 37.5665} lng={userLocation?.lng || 126.978} />
       <div className='gap-20 h-[58px] flex justify-center items-center'>
-        <div className=' flex gap-1 items-center' onClick={() => navigate('/event/donationking')}>
+        <div className='flex gap-1 items-center' onClick={() => navigate('/event/donationking')}>
           <img src={ListIcon} className='w-4 h-4' />
           <div>기부현황</div>
         </div>
