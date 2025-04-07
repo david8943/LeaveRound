@@ -2,7 +2,7 @@ import React from "react";
 import MinusIcon from "@/assets/icons/minus.svg";
 import PlusIcon from "@/assets/icons/plus.svg";
 
-type AccountStatus = 'AUTO_ENABLED' | 'AUTO_PAUSED' | 'AUTO_DISABLED';
+type AccountStatus = "AUTO_ENABLED" | "AUTO_PAUSED" | "AUTO_DISABLED";
 
 interface AccountCardProps {
     bankIcon: string;
@@ -11,6 +11,7 @@ interface AccountCardProps {
     balance: number;
     accountStatus: AccountStatus;
     showButton?: boolean;
+    onClickButton?: () => void;
 }
 
 const AccountCard: React.FC<AccountCardProps> = ({
@@ -20,6 +21,7 @@ const AccountCard: React.FC<AccountCardProps> = ({
     balance,
     accountStatus,
     showButton = false,
+    onClickButton,
 }) => {
     const formattedBalance = balance.toLocaleString() + "원";
 
@@ -39,14 +41,21 @@ const AccountCard: React.FC<AccountCardProps> = ({
     }
 
     return (
-        <div className={`w-[348px] h-[86px] border ${cardStyle} rounded-lg flex items-center relative`}>
+        <div
+            className={`w-[348px] h-[86px] border ${cardStyle} rounded-lg flex items-center relative`}
+        >
             <img src={bankIcon} alt="Bank Icon" className="w-[34px] h-[34px] ml-[32px]" />
             <div className="ml-[21px] flex flex-col justify-center">
                 <p className="text-deepgray text-detail">{`${bankName} ${accountNumber}`}</p>
                 <p className="font-bold text-[20px]">{formattedBalance}</p>
             </div>
-            {showButton && (
-                <img src={icon} alt="Action Icon" className="absolute right-[36px] w-[24px] h-[24px]" />
+            {showButton && icon && (
+                <img
+                    src={icon}
+                    alt="Action Icon"
+                    className="absolute right-[36px] w-[24px] h-[24px] cursor-pointer"
+                    onClick={onClickButton}
+                />
             )}
         </div>
     );
