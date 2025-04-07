@@ -53,28 +53,33 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
   // 로컬 상태로 계좌 정보 관리
   const [localAccountInfo, setLocalAccountInfo] = useState(accountInfo);
 
-  // 로컬 스토리지에서 데이터 불러오기
-  useEffect(() => {
-    if (accountInfo.autoDonationId) {
-      const autoDonationKey = `autoDonation_${accountInfo.autoDonationId}`;
-      const savedDataStr = localStorage.getItem(autoDonationKey);
+  // 로컬 스토리지에서 데이터 읽어서 계좌 정보 업데이트하는 함수
+  const updateAccountInfoFromStorage = (autoDonationId?: number) => {
+    if (!autoDonationId) return;
 
-      if (savedDataStr) {
-        try {
-          const savedData = JSON.parse(savedDataStr);
+    const autoDonationKey = `autoDonation_${autoDonationId}`;
+    const savedDataStr = localStorage.getItem(autoDonationKey);
 
-          // 로컬 계좌 정보 업데이트
-          setLocalAccountInfo((prev) => ({
-            ...prev,
-            paymentUnit: savedData.sliceMoney || prev.paymentUnit,
-            paymentFrequency: savedData.donationTime || prev.paymentFrequency,
-            paymentPurpose: savedData.purpose || prev.paymentPurpose,
-          }));
-        } catch (error) {
-          // 오류 처리
-        }
+    if (savedDataStr) {
+      try {
+        const savedData = JSON.parse(savedDataStr);
+
+        // 로컬 계좌 정보 업데이트
+        setLocalAccountInfo((prev) => ({
+          ...prev,
+          paymentUnit: savedData.sliceMoney || prev.paymentUnit,
+          paymentFrequency: savedData.donationTime || prev.paymentFrequency,
+          paymentPurpose: savedData.purpose || prev.paymentPurpose,
+        }));
+      } catch (error) {
+        console.error('자동기부 정보 로딩 오류:', error);
       }
     }
+  };
+
+  // 로컬 스토리지에서 데이터 불러오기
+  useEffect(() => {
+    updateAccountInfoFromStorage(accountInfo.autoDonationId);
   }, [accountInfo.autoDonationId]);
 
   const {
@@ -153,10 +158,6 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
     setIsSettingModalOpen(true);
   };
 
-  const handleStatusChange = () => {
-    closeMenu();
-  };
-
   const handleDelete = () => {
     closeMenu();
     if (onDelete) {
@@ -212,28 +213,7 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
   // 설정 모달 닫힐 때 호출되는 함수
   const handleSettingModalClose = () => {
     setIsSettingModalOpen(false);
-
-    // 로컬 스토리지에서 최신 데이터 확인 및 반영
-    if (autoDonationId) {
-      const autoDonationKey = `autoDonation_${autoDonationId}`;
-      const savedDataStr = localStorage.getItem(autoDonationKey);
-
-      if (savedDataStr) {
-        try {
-          const savedData = JSON.parse(savedDataStr);
-
-          // 로컬 계좌 정보 업데이트
-          setLocalAccountInfo((prev) => ({
-            ...prev,
-            paymentUnit: savedData.sliceMoney || prev.paymentUnit,
-            paymentFrequency: savedData.donationTime || prev.paymentFrequency,
-            paymentPurpose: savedData.purpose || prev.paymentPurpose,
-          }));
-        } catch (error) {
-          // 오류 처리
-        }
-      }
-    }
+    updateAccountInfoFromStorage(autoDonationId);
   };
 
   return (
@@ -280,6 +260,7 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
                     onModify={handleModify}
                     isPaused={autoDonation === 'inactive'}
                     onStatusChange={onStatusChange}
+                    onDelete={handleDelete}
                   />
                 </div>
               )}

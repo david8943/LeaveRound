@@ -43,9 +43,17 @@ interface AccountMenuProps {
   onModify: () => void;
   isPaused?: boolean;
   onStatusChange?: () => void;
+  onDelete?: () => void;
 }
 
-export const AccountMenu = ({ onClose, accountInfo, onModify, isPaused = false, onStatusChange }: AccountMenuProps) => {
+export const AccountMenu = ({
+  onClose,
+  accountInfo,
+  onModify,
+  isPaused = false,
+  onStatusChange,
+  onDelete,
+}: AccountMenuProps) => {
   const navigate = useNavigate();
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
   const [modalState, setModalState] = useState<{
@@ -134,6 +142,10 @@ export const AccountMenu = ({ onClose, accountInfo, onModify, isPaused = false, 
       } else {
         // 삭제 처리
         await deleteDonation();
+
+        if (onDelete) {
+          onDelete();
+        }
 
         if (onStatusChange) {
           await onStatusChange();
