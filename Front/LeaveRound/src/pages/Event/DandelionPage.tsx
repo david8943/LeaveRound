@@ -4,7 +4,7 @@ import { PTitle } from '@/models/title';
 import MagicWand from '@/assets/icons/magic-wand.svg';
 import ListIcon from '@/assets/icons/list.svg';
 import { useNavigate } from 'react-router-dom';
-import Map from '@/components/Map';
+import KakaoMap from '@/components/KakaoMap';
 import useAxios from '@/hooks/useAxios';
 import { API } from '@/constants/url';
 import { dandelionLocation } from '@/models/dandelion';
@@ -85,7 +85,7 @@ const DandelionPage = () => {
   return (
     <div className='h-[calc(100vh-5rem)]'>
       <Title {...pageTitle} />
-      <Map
+      <KakaoMap
         lat={userLocation.lat || INIT_LOCATION.lat}
         lng={userLocation.lng || INIT_LOCATION.lng}
         dandelions={dandelions}

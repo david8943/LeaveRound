@@ -8,8 +8,8 @@ export const API = {
     account: `${API_VERSION}/users/accounts`,
   },
   event: {
-    getGoldDandelion: (dandelionId: string) => `${API_VERSION}/dandelions/collections/gold/${dandelionId}`,
-    getWhiteDandelion: (dandelionId: string) => `${API_VERSION}/dandelions/collections/personal/${dandelionId}`,
+    getGoldDandelion: (dandelionId: number) => `${API_VERSION}/dandelions/collections/gold/${dandelionId}`,
+    getWhiteDandelion: (dandelionId: number) => `${API_VERSION}/dandelions/collections/personal/${dandelionId}`,
     whiteLocation: `${API_VERSION}/dandelions/locations/personal`,
     goldLocation: `${API_VERSION}/dandelions/locations/gold `,
     donateDandelion: `${API_VERSION}/dandelions/donations/organizations`,
