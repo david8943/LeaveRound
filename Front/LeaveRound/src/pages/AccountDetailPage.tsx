@@ -69,13 +69,7 @@ export const AccountDetail = () => {
   if (error) return <div>오류가 발생했습니다.</div>;
   if (!response?.result) return <div>데이터를 찾을 수 없습니다.</div>;
 
-  const {
-    bankName = '',
-    acountNo = '',
-    totalBalance = 0,
-    autoDonationInfos = [],
-    organizationName = '',
-  } = response.result;
+  const { autoDonationInfos = [] } = response.result;
 
   const displayCards = isExpanded ? autoDonationInfos : autoDonationInfos.slice(0, 5);
   const totalDonationAmount = autoDonationInfos.reduce((sum, info) => sum + info.transactionBalance, 0);

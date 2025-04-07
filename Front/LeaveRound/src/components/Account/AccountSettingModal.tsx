@@ -65,7 +65,7 @@ interface AccountSettingModalProps {
 }
 
 export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClose, accountInfo }) => {
-  const [_selectedOrganizationId, setSelectedOrganizationId] = useState<number>();
+  const [_selectedOrganizationId, _setSelectedOrganizationId] = useState<number>();
   const [settings, setSettings] = useState<DonationSettings>({
     amount: accountInfo.paymentUnit || 'ONE_THOUSAND',
     frequency: accountInfo.paymentFrequency || 'ONE_DAY',
