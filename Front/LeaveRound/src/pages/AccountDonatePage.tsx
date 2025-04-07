@@ -66,7 +66,55 @@ export const AccountDonate = () => {
 
   useEffect(() => {
     if (response?.result) {
-      setAutoDonationAccounts(response.result);
+      const result = response.result;
+
+      // 로컬 스토리지에서 데이터 읽어와 업데이트
+      const updatedAccounts = {
+        activeAccounts: result.activeAccounts.map((account) => {
+          // 로컬 스토리지에서 저장된 정보 확인
+          const autoDonationKey = `autoDonation_${account.autoDonationId}`;
+          const savedDataStr = localStorage.getItem(autoDonationKey);
+
+          if (savedDataStr) {
+            try {
+              const savedData = JSON.parse(savedDataStr);
+              // 저장된 데이터가 있으면 업데이트
+              return {
+                ...account,
+                sliceMoney: savedData.sliceMoney || account.sliceMoney,
+                donationTime: savedData.donationTime || account.donationTime,
+                organizationName: savedData.purpose || account.organizationName,
+              };
+            } catch (error) {
+              // 오류 처리
+            }
+          }
+          return account;
+        }),
+        inactiveAccounts: result.inactiveAccounts.map((account) => {
+          // 로컬 스토리지에서 저장된 정보 확인
+          const autoDonationKey = `autoDonation_${account.autoDonationId}`;
+          const savedDataStr = localStorage.getItem(autoDonationKey);
+
+          if (savedDataStr) {
+            try {
+              const savedData = JSON.parse(savedDataStr);
+              // 저장된 데이터가 있으면 업데이트
+              return {
+                ...account,
+                sliceMoney: savedData.sliceMoney || account.sliceMoney,
+                donationTime: savedData.donationTime || account.donationTime,
+                organizationName: savedData.purpose || account.organizationName,
+              };
+            } catch (error) {
+              // 오류 처리
+            }
+          }
+          return account;
+        }),
+      };
+
+      setAutoDonationAccounts(updatedAccounts);
     }
   }, [response]);
 
@@ -103,7 +151,7 @@ export const AccountDonate = () => {
         return prev;
       });
     } catch (error) {
-      console.error('자동기부 상태 변경 실패:', error);
+      // 오류 처리
     }
   };
 
@@ -125,7 +173,7 @@ export const AccountDonate = () => {
         inactiveAccounts: prev.inactiveAccounts.filter((acc) => acc.autoDonationId !== autoDonationId),
       }));
     } catch (error) {
-      console.error('자동기부 삭제 실패:', error);
+      // 오류 처리
     }
   };
 

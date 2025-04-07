@@ -50,6 +50,33 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  // 로컬 상태로 계좌 정보 관리
+  const [localAccountInfo, setLocalAccountInfo] = useState(accountInfo);
+
+  // 로컬 스토리지에서 데이터 불러오기
+  useEffect(() => {
+    if (accountInfo.autoDonationId) {
+      const autoDonationKey = `autoDonation_${accountInfo.autoDonationId}`;
+      const savedDataStr = localStorage.getItem(autoDonationKey);
+
+      if (savedDataStr) {
+        try {
+          const savedData = JSON.parse(savedDataStr);
+
+          // 로컬 계좌 정보 업데이트
+          setLocalAccountInfo((prev) => ({
+            ...prev,
+            paymentUnit: savedData.sliceMoney || prev.paymentUnit,
+            paymentFrequency: savedData.donationTime || prev.paymentFrequency,
+            paymentPurpose: savedData.purpose || prev.paymentPurpose,
+          }));
+        } catch (error) {
+          // 오류 처리
+        }
+      }
+    }
+  }, [accountInfo.autoDonationId]);
+
   const {
     bankName,
     accountNumber,
@@ -61,7 +88,7 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
     paymentPurpose,
     paymentAmount,
     autoDonationId,
-  } = accountInfo;
+  } = localAccountInfo;
 
   // 금액 포맷팅 (1,000단위 콤마)
   const formattedBalance = balance.toLocaleString('ko-KR');
@@ -182,6 +209,33 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
     return times[value] || value;
   };
 
+  // 설정 모달 닫힐 때 호출되는 함수
+  const handleSettingModalClose = () => {
+    setIsSettingModalOpen(false);
+
+    // 로컬 스토리지에서 최신 데이터 확인 및 반영
+    if (autoDonationId) {
+      const autoDonationKey = `autoDonation_${autoDonationId}`;
+      const savedDataStr = localStorage.getItem(autoDonationKey);
+
+      if (savedDataStr) {
+        try {
+          const savedData = JSON.parse(savedDataStr);
+
+          // 로컬 계좌 정보 업데이트
+          setLocalAccountInfo((prev) => ({
+            ...prev,
+            paymentUnit: savedData.sliceMoney || prev.paymentUnit,
+            paymentFrequency: savedData.donationTime || prev.paymentFrequency,
+            paymentPurpose: savedData.purpose || prev.paymentPurpose,
+          }));
+        } catch (error) {
+          // 오류 처리
+        }
+      }
+    }
+  };
+
   return (
     <>
       <div className={`flex flex-col mx-4 p-4 mb-[12px] rounded-[8px] border ${cardStyle()}`}>
@@ -263,10 +317,12 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
           </button>
         </div>
       </div>
+
+      {/* 설정 모달 */}
       {isSettingModalOpen &&
         createPortal(
           <AccountSettingModal
-            onClose={() => setIsSettingModalOpen(false)}
+            onClose={handleSettingModalClose}
             accountInfo={{
               bankName,
               balance,

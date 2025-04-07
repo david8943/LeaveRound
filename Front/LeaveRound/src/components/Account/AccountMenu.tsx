@@ -15,7 +15,6 @@ type DonationAmount =
   | 'THREE_THOUSAND'
   | 'THREE_THOUSAND_FIVE_HUNDRED'
   | 'FOUR_THOUSAND'
-  | 'FOUR_THOUSAND_FIVE_HUNDRED'
   | 'FIVE_THOUSAND';
 
 type DonationTime = 'ONE_DAY' | 'TWO_DAY' | 'THREE_DAY' | 'FOUR_DAY' | 'FIVE_DAY' | 'SIX_DAY' | 'SEVEN_DAY';
@@ -46,15 +45,7 @@ interface AccountMenuProps {
   onStatusChange?: () => void;
 }
 
-export const AccountMenu = ({
-  onClose,
-  accountNumber,
-  userId,
-  accountInfo,
-  onModify,
-  isPaused = false,
-  onStatusChange,
-}: AccountMenuProps) => {
+export const AccountMenu = ({ onClose, accountInfo, onModify, isPaused = false, onStatusChange }: AccountMenuProps) => {
   const navigate = useNavigate();
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
   const [modalState, setModalState] = useState<{
@@ -71,7 +62,6 @@ export const AccountMenu = ({
 
   const {
     refetch: toggleActive,
-    response: toggleResponse,
     loading: toggleLoading,
     error: toggleError,
   } = useAxios<ApiResponse>({
@@ -82,7 +72,6 @@ export const AccountMenu = ({
 
   const {
     refetch: deleteDonation,
-    response: deleteResponse,
     loading: deleteLoading,
     error: deleteError,
   } = useAxios<ApiResponse>({
@@ -129,20 +118,23 @@ export const AccountMenu = ({
 
   const handleModalConfirm = async () => {
     if (!accountInfo.autoDonationId) {
-      console.error('자동기부 ID가 없습니다.');
       return;
     }
 
     try {
       if (modalState.isConfirmAction) {
+        // 활성화/비활성화 처리
         await toggleActive();
+
         if (onStatusChange) {
           await onStatusChange();
         }
         setModalState({ ...modalState, isOpen: false });
         onClose();
       } else {
+        // 삭제 처리
         await deleteDonation();
+
         if (onStatusChange) {
           await onStatusChange();
         }
@@ -150,7 +142,7 @@ export const AccountMenu = ({
         onClose();
       }
     } catch (error) {
-      console.error('자동기부 작업 중 오류 발생:', error);
+      // 오류 처리
     }
   };
 
@@ -192,7 +184,19 @@ export const AccountMenu = ({
       </div>
       {isSettingModalOpen &&
         createPortal(
-          <AccountSettingModal onClose={() => setIsSettingModalOpen(false)} accountInfo={accountInfo} />,
+          <AccountSettingModal
+            onClose={() => setIsSettingModalOpen(false)}
+            accountInfo={{
+              bankName: accountInfo.bankName,
+              balance: accountInfo.balance,
+              paymentUnit: accountInfo.paymentUnit,
+              paymentFrequency: accountInfo.paymentFrequency,
+              paymentPurpose: accountInfo.paymentPurpose,
+              paymentAmount: accountInfo.paymentAmount,
+              autoDonationId: accountInfo.autoDonationId,
+              accountNo: accountInfo.accountNo,
+            }}
+          />,
           document.body,
         )}
       {modalState.isOpen && (
@@ -206,13 +210,4 @@ export const AccountMenu = ({
       )}
     </>
   );
-};
-
-const testAccountInfo = {
-  bankName: '테스트은행',
-  balance: 100000,
-  autoDonationId: 1,
-  accountNo: '1234567890',
-  paymentUnit: 'ONE_THOUSAND' as DonationAmount,
-  paymentFrequency: 'ONE_DAY' as DonationTime,
 };

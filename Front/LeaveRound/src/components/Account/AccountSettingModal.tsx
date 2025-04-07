@@ -7,15 +7,16 @@ import { BasicButton } from '../common/BasicButton';
 import { ConfirmModal } from './ConfirmModal';
 import { OrganizationModal } from './OrganizationModal';
 import { createPortal } from 'react-dom';
-import useAxios from '@/hooks/useAxios';
 import { API } from '@/constants/url';
+import api from '@/services/api';
 
-interface ApiResponse {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: null;
-}
+// 쿠키에서 값을 가져오는 함수
+const getCookie = (name: string) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+  return null;
+};
 
 // API enum 값과 일치하는 기부 금액 단위
 const DONATION_AMOUNTS = [
@@ -27,7 +28,6 @@ const DONATION_AMOUNTS = [
   { value: 'THREE_THOUSAND', label: '3,000원' },
   { value: 'THREE_THOUSAND_FIVE_HUNDRED', label: '3,500원' },
   { value: 'FOUR_THOUSAND', label: '4,000원' },
-  { value: 'FOUR_THOUSAND_FIVE_HUNDRED', label: '4,500원' },
   { value: 'FIVE_THOUSAND', label: '5,000원' },
 ] as const;
 
@@ -73,18 +73,9 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isOrganizationModalOpen, setIsOrganizationModalOpen] = useState(false);
   const [selectedPurpose, setSelectedPurpose] = useState(accountInfo.paymentPurpose || '');
-  const [organizationProjectId, setOrganizationProjectId] = useState<number>(1); // API 연동 시 실제 프로젝트 ID로 변경 필요
-
-  const {
-    response: updateResponse,
-    loading: updateLoading,
-    error: updateError,
-    refetch: updateDonation,
-  } = useAxios<ApiResponse>({
-    url: accountInfo.autoDonationId ? API.autoDonation.update(accountInfo.autoDonationId.toString()) : '',
-    method: 'put',
-    executeOnMount: false,
-  });
+  const [organizationProjectId, setOrganizationProjectId] = useState<number | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleClose = () => {
     onClose();
@@ -96,7 +87,11 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
 
   const handleConfirm = async () => {
     if (!accountInfo.autoDonationId) {
-      console.error('자동기부 ID가 없습니다.');
+      return;
+    }
+
+    if (!organizationProjectId) {
+      alert('기부처를 선택해주세요.');
       return;
     }
 
@@ -108,16 +103,47 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
       organizationProjectId: organizationProjectId,
     };
 
-    try {
-      await updateDonation(updateData);
+    setIsLoading(true);
+    setError(null);
 
-      if (updateResponse?.isSuccess) {
+    try {
+      // 직접 API 호출 - 인증 토큰 포함
+      const accessToken = getCookie('access_token');
+
+      // axios 옵션 설정
+      const axiosConfig = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: accessToken ? `Bearer ${accessToken}` : '',
+        },
+        withCredentials: true,
+      };
+
+      // API 요청 시도
+      const response = await api.put(
+        API.autoDonation.update(accountInfo.autoDonationId.toString()),
+        updateData,
+        axiosConfig,
+      );
+
+      if (response.data.isSuccess) {
         onClose();
       } else {
-        console.error('자동기부 설정 업데이트 실패:', updateResponse?.message);
+        setError(response.data.message || '업데이트에 실패했습니다.');
       }
-    } catch (error) {
-      console.error('자동기부 설정 업데이트 중 오류 발생:', error);
+    } catch (err) {
+      const error = err as any;
+
+      if (error.response) {
+        const errorMsg = error.response.data?.message || '업데이트 중 오류가 발생했습니다.';
+        setError(errorMsg);
+      } else if (error.request) {
+        setError('서버에서 응답이 없습니다.');
+      } else {
+        setError('요청을 보낼 수 없습니다. 네트워크 연결을 확인해주세요.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -133,8 +159,15 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
     setIsOrganizationModalOpen(false);
   };
 
-  if (updateLoading) return <div>처리 중...</div>;
-  if (updateError) return <div>오류가 발생했습니다.</div>;
+  const handleSelectedId = (projectId: number) => {
+    setOrganizationProjectId(projectId);
+  };
+
+  // 기부처가 선택되었는지 확인
+  const isPurposeSelected = selectedPurpose !== '' && organizationProjectId !== undefined;
+
+  if (isLoading) return <div>처리 중...</div>;
+  if (error) return <div>오류가 발생했습니다: {error}</div>;
 
   return (
     <>
@@ -203,7 +236,12 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
           </div>
         </div>
         <div className='flex gap-2 relative z-50'>
-          <BasicButton text='설정하기' onClick={handleSave} className='w-[313px] h-[48px]' disabled={updateLoading} />
+          <BasicButton
+            text='설정하기'
+            onClick={handleSave}
+            className='w-[313px] h-[48px]'
+            disabled={isLoading || !isPurposeSelected}
+          />
         </div>
       </AccountModal>
       {isConfirmModalOpen &&
@@ -226,7 +264,7 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
           <OrganizationModal
             onClose={() => setIsOrganizationModalOpen(false)}
             onSave={handleOrganizationSave}
-            selectedId={setSelectedOrganizationId}
+            selectedId={handleSelectedId}
             currentPurpose={selectedPurpose === '기부처 랜덤 선택' ? '리브라운드가 정해주세요!' : selectedPurpose}
           />,
           document.body,
