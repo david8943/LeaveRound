@@ -1,7 +1,14 @@
 package com.ssafy.Dandelion.domain.dandelion.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +19,7 @@ import com.ssafy.Dandelion.domain.dandelion.dto.response.MonthlyGoldRankingRespo
 import com.ssafy.Dandelion.domain.dandelion.dto.response.MyDandelionRankDTO;
 import com.ssafy.Dandelion.domain.dandelion.dto.response.MyGoldDandelionRankDTO;
 import com.ssafy.Dandelion.domain.dandelion.dto.response.WeeklyRankingResponseDTO;
+import com.ssafy.Dandelion.domain.dandelion.entity.GoldDandelion;
 import com.ssafy.Dandelion.domain.dandelion.repository.DandelionDonationInfoRepository;
 import com.ssafy.Dandelion.domain.dandelion.repository.GoldDandelionRepository;
 import com.ssafy.Dandelion.domain.user.entity.User;
@@ -154,53 +162,37 @@ public class DandelionRankingServiceImpl implements DandelionRankingService {
 
 	@Override
 	public MonthlyGoldRankingResponseDTO getMonthlyGoldRanking(Integer userId) {
-		// DB에서 월간 황금 민들레 보유 및 기부한 수 합산 랭킹 데이터 조회
-		List<Object[]> goldRankingData = goldDandelionRepository.getMonthlyGoldDonationRanking();
-		log.info("Gold Ranking Data: {}", goldRankingData);
+		List<GoldDandelion> goldDandelionList = getGoldDandelionInMonth();
+
+		Map<Integer, Long> goldCountMap = new HashMap<>();
+		for (GoldDandelion goldDandelion : goldDandelionList) {
+			goldCountMap.merge(goldDandelion.getUserId(), 1L, Long::sum);
+		}
 
 		List<GoldDandelionRankDTO> goldInfos = new ArrayList<>();
 		MyGoldDandelionRankDTO myGoldInfo = null;
 
-		// 황금 민들레 보유 + 기부 수 내림차순으로 정렬
-		for (Object[] entry : goldRankingData) {
-			try {
-				Integer userIdValue = (Integer)entry[0];
-				Number totalGoldCount = (Number)entry[1]; // Number 타입으로 처리
-				int goldCount = totalGoldCount.intValue();
+		for (Map.Entry<Integer, Long> entry : goldCountMap.entrySet()) {
+			Integer targetUserId = entry.getKey();
+			Long count = entry.getValue();
 
-				if (goldCount <= 0) {
-					continue;
-				}
+			String userName = userRepository.findUserNameByUserId(targetUserId);
 
-				String userName = userRepository.findById(userIdValue)
-					.map(User::getName)
-					.orElse("Unknown User");
+			goldInfos.add(GoldDandelionRankDTO.builder()
+				.name(userName)
+				.goldCount(count.intValue())
+				.build());
 
-				GoldDandelionRankDTO rankDTO = GoldDandelionRankDTO.builder()
-					.name(userName)
-					.goldCount(goldCount)
+			if (userId.equals(targetUserId)) {
+				myGoldInfo = MyGoldDandelionRankDTO.builder()
+					.myName(userName)
+					.myGoldCount(count.intValue())
 					.build();
-
-				goldInfos.add(rankDTO);
-
-				// 현재 사용자 정보 저장
-				if (userIdValue.equals(userId)) {
-					myGoldInfo = MyGoldDandelionRankDTO.builder()
-						.myName(userName)
-						.myGoldCount(goldCount)
-						.build();
-				}
-			} catch (Exception e) {
-				log.error("Error processing gold ranking entry: {}", entry, e);
 			}
 		}
 
-		// 만약 데이터가 없거나 문제가 있는 경우를 위한 디버깅 로그
-		if (goldInfos.isEmpty()) {
-			log.warn("No gold ranking data found or all entries were filtered out");
-		}
+		goldInfos.sort(Comparator.comparing(GoldDandelionRankDTO::getGoldCount));
 
-		// 랭킹에 없는 경우 기본값 설정
 		if (myGoldInfo == null) {
 			String userName = userRepository.findById(userId)
 				.map(User::getName)
@@ -216,5 +208,15 @@ public class DandelionRankingServiceImpl implements DandelionRankingService {
 			.goldInfos(goldInfos)
 			.myGoldInfo(myGoldInfo)
 			.build();
+	}
+
+	private List<GoldDandelion> getGoldDandelionInMonth() {
+		ZoneId koreaZone = ZoneId.of("Asia/Seoul");
+		LocalDate now = LocalDate.now(koreaZone);
+
+		LocalDateTime start = now.withDayOfMonth(1).atStartOfDay(); // 1일 00:00
+		LocalDateTime end = now.withDayOfMonth(now.lengthOfMonth()).atTime(LocalTime.MAX); // 말일 23:59:59.999999999
+
+		return goldDandelionRepository.findAllByAcquiredAtIsBetween(start, end);
 	}
 }
