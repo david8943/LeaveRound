@@ -4,19 +4,15 @@ import { BasicButton } from '../common/BasicButton';
 
 interface ConfirmModalProps {
   onClose: () => void;
+  onConfirm: () => Promise<void>;
   amount: number;
   frequency: string;
   purpose: string;
 }
 
-export const ConfirmModal = ({ onClose, amount, frequency, purpose }: ConfirmModalProps) => {
-  const handleConfirm = () => {
-    console.log('기부 설정 확인:', {
-      기부금액: `${amount}원`,
-      기부주기: frequency,
-      기부처: purpose,
-    });
-    onClose();
+export const ConfirmModal = ({ onClose, onConfirm, amount, frequency, purpose }: ConfirmModalProps) => {
+  const handleConfirm = async () => {
+    await onConfirm();
   };
 
   return (

@@ -12,10 +12,10 @@ import TitleLayout from '@/components/layout/TitleLayout.tsx';
 import DandelionPage from './pages/Event/DandelionPage.tsx';
 import MainPage from './pages/MainPage.tsx';
 import ManageAccountsPage from './pages/ManageAccountsPage.tsx';
-import PublicRouter from './router/PublicRouter.tsx';
-import ProtectedRoute from './router/ProtectedRoute.tsx';
 import { useAuthStore } from './stores/useAuthStore.ts';
 import { useEffect } from 'react';
+import PublicRouter from './router/PublicRouter.tsx';
+import ProtectedRoute from './router/ProtectedRoute.tsx';
 
 function App() {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);

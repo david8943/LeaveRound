@@ -6,49 +6,98 @@ import { AccountMenu } from '@/components/Account/AccountMenu';
 import { AccountSettingModal } from './AccountSettingModal';
 import { createPortal } from 'react-dom';
 
+// 타입 정의
+type DonationAmount =
+  | 'FIVE_HUNDRED'
+  | 'ONE_THOUSAND'
+  | 'ONE_THOUSAND_FIVE_HUNDRED'
+  | 'TWO_THOUSAND'
+  | 'TWO_THOUSAND_FIVE_HUNDRED'
+  | 'THREE_THOUSAND'
+  | 'THREE_THOUSAND_FIVE_HUNDRED'
+  | 'FOUR_THOUSAND'
+  | 'FIVE_THOUSAND';
+
+type DonationTime = 'ONE_DAY' | 'TWO_DAY' | 'THREE_DAY' | 'FOUR_DAY' | 'FIVE_DAY' | 'SIX_DAY' | 'SEVEN_DAY';
+
 // 전역 상태를 관리하기 위한 변수
 let activeMenuId: string | null = null;
 const menuCloseListeners: Map<string, () => void> = new Map();
 
 interface DonationAccountCardProps {
   accountInfo: {
-    userId: string;
     bankIcon?: string;
     bankName: string;
     accountNumber: string;
     balance: number;
     autoDonation?: 'active' | 'inactive' | 'unregistered';
-    paymentUnit?: string;
-    paymentFrequency?: string;
+    paymentUnit?: DonationAmount;
+    paymentFrequency?: DonationTime;
     paymentPurpose?: string;
     paymentAmount?: number;
+    autoDonationId?: number;
   };
-  id: string; // 카드 식별을 위한 고유 ID
+  id: string;
+  userId: string;
+  onStatusChange?: () => void;
+  onDelete?: () => void;
 }
 
-export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProps) {
+export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, onDelete }: DonationAccountCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
+  // 로컬 상태로 계좌 정보 관리
+  const [localAccountInfo, setLocalAccountInfo] = useState(accountInfo);
+
+  // 로컬 스토리지에서 데이터 읽어서 계좌 정보 업데이트하는 함수
+  const updateAccountInfoFromStorage = (autoDonationId?: number) => {
+    if (!autoDonationId) return;
+
+    const autoDonationKey = `autoDonation_${autoDonationId}`;
+    const savedDataStr = localStorage.getItem(autoDonationKey);
+
+    if (savedDataStr) {
+      try {
+        const savedData = JSON.parse(savedDataStr);
+
+        // 로컬 계좌 정보 업데이트
+        setLocalAccountInfo((prev) => ({
+          ...prev,
+          paymentUnit: savedData.sliceMoney || prev.paymentUnit,
+          paymentFrequency: savedData.donationTime || prev.paymentFrequency,
+          paymentPurpose: savedData.purpose || prev.paymentPurpose,
+        }));
+      } catch (error) {
+        console.error('자동기부 정보 로딩 오류:', error);
+      }
+    }
+  };
+
+  // 로컬 스토리지에서 데이터 불러오기
+  useEffect(() => {
+    updateAccountInfoFromStorage(accountInfo.autoDonationId);
+  }, [accountInfo.autoDonationId]);
+
   const {
-    userId,
     bankName,
     accountNumber,
     balance,
     bankIcon = tossIcon,
     autoDonation = 'unregistered',
-    paymentUnit = '10원',
-    paymentFrequency = '매일',
-    paymentPurpose = '싸피복지관',
-    paymentAmount = 1330,
-  } = accountInfo;
+    paymentUnit,
+    paymentFrequency,
+    paymentPurpose,
+    paymentAmount,
+    autoDonationId,
+  } = localAccountInfo;
 
   // 금액 포맷팅 (1,000단위 콤마)
   const formattedBalance = balance.toLocaleString('ko-KR');
-  const formattedPaymentAmount = paymentAmount.toLocaleString('ko-KR');
+  const formattedPaymentAmount = paymentAmount ? paymentAmount.toLocaleString('ko-KR') : '0';
 
   // 메뉴 닫기 함수
   const closeMenu = () => {
@@ -109,6 +158,13 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
     setIsSettingModalOpen(true);
   };
 
+  const handleDelete = () => {
+    closeMenu();
+    if (onDelete) {
+      onDelete();
+    }
+  };
+
   // 자동기부 상태에 따른 스타일 결정
   const cardStyle = () => {
     switch (autoDonation) {
@@ -126,9 +182,43 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
     setIsExpanded(!isExpanded);
   };
 
+  const getDonationAmountLabel = (value: DonationAmount) => {
+    const amounts: { [key in DonationAmount]: string } = {
+      FIVE_HUNDRED: '500원',
+      ONE_THOUSAND: '1,000원',
+      ONE_THOUSAND_FIVE_HUNDRED: '1,500원',
+      TWO_THOUSAND: '2,000원',
+      TWO_THOUSAND_FIVE_HUNDRED: '2,500원',
+      THREE_THOUSAND: '3,000원',
+      THREE_THOUSAND_FIVE_HUNDRED: '3,500원',
+      FOUR_THOUSAND: '4,000원',
+      FIVE_THOUSAND: '5,000원',
+    };
+    return amounts[value] || value;
+  };
+
+  const getDonationTimeLabel = (value: DonationTime) => {
+    const times: { [key in DonationTime]: string } = {
+      ONE_DAY: '1일',
+      TWO_DAY: '2일',
+      THREE_DAY: '3일',
+      FOUR_DAY: '4일',
+      FIVE_DAY: '5일',
+      SIX_DAY: '6일',
+      SEVEN_DAY: '7일',
+    };
+    return times[value] || value;
+  };
+
+  // 설정 모달 닫힐 때 호출되는 함수
+  const handleSettingModalClose = () => {
+    setIsSettingModalOpen(false);
+    updateAccountInfoFromStorage(autoDonationId);
+  };
+
   return (
     <>
-      <div className={`flex flex-col mx-8 p-4 mb-[12px] rounded-[8px] border ${cardStyle()}`}>
+      <div className={`flex flex-col mx-4 p-4 mb-[12px] rounded-[8px] border ${cardStyle()}`}>
         <div className='relative ml-[1rem]'>
           {/* 계좌 정보 */}
           <div className='flex items-center gap-[21px] flex-shrink-0'>
@@ -165,8 +255,12 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
                       paymentFrequency,
                       paymentPurpose,
                       paymentAmount,
+                      autoDonationId,
                     }}
                     onModify={handleModify}
+                    isPaused={autoDonation === 'inactive'}
+                    onStatusChange={onStatusChange}
+                    onDelete={handleDelete}
                   />
                 </div>
               )}
@@ -179,10 +273,10 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
           <div className='mt-4 pt-4 border-t border-gray-500'>
             <div className='grid grid-cols-2 gap-y-2 ml-3 mr-3'>
               <div className='text-gray-700'>기부 금액 단위</div>
-              <div className='text-right'>{paymentUnit}</div>
+              <div className='text-right'>{paymentUnit && getDonationAmountLabel(paymentUnit)}</div>
 
               <div className='text-gray-700'>기부 주기</div>
-              <div className='text-right'>{paymentFrequency}</div>
+              <div className='text-right'>{paymentFrequency && getDonationTimeLabel(paymentFrequency)}</div>
 
               <div className='text-gray-700'>기부하는 곳</div>
               <div className='text-right'>{paymentPurpose}</div>
@@ -204,10 +298,12 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
           </button>
         </div>
       </div>
+
+      {/* 설정 모달 */}
       {isSettingModalOpen &&
         createPortal(
           <AccountSettingModal
-            onClose={() => setIsSettingModalOpen(false)}
+            onClose={handleSettingModalClose}
             accountInfo={{
               bankName,
               balance,
@@ -215,6 +311,8 @@ export function DonationAccountCard({ accountInfo, id }: DonationAccountCardProp
               paymentFrequency,
               paymentPurpose,
               paymentAmount,
+              autoDonationId,
+              accountNo: accountNumber,
             }}
           />,
           document.body,
