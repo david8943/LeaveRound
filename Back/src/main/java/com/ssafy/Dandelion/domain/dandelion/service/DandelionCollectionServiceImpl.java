@@ -15,7 +15,6 @@ import com.ssafy.Dandelion.domain.dandelion.DandelionLocationUtil;
 import com.ssafy.Dandelion.domain.dandelion.dto.request.DandelionLocationRequestDTO;
 import com.ssafy.Dandelion.domain.dandelion.dto.response.DandelionLocationResponseDTO;
 import com.ssafy.Dandelion.domain.dandelion.dto.response.GoldDandelionLocationResponseDTO;
-import com.ssafy.Dandelion.domain.dandelion.entity.Dandelion;
 import com.ssafy.Dandelion.domain.dandelion.entity.GoldDandelion;
 import com.ssafy.Dandelion.domain.dandelion.repository.DandelionLocationRedisRepository;
 import com.ssafy.Dandelion.domain.dandelion.repository.DandelionRepository;
@@ -116,15 +115,6 @@ public class DandelionCollectionServiceImpl implements DandelionCollectionServic
 		user.setDandelionCount(user.getDandelionCount() + 1);
 		userRepository.save(user);
 
-		// 수집 시 민들레 정보를 DB에 저장 (dandelionId 포함)
-		Dandelion dandelion = Dandelion.builder()
-			.dandelionId(dandelionId)
-			.userId(userId)
-			.latitude(locationRequestDTO.getMyLatitude())
-			.longitude(locationRequestDTO.getMyLongitude())
-			.build();
-
-		dandelionRepository.save(dandelion);
 	}
 
 	@Override
@@ -156,7 +146,6 @@ public class DandelionCollectionServiceImpl implements DandelionCollectionServic
 
 		// 수집 시 황금 민들레 정보를 DB에 저장 (goldDandelionId 포함)
 		GoldDandelion goldDandelion = GoldDandelion.builder()
-			.goldDandelionId(goldDandelionId)
 			.userId(userId)
 			.latitude(locationRequestDTO.getMyLatitude())
 			.longitude(locationRequestDTO.getMyLongitude())
