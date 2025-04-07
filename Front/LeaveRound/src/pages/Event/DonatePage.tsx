@@ -9,14 +9,20 @@ import { API } from '@/constants/url';
 import { User } from '@/models/member';
 import { OrganizationModal } from '@/components/Account/OrganizationModal';
 import { createPortal } from 'react-dom';
+import Modal from '@/components/Modal';
 
 const DonatePage = () => {
   const [userInfo, setUserInfo] = useState<User>();
   const [whiteCnt, setWhiteCnt] = useState<string>('');
   const [goldCnt, setGoldCnt] = useState<string>('');
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState<number>();
+  const [selectedOrganizationId, setSelectedOrganizationId] = useState<number | null>();
   const [selectedPurpose, setSelectedPurpose] = useState<string>('');
   const [isOrganizationModalOpen, setIsOrganizationModalOpen] = useState<boolean>(false);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [resultModalContent, setResultModalContent] = useState({
+    mainMessage: '',
+    detailMessage: '',
+  });
 
   const { response, refetch } = useAxios<{ result: User }>({
     url: API.member.signup,
@@ -61,11 +67,20 @@ const DonatePage = () => {
       setWhiteCnt('');
       setGoldCnt('');
       setSelectedPurpose('');
+      setSelectedOrganizationId(null);
 
-      alert('기부가 완료되었습니다!');
+      setResultModalContent({
+        mainMessage: '홀씨 기부를 완료했습니다',
+        detailMessage: '따뜻한 온기를 준 후원자님, 감사합니다',
+      });
+      setIsResultModalOpen(true);
     } catch (err) {
-      alert('기부 중 오류가 발생했습니다.');
       console.error(err);
+      setResultModalContent({
+        mainMessage: '기부 중 오류 발생',
+        detailMessage: '잠시 후 다시 시도해주세요.',
+      });
+      setIsResultModalOpen(true);
     }
   };
 
@@ -166,6 +181,15 @@ const DonatePage = () => {
             onSave={handleOrganizationSave}
             selectedId={setSelectedOrganizationId}
             currentPurpose={selectedPurpose}
+          />,
+          document.body,
+        )}
+      {isResultModalOpen &&
+        createPortal(
+          <Modal
+            mainMessage={resultModalContent.mainMessage}
+            detailMessage={resultModalContent.detailMessage}
+            onClose={() => setIsResultModalOpen(false)}
           />,
           document.body,
         )}
