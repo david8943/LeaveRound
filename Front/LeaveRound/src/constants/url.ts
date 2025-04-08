@@ -23,6 +23,7 @@ export const API = {
     toggleActive: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}/active`,
     delete: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}`,
     update: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}`,
+    create: `${API_VERSION}/auto-donations`,
   },
   organization: {
     list: `${API_VERSION}/organizations`,

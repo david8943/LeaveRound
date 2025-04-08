@@ -304,6 +304,10 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
         createPortal(
           <AccountSettingModal
             onClose={handleSettingModalClose}
+            onSuccess={() => {
+              handleSettingModalClose(); // 모달 닫기
+              if (onStatusChange) onStatusChange(); // 외부에서 계좌 목록 새로고침 트리거
+            }}
             accountInfo={{
               bankName,
               balance,

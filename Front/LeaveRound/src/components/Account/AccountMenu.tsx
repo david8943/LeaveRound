@@ -198,6 +198,10 @@ export const AccountMenu = ({
         createPortal(
           <AccountSettingModal
             onClose={() => setIsSettingModalOpen(false)}
+            onSuccess={() => {
+              onClose();
+              onStatusChange?.(); // 계좌 새로고침을 위한 콜백 실행
+            }}
             accountInfo={{
               bankName: accountInfo.bankName,
               balance: accountInfo.balance,
