@@ -1,6 +1,5 @@
 interface AccouontDeatilCardProps {
   accountDetailInfo: {
-    userId: string;
     accountId: string;
     donateDate: string;
     donateAmount: number;
@@ -15,7 +14,7 @@ export const AccountDetailCard = ({ accountDetailInfo }: AccouontDeatilCardProps
         <span className='text-detail text-gray-700'>{accountDetailInfo.donateDate}</span>
       </div>
       <div className='flex justify-between w-full'>
-        <span>{accountDetailInfo.donateAmount}원</span>
+        <span>{accountDetailInfo.donateAmount.toLocaleString()}원</span>
         <span>{accountDetailInfo.donatePurpose}</span>
       </div>
     </div>

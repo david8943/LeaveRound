@@ -30,6 +30,8 @@ const useAxios = <T = any>({
 
   const fetchData = useCallback(
     async (overrideData: any = data) => {
+      if (loading) return; // 이미 로딩 중이면 중복 호출 방지
+
       setLoading(true);
       setError(null);
 
@@ -47,14 +49,14 @@ const useAxios = <T = any>({
         setLoading(false);
       }
     },
-    [url, method, data, config],
+    [url, method, data, config, loading],
   );
 
   useEffect(() => {
-    if (executeOnMount) {
+    if (executeOnMount && !loading && !response) {
       fetchData();
     }
-  }, [fetchData, executeOnMount]);
+  }, [executeOnMount, fetchData, loading, response]);
 
   return { response, error, loading, refetch: fetchData };
 };
