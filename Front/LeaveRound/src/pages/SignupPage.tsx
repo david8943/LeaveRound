@@ -15,7 +15,8 @@ const SignupPage: React.FC = () => {
   const [isNameValid, setIsNameValid] = useState(true);
   const [password, setPassword] = useState('');
   const [isPasswordValid, setIsPasswordValid] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState<string | null>(null); // ✅ 추가
 
   const { response, error, loading, refetch } = useAxios({
     url: API.member.signup,
@@ -26,11 +27,7 @@ const SignupPage: React.FC = () => {
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value;
     setEmail(newEmail);
-    if (newEmail === '') {
-      setIsEmailValid(true);
-    } else {
-      setIsEmailValid(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail));
-    }
+    setIsEmailValid(newEmail === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail));
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,9 +57,15 @@ const SignupPage: React.FC = () => {
 
   useEffect(() => {
     if (response?.isSuccess) {
-      setShowModal(true);
+      setSuccessModalVisible(true);
     }
   }, [response]);
+
+  useEffect(() => {
+    if (error) {
+      setErrorModalMessage(error.message); // ✅ 에러 발생 시 모달 메시지 설정
+    }
+  }, [error]);
 
   return (
     <TitleLayout title="회원가입">
@@ -138,21 +141,24 @@ const SignupPage: React.FC = () => {
               로그인
             </Link>
           </p>
-
-          {error && (
-            <p className="text-detail text-alert mt-2">
-              오류가 발생했습니다: {error.message}
-            </p>
-          )}
         </div>
       </div>
 
-      {/* 회원가입 성공 모달 */}
-      {showModal && (
+      {/* 성공 모달 */}
+      {successModalVisible && (
         <Modal
           mainMessage="회원가입 완료!"
           detailMessage="로그인 후 민들레를 만나보세요!"
           onClose={() => navigate('/login')}
+        />
+      )}
+
+      {/* 에러 모달 */}
+      {errorModalMessage && (
+        <Modal
+          mainMessage="회원가입 실패"
+          detailMessage={errorModalMessage}
+          onClose={() => setErrorModalMessage(null)}
         />
       )}
     </TitleLayout>

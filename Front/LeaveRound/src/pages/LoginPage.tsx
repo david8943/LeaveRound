@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import SeedLeaveRound from '@/assets/icons/SeedLeaveRoundSmall.svg';
 import TitleLayout from '@/components/layout/TitleLayout';
+import Modal from '@/components/Modal';
 import useAxios from '@/hooks/useAxios';
 import { API } from '@/constants/url';
-import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<'invalid-email' | 'login-fail' | ''>('');
+  const [showModal, setShowModal] = useState(false);
+  const [responseUpdatedAt, setResponseUpdatedAt] = useState<number>(0);
 
+  const passwordInputRef = useRef<HTMLInputElement>(null);
   const { setIsLoggedIn } = useAuthStore.getState();
-
   const navigator = useNavigate();
 
   const isValidEmail = (email: string) => {
@@ -21,7 +23,7 @@ const LoginPage: React.FC = () => {
     return emailRegex.test(email);
   };
 
-  const { response, refetch } = useAxios<any>({
+  const { response, refetch } = useAxios<{ isSuccess: boolean }>({
     url: API.member.login,
     method: 'post',
     executeOnMount: false,
@@ -45,15 +47,23 @@ const LoginPage: React.FC = () => {
     form.append('password', password);
 
     refetch(form);
+    setResponseUpdatedAt(Date.now()); // ⬅️ 응답 타이밍 강제 리렌더링
   };
 
   useEffect(() => {
-    if (response && response.isSuccess) {
+    if (responseUpdatedAt === 0) return;
+
+    if (response?.isSuccess) {
       navigator('/main');
       sessionStorage.setItem('isLoggedIn', 'true');
       setIsLoggedIn(true);
+    } else {
+      setError('login-fail');
+      setShowModal(true);
+      setPassword('');
+      passwordInputRef.current?.focus();
     }
-  }, [response]);
+  }, [responseUpdatedAt]);
 
   return (
     <TitleLayout title='로그인'>
@@ -75,6 +85,7 @@ const LoginPage: React.FC = () => {
           </div>
           <div className='mt-[47px] w-full'>
             <input
+              ref={passwordInputRef}
               type='password'
               placeholder='비밀번호'
               value={password}
@@ -95,9 +106,8 @@ const LoginPage: React.FC = () => {
             <button
               onClick={submitLogin}
               disabled={isLoginDisabled}
-              className={`w-[312px] h-[48px] rounded-[24px] text-white ${
-                isLoginDisabled ? 'bg-[#E0E0E0] cursor-not-allowed' : 'bg-primary'
-              }`}
+              className={`w-[312px] h-[48px] rounded-[24px] text-white ${isLoginDisabled ? 'bg-[#E0E0E0] cursor-not-allowed' : 'bg-primary'
+                }`}
             >
               로그인
             </button>
@@ -110,6 +120,14 @@ const LoginPage: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {showModal && (
+        <Modal
+          mainMessage="로그인 실패"
+          detailMessage="아이디 또는 비밀번호를 확인해 주세요."
+          onClose={() => setShowModal(false)}
+        />
+      )}
     </TitleLayout>
   );
 };
