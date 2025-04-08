@@ -40,8 +40,8 @@ function App() {
               <Route path='/main' element={<MainPage />} />
               <Route path='/manage' element={<ManageAccountsPage />} />
               <Route path='/organization' element={<Organization />} />
-              <Route path='/:userId/donate' element={<AccountDonate />} />
-              <Route path='/:userId/donate/:id' element={<AccountDetail />} />
+              <Route path='/donate' element={<AccountDonate />} />
+              <Route path='/donate/:autoDonationId' element={<AccountDetail />} />
               <Route path='/event'>
                 <Route index element={<DandelionPage />} />
                 <Route
