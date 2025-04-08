@@ -34,7 +34,7 @@ public class AutoDonationController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails,
 		@RequestBody @Valid RequestDTO.AutoDonationDTO request
 	) {
-		autoDonationService.createAutoDonation(1, request);
+		autoDonationService.createAutoDonation(customUserDetails.getUserId(), request);
 		return ApiResponse.onSuccess(null);
 	}
 
