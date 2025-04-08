@@ -1,5 +1,3 @@
-import { create } from "node_modules/axios/index.d.cts";
-
 const API_VERSION: string = '/api';
 
 export const API = {
