@@ -124,7 +124,8 @@ public class AutoDonationServiceImpl implements AutoDonationService {
 		if (!organizationProjectRepository.existsById(request.getOrganizationProjectId()))
 			throw new NotFoundHandler(ErrorStatus.NOT_FOUND_ORGANIZATION_PROJECT);
 
-		if (autoDonationRepository.existsByAccountNo(request.getAccountNo()))
+		if (!target.getAccountNo().equals(request.getAccountNo()) && autoDonationRepository.existsByAccountNo(
+			request.getAccountNo()))
 			throw new BadRequestHandler(ErrorStatus.ALREADY_EXIST_AUTO_DONATION);
 
 		target.updateAutoDonation(AutoDonationConverter.toAutoDonation(userId, request));
