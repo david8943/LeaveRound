@@ -4,7 +4,7 @@ export const API = {
   member: {
     signup: `${API_VERSION}/users`,
     login: `${API_VERSION}/users/login`,
-    info: (userId: string) => `${API_VERSION}/users/${userId}`,
+    info: `${API_VERSION}/users`,
     account: `${API_VERSION}/users/accounts`,
   },
   event: {
