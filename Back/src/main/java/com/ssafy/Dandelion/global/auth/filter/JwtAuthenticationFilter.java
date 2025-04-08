@@ -56,11 +56,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				"/api/users/login"
 			)
 		);
-		put(
-			HttpMethod.PUT, Arrays.asList(
-				"/**"
-			)
-		);
 	}};
 
 	@Override
