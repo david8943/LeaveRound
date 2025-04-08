@@ -1,7 +1,7 @@
 import { dandelionIcon } from '@/assets/aseets';
 import { AccountDetailCard } from '@/components/Account/AccountDetailCard';
 import TitleLayout from '@/components/layout/TitleLayout';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import bracketsIcon from '@/assets/icons/brackets.svg';
 import { useParams } from 'react-router-dom';
 import useAxios from '@/hooks/useAxios';
@@ -50,15 +50,6 @@ export const AccountDetail = () => {
     },
     executeOnMount: true,
   });
-
-  useEffect(() => {
-    console.log('Component mounted or updated');
-    console.log('autoDonationId:', autoDonationId);
-    console.log('accessToken:', getToken());
-    console.log('API Response:', response);
-    console.log('Loading:', loading);
-    console.log('Error:', error);
-  }, [autoDonationId, response, loading, error]);
 
   if (loading) {
     return <div>로딩 중...</div>;
