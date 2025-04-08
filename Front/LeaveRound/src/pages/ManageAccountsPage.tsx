@@ -144,6 +144,11 @@ const ManageAccountsPage: React.FC = () => {
       {isSettingModalOpen && selectedAccountInfo && (
         <AccountSettingModal
           onClose={() => setIsSettingModalOpen(false)}
+          onSuccess={() => {
+            setIsSettingModalOpen(false);
+            refetchAccounts();
+            refetchTotalDonation();
+          }}
           accountInfo={{
             bankName: selectedAccountInfo.bankName,
             balance: Number(selectedAccountInfo.accountMoney),

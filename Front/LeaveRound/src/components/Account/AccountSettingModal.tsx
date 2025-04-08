@@ -52,6 +52,7 @@ interface DonationSettings {
 
 interface AccountSettingModalProps {
   onClose: () => void;
+  onSuccess: () => void;
   accountInfo: {
     bankName: string;
     balance: number;
@@ -64,7 +65,7 @@ interface AccountSettingModalProps {
   };
 }
 
-export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClose, accountInfo }) => {
+export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClose, onSuccess, accountInfo }) => {
   const [_selectedOrganizationId, _setSelectedOrganizationId] = useState<number>();
   const [settings, setSettings] = useState<DonationSettings>({
     amount: accountInfo.paymentUnit || 'ONE_THOUSAND',
@@ -86,16 +87,22 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
   };
 
   const handleConfirm = async () => {
-    if (!accountInfo.autoDonationId) {
-      return;
-    }
-
     if (!organizationProjectId) {
       alert('기부처를 선택해주세요.');
       return;
     }
 
-    const updateData = {
+    const accessToken = getCookie('access_token');
+
+    const axiosConfig = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: accessToken ? `Bearer ${accessToken}` : '',
+      },
+      withCredentials: true,
+    };
+
+    const requestData = {
       accountNo: accountInfo.accountNo,
       sliceMoney: settings.amount,
       donationTime: settings.frequency,
@@ -107,40 +114,36 @@ export const AccountSettingModal: React.FC<AccountSettingModalProps> = ({ onClos
     setError(null);
 
     try {
-      // 직접 API 호출 - 인증 토큰 포함
-      const accessToken = getCookie('access_token');
+      let response;
 
-      // axios 옵션 설정
-      const axiosConfig = {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: accessToken ? `Bearer ${accessToken}` : '',
-        },
-        withCredentials: true,
-      };
-
-      // API 요청 시도
-      const response = await api.put(
-        API.autoDonation.update(accountInfo.autoDonationId.toString()),
-        updateData,
-        axiosConfig,
-      );
+      if (accountInfo.autoDonationId) {
+        // 자동기부 수정
+        response = await api.put(
+          API.autoDonation.update(accountInfo.autoDonationId.toString()),
+          requestData,
+          axiosConfig
+        );
+      } else {
+        // 자동기부 등록
+        response = await api.post(
+          API.autoDonation.create,
+          requestData,
+          axiosConfig
+        );
+      }
 
       if (response.data.isSuccess) {
-        onClose();
+        setError(null);
+        onSuccess();
       } else {
-        setError(response.data.message || '업데이트에 실패했습니다.');
+        setError(response.data.message || '요청에 실패했습니다.');
       }
     } catch (err) {
       const error = err as any;
-
       if (error.response) {
-        const errorMsg = error.response.data?.message || '업데이트 중 오류가 발생했습니다.';
-        setError(errorMsg);
-      } else if (error.request) {
-        setError('서버에서 응답이 없습니다.');
+        setError(error.response.data?.message || '오류 발생');
       } else {
-        setError('요청을 보낼 수 없습니다. 네트워크 연결을 확인해주세요.');
+        setError('네트워크 오류');
       }
     } finally {
       setIsLoading(false);

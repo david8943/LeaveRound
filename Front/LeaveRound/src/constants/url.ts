@@ -1,3 +1,5 @@
+import { create } from "node_modules/axios/index.d.cts";
+
 const API_VERSION: string = '/api';
 
 export const API = {
@@ -23,6 +25,7 @@ export const API = {
     toggleActive: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}/active`,
     delete: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}`,
     update: (autoDonationId: string) => `${API_VERSION}/auto-donations/${autoDonationId}`,
+    create: `${API_VERSION}/auto-donations`,
   },
   organization: {
     list: `${API_VERSION}/organizations`,
