@@ -5,10 +5,9 @@ interface ModalProps {
   detailMessage: string;
   onClose: () => void;
   onConfirm?: () => Promise<void>;
-  confirmText?: string;
 }
 
-const Modal: React.FC<ModalProps> = ({ mainMessage, detailMessage, onClose, onConfirm, confirmText }) => {
+const Modal: React.FC<ModalProps> = ({ mainMessage, detailMessage, onClose, onConfirm }) => {
   return (
     <div className='fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-30'>
       <div className='relative w-[359px] h-[162px] bg-white rounded-[24px] p-6 flex flex-col items-center justify-center'>
@@ -21,7 +20,7 @@ const Modal: React.FC<ModalProps> = ({ mainMessage, detailMessage, onClose, onCo
           className='mt-[18px] w-[327px] h-[50px] bg-primary text-white rounded-[8px]'
           onClick={onConfirm || onClose}
         >
-          {confirmText}
+          확인
         </button>
       </div>
     </div>
