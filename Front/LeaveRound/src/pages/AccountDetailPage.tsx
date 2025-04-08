@@ -1,18 +1,15 @@
 import { dandelionIcon } from '@/assets/aseets';
 import { AccountDetailCard } from '@/components/Account/AccountDetailCard';
 import TitleLayout from '@/components/layout/TitleLayout';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import bracketsIcon from '@/assets/icons/brackets.svg';
 import { useParams } from 'react-router-dom';
 import useAxios from '@/hooks/useAxios';
 import { API } from '@/constants/url';
 
-// 쿠키에서 값을 가져오는 함수
-const getCookie = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-  return null;
+// 토큰을 가져오는 함수
+const getToken = () => {
+  return localStorage.getItem('access_token');
 };
 
 interface AutoDonationInfo {
@@ -42,32 +39,27 @@ interface AutoDonationDetailResponse {
 export const AccountDetail = () => {
   const { autoDonationId } = useParams<{ autoDonationId: string }>();
   const [isExpanded, setIsExpanded] = useState(false);
-  const userId = getCookie('userId');
 
-  const { response, loading, error, refetch } = useAxios<AutoDonationDetailResponse>({
+  const { response, loading, error } = useAxios<AutoDonationDetailResponse>({
     url: API.autoDonation.detail(autoDonationId || ''),
     method: 'get',
     config: {
       headers: {
-        Authorization: `Bearer ${getCookie('accessToken')}`,
+        Authorization: `Bearer ${getToken()}`,
       },
     },
-    executeOnMount: false,
+    executeOnMount: true,
   });
 
-  useEffect(() => {
-    if (autoDonationId) {
-      refetch();
-    }
-  }, [autoDonationId]);
-
-  console.log('API Response:', response);
-  console.log('Loading:', loading);
-  console.log('Error:', error);
-
-  if (loading) return <div>로딩 중...</div>;
-  if (error) return <div>오류가 발생했습니다.</div>;
-  if (!response?.result) return <div>데이터를 찾을 수 없습니다.</div>;
+  if (loading) {
+    return <div>로딩 중...</div>;
+  }
+  if (error) {
+    return <div>오류가 발생했습니다: {error.message}</div>;
+  }
+  if (!response?.result) {
+    return <div>데이터를 찾을 수 없습니다.</div>;
+  }
 
   const { autoDonationInfos = [] } = response.result;
 
@@ -93,7 +85,6 @@ export const AccountDetail = () => {
               <AccountDetailCard
                 key={info.autoDonationInfoId}
                 accountDetailInfo={{
-                  userId: userId || '',
                   accountId: autoDonationId || '',
                   donateDate: new Date(info.createTime).toLocaleDateString(),
                   donateAmount: info.transactionBalance,

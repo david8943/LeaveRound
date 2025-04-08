@@ -237,13 +237,13 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
             </div>
 
             {/* 메뉴 버튼 (오른쪽 상단) */}
-            <div className='absolute top-0 right-0'>
+            <div className='absolute top-0 right-0 '>
               <button ref={buttonRef} onClick={handleMenuClick} className='relative'>
                 <img src={menuIcon} alt='메뉴' className='w-5 h-5' />
               </button>
               {/* 메뉴 드롭다운 */}
               {isMenuOpen && (
-                <div ref={menuRef} className='absolute top-full right-0 mt-1 z-20'>
+                <div ref={menuRef} className='absolute top-full right-0 -mt-1 z-20'>
                   <AccountMenu
                     onClose={closeMenu}
                     accountNumber={accountNumber}
