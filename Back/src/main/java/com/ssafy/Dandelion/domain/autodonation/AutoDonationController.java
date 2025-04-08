@@ -19,7 +19,9 @@ import com.ssafy.Dandelion.global.auth.user.CustomUserDetails;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auto-donations")
@@ -67,6 +69,7 @@ public class AutoDonationController {
 		@PathVariable Integer autoDonationId,
 		@RequestBody @Valid RequestDTO.AutoDonationDTO request
 	) {
+		log.info("customUserDetails.getUserId() : {}", customUserDetails.getUserId());
 		autoDonationService.updateAutoDonation(customUserDetails.getUserId(), autoDonationId, request);
 		return ApiResponse.onSuccess(null);
 	}

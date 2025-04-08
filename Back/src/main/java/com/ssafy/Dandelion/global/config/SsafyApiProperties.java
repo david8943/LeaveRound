@@ -19,7 +19,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ssafy.Dandelion.domain.autodonation.dto.ResponseDTO;
 import com.ssafy.Dandelion.domain.autodonation.entity.AutoDonation;
 import com.ssafy.Dandelion.domain.user.dto.UserRequestDTO;
+import com.ssafy.Dandelion.global.apiPayload.code.status.ErrorStatus;
+import com.ssafy.Dandelion.global.apiPayload.exception.handler.SsafyApiHandler;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -187,7 +191,10 @@ public class SsafyApiProperties {
 		);
 	}
 
+	@CircuitBreaker(name = "depositUserAccount", fallbackMethod = "depositFallback")
+	@Retry(name = "depositUserAccount")
 	public void depositUserAccount(String userKey, UserRequestDTO.DepositAccount depositAccount) {
+		// 주소 바꾸기
 		String url = createApiUrl("/ssafy/api/v1/edu/demandDeposit/updateDemandDepositAccountDeposit");
 
 		Map<String, Object> body = new HashMap<>();
@@ -205,7 +212,6 @@ public class SsafyApiProperties {
 		headers.set("Content-Type", "application/json");
 		HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-		// API 호출
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.exchange(
 			url,
@@ -218,4 +224,9 @@ public class SsafyApiProperties {
 			depositAccount.getAccountBalance());
 	}
 
+	public void depositFallback(String userKey, UserRequestDTO.DepositAccount depositAccount, Throwable t) {
+		log.warn("[입금 실패] userKey={}, 계좌={}, 사유={}", userKey, depositAccount.getAccountNo(), t.toString());
+
+		throw new SsafyApiHandler(ErrorStatus.SSAFY_API_CONNECTION_ERROR);
+	}
 }
