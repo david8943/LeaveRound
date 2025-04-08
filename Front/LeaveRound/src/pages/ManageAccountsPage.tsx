@@ -6,6 +6,7 @@ import useAxios from "@/hooks/useAxios";
 import { API } from "@/constants/url";
 import Modal from "@/components/Modal";
 import api from "@/services/api";
+import { AccountSettingModal } from "@/components/Account/AccountSettingModal";
 
 type Account = {
   autoDonationId: number | null;
@@ -21,6 +22,9 @@ const ManageAccountsPage: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAutoDonationId, setSelectedAutoDonationId] = useState<number | null>(null);
+
+  const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
+  const [selectedAccountInfo, setSelectedAccountInfo] = useState<Account | null>(null);
 
   const {
     response: accountResponse,
@@ -91,6 +95,11 @@ const ManageAccountsPage: React.FC = () => {
     }
   };
 
+  const handleAddDonationSetting = (account: Account) => {
+    setSelectedAccountInfo(account);
+    setIsSettingModalOpen(true);
+  };
+
   return (
     <TitleLayout title="계좌 관리">
       <div className="px-[32px] pt-[36px]">
@@ -113,7 +122,9 @@ const ManageAccountsPage: React.FC = () => {
               showButton
               onClickButton={() => {
                 if (acc.accountStatus !== "AUTO_DISABLED") {
-                  openModal(acc.autoDonationId); // - 버튼만 동작
+                  openModal(acc.autoDonationId); // - 버튼
+                } else {
+                  handleAddDonationSetting(acc); // + 버튼
                 }
               }}
             />
@@ -127,6 +138,18 @@ const ManageAccountsPage: React.FC = () => {
           detailMessage="삭제 후 복구는 불가합니다."
           onClose={closeModal}
           onConfirm={handleDelete}
+        />
+      )}
+
+      {isSettingModalOpen && selectedAccountInfo && (
+        <AccountSettingModal
+          onClose={() => setIsSettingModalOpen(false)}
+          accountInfo={{
+            bankName: selectedAccountInfo.bankName,
+            balance: Number(selectedAccountInfo.accountMoney),
+            accountNo: selectedAccountInfo.accountNo,
+            autoDonationId: selectedAccountInfo.autoDonationId ?? undefined,
+          }}
         />
       )}
     </TitleLayout>
