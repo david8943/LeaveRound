@@ -72,7 +72,7 @@ const MainPage: React.FC = () => {
     <div className="relative">
       {user && (
         <div className="absolute top-[25px] w-full flex justify-center items-center">
-          <img src={LeaveRound} alt="감사 아이콘" className="w-10 h-10 mr-2" />
+          <img src={LeaveRound} alt="감사 아이콘" className="w-10 h-10" />
           <span className="text-body font-medium whitespace-nowrap">
             {user.name} 님, 함께해주셔서 감사합니다.
           </span>
