@@ -27,6 +27,14 @@ type DonationAmount =
 
 type DonationTime = 'ONE_DAY' | 'TWO_DAY' | 'THREE_DAY' | 'FOUR_DAY' | 'FIVE_DAY' | 'SIX_DAY' | 'SEVEN_DAY';
 
+type Account = {
+  autoDonationId: number | null;
+  bankName: string;
+  accountNo: string;
+  accountMoney: string;
+  accountStatus: 'AUTO_ENABLED' | 'AUTO_PAUSED' | 'AUTO_DISABLED';
+};
+
 interface AutoDonationAccount {
   autoDonationId: number;
   bankName: string;
@@ -48,6 +56,7 @@ export const AccountDonate = () => {
     activeAccounts: [],
     inactiveAccounts: [],
   });
+  const [accountBalances, setAccountBalances] = useState<Record<string, number>>({});
 
   const { response, refetch } = useAxios<{ result: AutoDonationResponse }>({
     url: '/api/auto-donations',
@@ -60,9 +69,31 @@ export const AccountDonate = () => {
     executeOnMount: false,
   });
 
+  const { response: accountsResponse, refetch: refetchAccounts } = useAxios<{ result: Account[] }>({
+    url: API.member.account,
+    method: 'get',
+    config: {
+      headers: {
+        Authorization: `Bearer ${getCookie('accessToken')}`,
+      },
+    },
+    executeOnMount: false,
+  });
+
   useEffect(() => {
     refetch();
+    refetchAccounts();
   }, []);
+
+  useEffect(() => {
+    if (accountsResponse?.result) {
+      const balances: Record<string, number> = {};
+      accountsResponse.result.forEach((account) => {
+        balances[account.accountNo] = Number(account.accountMoney);
+      });
+      setAccountBalances(balances);
+    }
+  }, [accountsResponse]);
 
   useEffect(() => {
     if (response?.result) {
@@ -197,7 +228,7 @@ export const AccountDonate = () => {
                 accountInfo={{
                   bankName: account.bankName,
                   accountNumber: account.acountNo || '',
-                  balance: 100000,
+                  balance: accountBalances[account.acountNo || ''] || 0,
                   autoDonation: 'active',
                   paymentUnit: account.sliceMoney,
                   paymentFrequency: account.donationTime,
@@ -223,7 +254,7 @@ export const AccountDonate = () => {
                 accountInfo={{
                   bankName: account.bankName,
                   accountNumber: account.acountNo || '',
-                  balance: 100000,
+                  balance: accountBalances[account.acountNo || ''] || 0,
                   autoDonation: 'inactive',
                   paymentUnit: account.sliceMoney,
                   paymentFrequency: account.donationTime,
