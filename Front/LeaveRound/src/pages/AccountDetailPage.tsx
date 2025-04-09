@@ -52,7 +52,24 @@ export const AccountDetail = () => {
   });
 
   if (loading) {
-    return <div>로딩 중...</div>;
+    return (
+      <TitleLayout title='자동기부 상세내역'>
+        <div className='p-5'>
+          <div className='flex flex-col justify-center items-center mb-4'>
+            <img src={dandelionIcon} alt='Dandelion Icon' className='mb-2' />
+            <div className='flex items-center mt-2'>
+              <span className='text-detail text-sm'>총 기부 금액</span>
+            </div>
+            <div className='flex items-center mt-2'>
+              <span className='text-heading font-heading'>0원</span>
+            </div>
+          </div>
+          <div className='flex justify-center items-center h-40'>
+            <div className='w-12 h-12 border-4 border-primary-light border-t-primary rounded-full animate-spin'></div>
+          </div>
+        </div>
+      </TitleLayout>
+    );
   }
   if (error) {
     return <div>오류가 발생했습니다: {error.message}</div>;

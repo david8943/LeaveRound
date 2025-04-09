@@ -58,7 +58,7 @@ export const AccountDonate = () => {
   });
   const [accountBalances, setAccountBalances] = useState<Record<string, number>>({});
 
-  const { response, refetch } = useAxios<{ result: AutoDonationResponse }>({
+  const { response, refetch, loading } = useAxios<{ result: AutoDonationResponse }>({
     url: '/api/auto-donations',
     method: 'get',
     config: {
@@ -69,7 +69,11 @@ export const AccountDonate = () => {
     executeOnMount: false,
   });
 
-  const { response: accountsResponse, refetch: refetchAccounts } = useAxios<{ result: Account[] }>({
+  const {
+    response: accountsResponse,
+    refetch: refetchAccounts,
+    loading: accountsLoading,
+  } = useAxios<{ result: Account[] }>({
     url: API.member.account,
     method: 'get',
     config: {
@@ -155,57 +159,65 @@ export const AccountDonate = () => {
           <span className='text-detail text-sm'>자동기부가 설정되어 있는 나의 계좌 목록입니다.</span>
         </div>
 
-        {/* 활성화된 계좌 섹션 */}
-        <div className='mb-6'>
-          <h2 className='text-lg font-semibold mb-3 ml-[1rem]'>자동 기부중인 계좌</h2>
-          <div>
-            {autoDonationAccounts.activeAccounts.map((account) => (
-              <DonationAccountCard
-                key={account.autoDonationId}
-                id={account.autoDonationId.toString()}
-                userId={userId}
-                accountInfo={{
-                  bankName: account.bankName,
-                  accountNumber: account.acountNo || '',
-                  balance: accountBalances[account.acountNo || ''] || 0,
-                  autoDonation: 'active',
-                  paymentUnit: account.sliceMoney,
-                  paymentFrequency: account.donationTime,
-                  paymentPurpose: account.organizationName,
-                  autoDonationId: account.autoDonationId,
-                }}
-                onStatusChange={() => handleStatusChange(account.autoDonationId)}
-                onDelete={() => handleDelete(account.autoDonationId)}
-              />
-            ))}
+        {loading || accountsLoading ? (
+          <div className='flex justify-center items-center h-40'>
+            <div className='w-12 h-12 border-4 border-primary-light border-t-primary rounded-full animate-spin'></div>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* 활성화된 계좌 섹션 */}
+            <div className='mb-6'>
+              <h2 className='text-lg font-semibold mb-3 ml-[1rem]'>자동 기부중인 계좌</h2>
+              <div>
+                {autoDonationAccounts.activeAccounts.map((account) => (
+                  <DonationAccountCard
+                    key={account.autoDonationId}
+                    id={account.autoDonationId.toString()}
+                    userId={userId}
+                    accountInfo={{
+                      bankName: account.bankName,
+                      accountNumber: account.acountNo || '',
+                      balance: accountBalances[account.acountNo || ''] || 0,
+                      autoDonation: 'active',
+                      paymentUnit: account.sliceMoney,
+                      paymentFrequency: account.donationTime,
+                      paymentPurpose: account.organizationName,
+                      autoDonationId: account.autoDonationId,
+                    }}
+                    onStatusChange={() => handleStatusChange(account.autoDonationId)}
+                    onDelete={() => handleDelete(account.autoDonationId)}
+                  />
+                ))}
+              </div>
+            </div>
 
-        {/* 비활성화된 계좌 섹션 */}
-        <div>
-          <h2 className='text-lg font-semibold mb-3 ml-[1rem]'>기부 일시중지된 계좌</h2>
-          <div>
-            {autoDonationAccounts.inactiveAccounts.map((account) => (
-              <DonationAccountCard
-                key={account.autoDonationId}
-                id={account.autoDonationId.toString()}
-                userId={userId}
-                accountInfo={{
-                  bankName: account.bankName,
-                  accountNumber: account.acountNo || '',
-                  balance: accountBalances[account.acountNo || ''] || 0,
-                  autoDonation: 'inactive',
-                  paymentUnit: account.sliceMoney,
-                  paymentFrequency: account.donationTime,
-                  paymentPurpose: account.organizationName,
-                  autoDonationId: account.autoDonationId,
-                }}
-                onStatusChange={() => handleStatusChange(account.autoDonationId)}
-                onDelete={() => handleDelete(account.autoDonationId)}
-              />
-            ))}
-          </div>
-        </div>
+            {/* 비활성화된 계좌 섹션 */}
+            <div>
+              <h2 className='text-lg font-semibold mb-3 ml-[1rem]'>기부 일시중지된 계좌</h2>
+              <div>
+                {autoDonationAccounts.inactiveAccounts.map((account) => (
+                  <DonationAccountCard
+                    key={account.autoDonationId}
+                    id={account.autoDonationId.toString()}
+                    userId={userId}
+                    accountInfo={{
+                      bankName: account.bankName,
+                      accountNumber: account.acountNo || '',
+                      balance: accountBalances[account.acountNo || ''] || 0,
+                      autoDonation: 'inactive',
+                      paymentUnit: account.sliceMoney,
+                      paymentFrequency: account.donationTime,
+                      paymentPurpose: account.organizationName,
+                      autoDonationId: account.autoDonationId,
+                    }}
+                    onStatusChange={() => handleStatusChange(account.autoDonationId)}
+                    onDelete={() => handleDelete(account.autoDonationId)}
+                  />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </TitleLayout>
   );
