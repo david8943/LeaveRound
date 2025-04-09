@@ -4,7 +4,6 @@ import { DonationAccountCard } from '@/components/Account/DonationAccountCard';
 import useAxios from '@/hooks/useAxios';
 import { API } from '@/constants/url';
 import { useState, useEffect } from 'react';
-import api from '@/services/api';
 
 // 쿠키에서 값을 가져오는 함수
 const getCookie = (name: string) => {
@@ -145,7 +144,7 @@ export const AccountDonate = () => {
   };
 
   // 자동기부 삭제 핸들러
-  const handleDelete = async (autoDonationId: number) => {
+  const handleDelete = async () => {
     // API 호출은 AccountMenu에서 처리하므로 여기서는 데이터만 다시 불러옴
     refetch();
     refetchAccounts();
@@ -185,7 +184,7 @@ export const AccountDonate = () => {
                       autoDonationId: account.autoDonationId,
                     }}
                     onStatusChange={() => handleStatusChange(account.autoDonationId)}
-                    onDelete={() => handleDelete(account.autoDonationId)}
+                    onDelete={() => handleDelete()}
                   />
                 ))}
               </div>
@@ -211,7 +210,7 @@ export const AccountDonate = () => {
                       autoDonationId: account.autoDonationId,
                     }}
                     onStatusChange={() => handleStatusChange(account.autoDonationId)}
-                    onDelete={() => handleDelete(account.autoDonationId)}
+                    onDelete={() => handleDelete()}
                   />
                 ))}
               </div>
