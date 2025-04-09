@@ -10,9 +10,8 @@ import { useAuthStore } from '@/stores/useAuthStore';
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<'invalid-email' | 'login-fail' | ''>('');
+  const [errorType, setErrorType] = useState<'invalid-email' | 'login-fail' | ''>('');
   const [showModal, setShowModal] = useState(false);
-  const [responseUpdatedAt, setResponseUpdatedAt] = useState<number>(0);
 
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const { setIsLoggedIn } = useAuthStore.getState();
@@ -23,7 +22,7 @@ const LoginPage: React.FC = () => {
     return emailRegex.test(email);
   };
 
-  const { response, refetch } = useAxios<{ isSuccess: boolean }>({
+  const { response, error, refetch } = useAxios<{ isSuccess: boolean }>({
     url: API.member.login,
     method: 'post',
     executeOnMount: false,
@@ -31,11 +30,11 @@ const LoginPage: React.FC = () => {
 
   useEffect(() => {
     if (email === '') {
-      setError('');
+      setErrorType('');
     } else if (!isValidEmail(email)) {
-      setError('invalid-email');
-    } else if (error === 'invalid-email') {
-      setError('');
+      setErrorType('invalid-email');
+    } else if (errorType === 'invalid-email') {
+      setErrorType('');
     }
   }, [email]);
 
@@ -45,25 +44,29 @@ const LoginPage: React.FC = () => {
     const form = new FormData();
     form.append('email', email);
     form.append('password', password);
-
     refetch(form);
-    setResponseUpdatedAt(Date.now()); // ⬅️ 응답 타이밍 강제 리렌더링
   };
 
   useEffect(() => {
-    if (responseUpdatedAt === 0) return;
+    if (error) {
+      setErrorType('login-fail');
+      setShowModal(true);
+      setPassword('');
+      passwordInputRef.current?.focus();
+      return;
+    }
 
     if (response?.isSuccess) {
       navigator('/main');
       sessionStorage.setItem('isLoggedIn', 'true');
       setIsLoggedIn(true);
-    } else {
-      setError('login-fail');
+    } else if (response && !response.isSuccess) {
+      setErrorType('login-fail');
       setShowModal(true);
       setPassword('');
       passwordInputRef.current?.focus();
     }
-  }, [responseUpdatedAt]);
+  }, [response, error]);
 
   return (
     <TitleLayout title='로그인'>
@@ -80,7 +83,9 @@ const LoginPage: React.FC = () => {
               className='w-[312px] h-[34px] border-b outline-none bg-transparent border-[var(--text-deepgray)] placeholder-[var(--text-deepgray)]'
             />
             <div className='h-[16px] mt-[13px]'>
-              {error === 'invalid-email' && <p className='text-detail text-primary'>이메일 형식을 지켜주세요.</p>}
+              {errorType === 'invalid-email' && (
+                <p className='text-detail text-primary'>이메일 형식을 지켜주세요.</p>
+              )}
             </div>
           </div>
           <div className='mt-[47px] w-full'>
@@ -93,7 +98,7 @@ const LoginPage: React.FC = () => {
               className='w-[312px] h-[34px] border-b outline-none bg-transparent border-[var(--text-deepgray)] placeholder-[var(--text-deepgray)]'
             />
             <div className='h-[32px] mt-[13px]'>
-              {error === 'login-fail' && (
+              {errorType === 'login-fail' && (
                 <p className='text-detail text-primary leading-[1.1rem]'>
                   아이디 또는 비밀번호가 잘못되었습니다.
                   <br />
