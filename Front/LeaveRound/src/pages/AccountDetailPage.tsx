@@ -63,6 +63,27 @@ export const AccountDetail = () => {
 
   const { autoDonationInfos = [] } = response.result;
 
+  if (autoDonationInfos.length === 0) {
+    return (
+      <TitleLayout title='자동기부 상세내역'>
+        <div className='p-5'>
+          <div className='flex flex-col justify-center items-center mb-4'>
+            <img src={dandelionIcon} alt='Dandelion Icon' className='mb-2' />
+            <div className='flex items-center mt-2'>
+              <span className='text-detail text-sm'>총 기부 금액</span>
+            </div>
+            <div className='flex items-center mt-2'>
+              <span className='text-heading font-heading'>0원</span>
+            </div>
+          </div>
+          <div className='flex justify-center items-center h-40'>
+            <span>아직 기부 내역이 없습니다</span>
+          </div>
+        </div>
+      </TitleLayout>
+    );
+  }
+
   const displayCards = isExpanded ? autoDonationInfos : autoDonationInfos.slice(0, 5);
   const totalDonationAmount = autoDonationInfos.reduce((sum, info) => sum + info.transactionBalance, 0);
 

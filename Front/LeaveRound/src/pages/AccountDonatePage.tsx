@@ -151,61 +151,16 @@ export const AccountDonate = () => {
 
   // 자동기부 상태 변경 핸들러
   const handleStatusChange = async (autoDonationId: number) => {
-    try {
-      const toggleUrl = API.autoDonation.toggleActive(autoDonationId.toString());
-      await api({
-        url: toggleUrl,
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${getCookie('accessToken')}`,
-        },
-      });
-
-      // 로컬 상태 업데이트
-      setAutoDonationAccounts((prev) => {
-        const activeAccount = prev.activeAccounts.find((acc) => acc.autoDonationId === autoDonationId);
-        const inactiveAccount = prev.inactiveAccounts.find((acc) => acc.autoDonationId === autoDonationId);
-
-        if (activeAccount) {
-          // 활성 -> 비활성
-          return {
-            activeAccounts: prev.activeAccounts.filter((acc) => acc.autoDonationId !== autoDonationId),
-            inactiveAccounts: [...prev.inactiveAccounts, { ...activeAccount, isActive: false }],
-          };
-        } else if (inactiveAccount) {
-          // 비활성 -> 활성
-          return {
-            activeAccounts: [...prev.activeAccounts, { ...inactiveAccount, isActive: true }],
-            inactiveAccounts: prev.inactiveAccounts.filter((acc) => acc.autoDonationId !== autoDonationId),
-          };
-        }
-        return prev;
-      });
-    } catch (error) {
-      // 오류 처리
-    }
+    // API 호출은 AccountMenu에서 처리하므로 여기서는 데이터만 다시 불러옴
+    refetch();
+    refetchAccounts();
   };
 
   // 자동기부 삭제 핸들러
   const handleDelete = async (autoDonationId: number) => {
-    try {
-      const deleteUrl = API.autoDonation.delete(autoDonationId.toString());
-      await api({
-        url: deleteUrl,
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${getCookie('accessToken')}`,
-        },
-      });
-
-      // 로컬 상태에서 삭제된 계좌 제거
-      setAutoDonationAccounts((prev) => ({
-        activeAccounts: prev.activeAccounts.filter((acc) => acc.autoDonationId !== autoDonationId),
-        inactiveAccounts: prev.inactiveAccounts.filter((acc) => acc.autoDonationId !== autoDonationId),
-      }));
-    } catch (error) {
-      // 오류 처리
-    }
+    // API 호출은 AccountMenu에서 처리하므로 여기서는 데이터만 다시 불러옴
+    refetch();
+    refetchAccounts();
   };
 
   return (

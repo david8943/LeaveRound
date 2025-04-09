@@ -133,28 +133,22 @@ export const AccountMenu = ({
       if (modalState.isConfirmAction) {
         // 활성화/비활성화 처리
         await toggleActive();
-
         if (onStatusChange) {
-          await onStatusChange();
+          onStatusChange(); // 상태 변경 콜백 호출
         }
         setModalState({ ...modalState, isOpen: false });
         onClose();
       } else {
         // 삭제 처리
         await deleteDonation();
-
         if (onDelete) {
           onDelete();
-        }
-
-        if (onStatusChange) {
-          await onStatusChange();
         }
         setModalState({ ...modalState, isOpen: false });
         onClose();
       }
     } catch (error) {
-      // 오류 처리
+      console.error('API 호출 중 오류 발생:', error);
     }
   };
 
