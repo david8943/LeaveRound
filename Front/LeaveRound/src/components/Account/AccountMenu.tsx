@@ -133,28 +133,22 @@ export const AccountMenu = ({
       if (modalState.isConfirmAction) {
         // 활성화/비활성화 처리
         await toggleActive();
-
         if (onStatusChange) {
-          await onStatusChange();
+          onStatusChange(); // 상태 변경 콜백 호출
         }
         setModalState({ ...modalState, isOpen: false });
         onClose();
       } else {
         // 삭제 처리
         await deleteDonation();
-
         if (onDelete) {
           onDelete();
-        }
-
-        if (onStatusChange) {
-          await onStatusChange();
         }
         setModalState({ ...modalState, isOpen: false });
         onClose();
       }
     } catch (error) {
-      // 오류 처리
+      console.error('API 호출 중 오류 발생:', error);
     }
   };
 
@@ -165,7 +159,14 @@ export const AccountMenu = ({
   const menuItemClass =
     'w-full py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white transition-colors duration-200 rounded-lg';
 
-  if (toggleLoading || deleteLoading) return <div>처리 중...</div>;
+  if (toggleLoading || deleteLoading)
+    return (
+      <div className='flex flex-col justify-center w-[6rem] rounded-lg bg-white bg-opacity-97 shadow-[0_0_4.5px_rgba(214,214,214,0.10)] z-50'>
+        <div className='flex items-center justify-center p-4'>
+          <div className='w-6 h-6 border-4 border-primary-light border-t-primary rounded-full animate-spin'></div>
+        </div>
+      </div>
+    );
   if (toggleError || deleteError) return <div>오류가 발생했습니다.</div>;
 
   return (
