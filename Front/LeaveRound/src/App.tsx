@@ -46,7 +46,7 @@ function App() {
                 <Route index element={<DandelionPage />} />
                 <Route
                   element={
-                    <TitleLayout title='hihi'>
+                    <TitleLayout title='최고의 기부왕'>
                       <Outlet />
                     </TitleLayout>
                   }
