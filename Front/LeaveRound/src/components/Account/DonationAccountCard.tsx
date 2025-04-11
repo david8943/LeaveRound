@@ -5,6 +5,8 @@ import menuIcon from '@/assets/icons/menu.svg';
 import { AccountMenu } from '@/components/Account/AccountMenu';
 import { AccountSettingModal } from './AccountSettingModal';
 import { createPortal } from 'react-dom';
+import useAxios from '@/hooks/useAxios';
+import { API } from '@/constants/url';
 
 // 타입 정의
 type DonationAmount =
@@ -47,11 +49,30 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
+  const [totalDonationAmount, setTotalDonationAmount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   // 로컬 상태로 계좌 정보 관리
   const [localAccountInfo, setLocalAccountInfo] = useState(accountInfo);
+
+  // 자동기부 상세 내역 가져오기
+  const { response: donationHistoryResponse } = useAxios({
+    url: accountInfo.autoDonationId ? API.autoDonation.detail(accountInfo.autoDonationId.toString()) : '',
+    method: 'get',
+    executeOnMount: !!accountInfo.autoDonationId,
+  });
+
+  // 기부 내역이 변경될 때마다 총 기부 금액 계산
+  useEffect(() => {
+    if (donationHistoryResponse?.result?.autoDonationInfos) {
+      const totalAmount = donationHistoryResponse.result.autoDonationInfos.reduce(
+        (sum: number, info: any) => sum + info.transactionBalance,
+        0,
+      );
+      setTotalDonationAmount(totalAmount);
+    }
+  }, [donationHistoryResponse]);
 
   // 로컬 스토리지에서 데이터 읽어서 계좌 정보 업데이트하는 함수
   const updateAccountInfoFromStorage = (autoDonationId?: number) => {
@@ -97,7 +118,7 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
 
   // 금액 포맷팅 (1,000단위 콤마)
   const formattedBalance = balance.toLocaleString('ko-KR');
-  const formattedPaymentAmount = paymentAmount ? paymentAmount.toLocaleString('ko-KR') : '0';
+  const formattedPaymentAmount = totalDonationAmount.toLocaleString('ko-KR');
 
   // 메뉴 닫기 함수
   const closeMenu = () => {
