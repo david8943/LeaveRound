@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
-import TitleLayout from "@/components/layout/TitleLayout";
-import AccountCard from "@/components/Account/AccountPreview";
-import { getBankIcon } from "@/constants/bankIconMap";
-import useAxios from "@/hooks/useAxios";
-import { API } from "@/constants/url";
-import Modal from "@/components/Modal";
-import api from "@/services/api";
-import { AccountSettingModal } from "@/components/Account/AccountSettingModal";
+import React, { useEffect, useState } from 'react';
+import TitleLayout from '@/components/layout/TitleLayout';
+import AccountCard from '@/components/Account/AccountPreview';
+import { getBankIcon } from '@/constants/bankIconMap';
+import useAxios from '@/hooks/useAxios';
+import { API } from '@/constants/url';
+import Modal from '@/components/Modal';
+import api from '@/services/api';
+import { AccountSettingModal } from '@/components/Account/AccountSettingModal';
 
 type Account = {
   autoDonationId: number | null;
   bankName: string;
   accountNo: string;
   accountMoney: string;
-  accountStatus: "AUTO_ENABLED" | "AUTO_PAUSED" | "AUTO_DISABLED";
+  accountStatus: 'AUTO_ENABLED' | 'AUTO_PAUSED' | 'AUTO_DISABLED';
 };
 
 const ManageAccountsPage: React.FC = () => {
@@ -26,21 +26,15 @@ const ManageAccountsPage: React.FC = () => {
   const [isSettingModalOpen, setIsSettingModalOpen] = useState(false);
   const [selectedAccountInfo, setSelectedAccountInfo] = useState<Account | null>(null);
 
-  const {
-    response: accountResponse,
-    refetch: refetchAccounts,
-  } = useAxios<{ result: Account[] }>({
+  const { response: accountResponse, refetch: refetchAccounts } = useAxios<{ result: Account[] }>({
     url: API.member.account,
-    method: "get",
+    method: 'get',
     executeOnMount: false,
   });
 
-  const {
-    response: donationResponse,
-    refetch: refetchTotalDonation,
-  } = useAxios<{ result: { totalAccount: number } }>({
+  const { response: donationResponse, refetch: refetchTotalDonation } = useAxios<{ result: { totalAccount: number } }>({
     url: API.autoDonation.totalAmount,
-    method: "get",
+    method: 'get',
     executeOnMount: false,
   });
 
@@ -91,26 +85,28 @@ const ManageAccountsPage: React.FC = () => {
       refetchAccounts();
       refetchTotalDonation();
     } catch (err) {
-      console.error("자동기부 삭제 실패", err);
+      console.error('자동기부 삭제 실패', err);
     }
   };
 
   const handleAddDonationSetting = (account: Account) => {
+    if (account.accountStatus !== 'AUTO_DISABLED') {
+      alert('이미 자동기부에 등록된 계좌입니다. 기존 설정을 수정하시겠습니까?');
+      return;
+    }
     setSelectedAccountInfo(account);
     setIsSettingModalOpen(true);
   };
 
   return (
-    <TitleLayout title="계좌 관리">
-      <div className="px-[32px] pt-[36px]">
-        <p className="text-detail text-right">총 기부금액</p>
-        <p className="text-[36px] text-right mt-[12px] font-heading">
-          {totalAmount.toLocaleString()} 원
-        </p>
+    <TitleLayout title='계좌 관리'>
+      <div className='px-[32px] pt-[36px]'>
+        <p className='text-detail text-right'>총 기부금액</p>
+        <p className='text-[36px] text-right mt-[12px] font-heading'>{totalAmount.toLocaleString()} 원</p>
 
-        <p className="mt-[45px] text-body">전체 계좌</p>
+        <p className='mt-[45px] text-body'>전체 계좌</p>
 
-        <div className="mt-[16px] space-y-[16px] pb-[5rem]">
+        <div className='mt-[16px] space-y-[16px] pb-[5rem]'>
           {sortedAccounts.map((acc) => (
             <AccountCard
               key={acc.accountNo}
@@ -121,7 +117,7 @@ const ManageAccountsPage: React.FC = () => {
               accountStatus={acc.accountStatus}
               showButton
               onClickButton={() => {
-                if (acc.accountStatus !== "AUTO_DISABLED") {
+                if (acc.accountStatus !== 'AUTO_DISABLED') {
                   openModal(acc.autoDonationId); // - 버튼
                 } else {
                   handleAddDonationSetting(acc); // + 버튼
@@ -134,8 +130,8 @@ const ManageAccountsPage: React.FC = () => {
 
       {isModalOpen && (
         <Modal
-          mainMessage="자동기부 설정을 삭제하겠습니까?"
-          detailMessage="삭제 후 복구는 불가합니다."
+          mainMessage='자동기부 설정을 삭제하겠습니까?'
+          detailMessage='삭제 후 복구는 불가합니다.'
           onClose={closeModal}
           onConfirm={handleDelete}
         />
