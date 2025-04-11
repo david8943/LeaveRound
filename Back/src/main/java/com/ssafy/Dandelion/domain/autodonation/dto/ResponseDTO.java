@@ -38,7 +38,7 @@ public class ResponseDTO {
 		String donationTime;
 		String organizationName;
 		String accountBalance;
-		Long amountSum;
+		Long paymentAmount;
 		Boolean isActive;
 	}
 
