@@ -57,11 +57,21 @@ export function DonationAccountCard({ accountInfo, id, userId, onStatusChange, o
   const [localAccountInfo, setLocalAccountInfo] = useState(accountInfo);
 
   // 자동기부 상세 내역 가져오기
-  const { response: donationHistoryResponse } = useAxios({
-    url: accountInfo.autoDonationId ? API.autoDonation.detail(accountInfo.autoDonationId.toString()) : '',
+  const { response: donationHistoryResponse, refetch } = useAxios({
+    url:
+      accountInfo.autoDonationId && accountInfo.autoDonationId > 0
+        ? API.autoDonation.detail(accountInfo.autoDonationId.toString())
+        : '',
     method: 'get',
-    executeOnMount: !!accountInfo.autoDonationId,
+    executeOnMount: false,
   });
+
+  // autoDonationId가 있고 0보다 큰 경우에만 API 호출
+  useEffect(() => {
+    if (accountInfo.autoDonationId && accountInfo.autoDonationId > 0) {
+      refetch();
+    }
+  }, [accountInfo.autoDonationId]);
 
   // 기부 내역이 변경될 때마다 총 기부 금액 계산
   useEffect(() => {
