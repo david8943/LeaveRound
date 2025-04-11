@@ -1,7 +1,7 @@
 import { dandelionIcon } from '@/assets/aseets';
 import { AccountDetailCard } from '@/components/Account/AccountDetailCard';
 import TitleLayout from '@/components/layout/TitleLayout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import bracketsIcon from '@/assets/icons/brackets.svg';
 import { useParams } from 'react-router-dom';
 import useAxios from '@/hooks/useAxios';
@@ -39,8 +39,9 @@ interface AutoDonationDetailResponse {
 export const AccountDetail = () => {
   const { autoDonationId } = useParams<{ autoDonationId: string }>();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
-  const { response, loading, error } = useAxios<AutoDonationDetailResponse>({
+  const { response, loading, error, refetch } = useAxios<AutoDonationDetailResponse>({
     url: API.autoDonation.detail(autoDonationId || ''),
     method: 'get',
     config: {
@@ -48,8 +49,28 @@ export const AccountDetail = () => {
         Authorization: `Bearer ${getToken()}`,
       },
     },
-    executeOnMount: true,
+    executeOnMount: false, // 초기 마운트 시에는 실행하지 않음
   });
+
+  // 자동기부 ID가 변경될 때마다 데이터를 가져옴
+  useEffect(() => {
+    if (autoDonationId) {
+      const fetchData = async () => {
+        try {
+          await refetch();
+        } catch (error) {
+          // 404 에러인 경우 3번까지 재시도
+          if (retryCount < 3) {
+            setTimeout(() => {
+              setRetryCount((prev) => prev + 1);
+            }, 2000); // 2초 후에 재시도
+          }
+        }
+      };
+
+      fetchData();
+    }
+  }, [autoDonationId, retryCount]);
 
   if (loading) {
     return (
@@ -71,9 +92,28 @@ export const AccountDetail = () => {
       </TitleLayout>
     );
   }
+
   if (error) {
-    return <div>오류가 발생했습니다: {error.message}</div>;
+    return (
+      <TitleLayout title='자동기부 상세내역'>
+        <div className='p-5'>
+          <div className='flex flex-col justify-center items-center mb-4'>
+            <img src={dandelionIcon} alt='Dandelion Icon' className='mb-2' />
+            <div className='flex items-center mt-2'>
+              <span className='text-detail text-sm'>총 기부 금액</span>
+            </div>
+            <div className='flex items-center mt-2'>
+              <span className='text-heading font-heading'>0원</span>
+            </div>
+          </div>
+          <div className='flex justify-center items-center h-40'>
+            <span>아직 기부 내역이 없습니다</span>
+          </div>
+        </div>
+      </TitleLayout>
+    );
   }
+
   if (!response?.result) {
     return <div>데이터를 찾을 수 없습니다.</div>;
   }
