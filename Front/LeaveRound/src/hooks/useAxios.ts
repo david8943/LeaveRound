@@ -44,7 +44,8 @@ const useAxios = <T = any>({
         });
         setResponse(res.data);
       } catch (err) {
-        setError(err as AxiosError);
+        const axiosError = err as AxiosError;
+        setError(axiosError);
       } finally {
         setLoading(false);
       }

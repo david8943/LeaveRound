@@ -57,7 +57,7 @@ export const AccountDonate = () => {
   });
   const [accountBalances, setAccountBalances] = useState<Record<string, number>>({});
 
-  const { response, refetch, loading } = useAxios<{ result: AutoDonationResponse }>({
+  const { response, refetch, loading, error } = useAxios<{ result: AutoDonationResponse }>({
     url: '/api/auto-donations',
     method: 'get',
     config: {
@@ -104,6 +104,12 @@ export const AccountDonate = () => {
       setAutoDonationAccounts(result);
     }
   }, [response]);
+
+  useEffect(() => {
+    if (error) {
+      console.error('자동기부 계좌 목록을 불러오는데 실패했습니다:', error);
+    }
+  }, [error]);
 
   // 자동기부 상태 변경 핸들러
   const handleStatusChange = async (autoDonationId: number) => {
